@@ -4,7 +4,7 @@ const startDateInput = document.getElementById('start-date');
 const durationInput = document.getElementById('duration');
 const shiftInput = document.getElementById('shift');
 const totalSeats = 34;
-let bookings = [];
+let bookings = [];    // HIIIIII
 
 function calculateEndDate(start, months) {
   if (!start) return null;
