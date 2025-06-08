@@ -46,15 +46,23 @@ function renderSeats() {
     const hasPM = seatBookings.some(b => b.shift === 'pm');
 
     const selectedShift = shiftInput.value;
+    let isSelectable = true;
 
+    // Set visual color
     if (hasFull || (hasAM && hasPM)) {
-      seat.classList.add('booked');
-    } else if (hasAM && selectedShift === 'am') {
-      seat.classList.add('half-booked');
-    } else if (hasPM && selectedShift === 'pm') {
-      seat.classList.add('evening-booked');
+      seat.classList.add('booked'); // 🔴 red
+      isSelectable = false;
+    } else if (hasAM) {
+      seat.classList.add('half-booked'); // 🟠 orange
+      if (selectedShift === 'full' || selectedShift === 'am') isSelectable = false;
+    } else if (hasPM) {
+      seat.classList.add('evening-booked'); // 🟣 purple
+      if (selectedShift === 'full' || selectedShift === 'pm') isSelectable = false;
     } else {
-      seat.classList.add('available');
+      seat.classList.add('available'); // ⚪ white
+    }
+
+    if (isSelectable) {
       seat.addEventListener('click', () => {
         document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
         seat.classList.add('selected');
@@ -65,6 +73,7 @@ function renderSeats() {
     seatMap.appendChild(seat);
   }
 }
+
 
 bookBtn.addEventListener('click', async () => {
   const seat = document.querySelector('.seat.selected');
