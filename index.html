@@ -16,8 +16,11 @@
     <nav>
       <a href="#home">Home</a>
       <a href="#about">About</a>
-      <a href="#booking">Book Now</a>
+      <a href="./booking.html">Book Now</a>
       <a href="#contact">Contact</a>
+      <span id="user-section">
+      <a href="./login.html" id="login-link">Login</a>
+    </span>
     </nav>
   </header>
 
@@ -32,7 +35,8 @@
       </div>
     </div>
     <h1>Welcome to Our Study Room Library</h1>
-    <a href="./booking.html"><button class="book-now-btn">Book Now</button></a>
+    <button class="book-now-btn" type="button">Book Now</button>
+
   </section>
 
   <section id="about">
@@ -50,6 +54,8 @@
     <p>&copy; 2025 Study Room Library. All rights reserved.</p>
   </footer>
 
+
+
   <script>
     // Carousel slider
     document.addEventListener("DOMContentLoaded", () => {
@@ -65,7 +71,84 @@
 
       setInterval(showNextImage, 4000); // 4 seconds delay
     });
+//////////////////
+
+const API_BASE = 'http://localhost:3000/api'; // Adjust for hosting
+
+  function login() {
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+
+    fetch(`${API_BASE}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem("username", data.username);
+        updateUserUI();
+        document.getElementById("loginModal").style.display = "none";
+      } else {
+        alert("Login failed");
+      }
+    });
+  }
+
+  function signup() {
+    const username = document.getElementById("signupUsername").value;
+    const password = document.getElementById("signupPassword").value;
+
+    fetch(`${API_BASE}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "Signup successful. You can now login.");
+      switchToLogin();
+    });
+  }
+
+  function updateUserUI() {
+    const user = localStorage.getItem("username");
+    const userSection = document.getElementById("user-section");
+    if (user) {
+      userSection.innerHTML = `<span>👤 ${user} <button onclick="logout()">Logout</button></span>`;
+    } else {
+  userSection.innerHTML = `<a href="./login.html" id="login-link">Login</a>`;
+}
+
+  }
+
+  function logout() {
+    localStorage.removeItem("username");
+    updateUserUI();
+  }
+
+  
+  // Book Now button behavior
+  document.addEventListener("DOMContentLoaded", () => {
+    updateUserUI();
+
+    const bookNowBtn = document.querySelector(".book-now-btn"); // <-- define it here
+
+    bookNowBtn.addEventListener("click", (e) => {
+  const user = localStorage.getItem("username");
+  if (!user) {
+    alert("Please log in first.");
+    window.location.href = "login.html";
+  } else {
+    window.location.href = "booking.html";
+  }
+      // Let the <a href="booking.html"> work if logged in
+    });
+  });
+  
   </script>
+
 </body>
 
 </html>
