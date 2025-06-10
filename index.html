@@ -7,7 +7,6 @@
   <title>Library Seat Booking</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./index.css">
-  
 </head>
 
 <body>
@@ -19,8 +18,8 @@
       <a href="./booking.html">Book Now</a>
       <a href="#contact">Contact</a>
       <span id="user-section">
-      <a href="./login.html" id="login-link">Login</a>
-    </span>
+        <a href="./login.html" id="login-link">Login</a>
+      </span>
     </nav>
   </header>
 
@@ -36,7 +35,6 @@
     </div>
     <h1>Welcome to Our Study Room Library</h1>
     <button class="book-now-btn" type="button">Book Now</button>
-
   </section>
 
   <section id="about">
@@ -54,8 +52,6 @@
     <p>&copy; 2025 Study Room Library. All rights reserved.</p>
   </footer>
 
-
-
   <script>
     // Carousel slider
     document.addEventListener("DOMContentLoaded", () => {
@@ -71,82 +67,41 @@
 
       setInterval(showNextImage, 4000); // 4 seconds delay
     });
-//////////////////
 
-const API_BASE = 'http://localhost:3000/api'; // Adjust for hosting
+    const API_BASE = 'http://localhost:3000/api';
 
-  function login() {
-    const username = document.getElementById("loginUsername").value;
-    const password = document.getElementById("loginPassword").value;
+    function updateUserUI() {
+      const userData = localStorage.getItem("user");
+      const userSection = document.getElementById("user-section");
 
-    fetch(`${API_BASE}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        localStorage.setItem("username", data.username);
-        updateUserUI();
-        document.getElementById("loginModal").style.display = "none";
+      if (userData) {
+        const user = JSON.parse(userData);
+        userSection.innerHTML = `<span>👤 ${user.firstName || user.email} <button onclick="logout()">Logout</button></span>`;
       } else {
-        alert("Login failed");
+        userSection.innerHTML = `<a href="./login.html" id="login-link">Login</a>`;
       }
+    }
+
+    function logout() {
+      localStorage.removeItem("user");
+      updateUserUI();
+    }
+
+    // Book Now button behavior
+    document.addEventListener("DOMContentLoaded", () => {
+      updateUserUI();
+
+      const bookNowBtn = document.querySelector(".book-now-btn");
+      bookNowBtn.addEventListener("click", () => {
+        const user = localStorage.getItem("user");
+        if (!user) {
+          alert("Please log in first.");
+          window.location.href = "login.html";
+        } else {
+          window.location.href = "booking.html";
+        }
+      });
     });
-  }
-
-  function signup() {
-    const username = document.getElementById("signupUsername").value;
-    const password = document.getElementById("signupPassword").value;
-
-    fetch(`${API_BASE}/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message || "Signup successful. You can now login.");
-      switchToLogin();
-    });
-  }
-
-  function updateUserUI() {
-    const user = localStorage.getItem("username");
-    const userSection = document.getElementById("user-section");
-    if (user) {
-      userSection.innerHTML = `<span>👤 ${user} <button onclick="logout()">Logout</button></span>`;
-    } else {
-  userSection.innerHTML = `<a href="./login.html" id="login-link">Login</a>`;
-}
-
-  }
-
-  function logout() {
-    localStorage.removeItem("username");
-    updateUserUI();
-  }
-
-  
-  // Book Now button behavior
-  document.addEventListener("DOMContentLoaded", () => {
-    updateUserUI();
-
-    const bookNowBtn = document.querySelector(".book-now-btn"); // <-- define it here
-
-    bookNowBtn.addEventListener("click", (e) => {
-  const user = localStorage.getItem("username");
-  if (!user) {
-    alert("Please log in first.");
-    window.location.href = "login.html";
-  } else {
-    window.location.href = "booking.html";
-  }
-      // Let the <a href="booking.html"> work if logged in
-    });
-  });
-  
   </script>
 
 </body>
