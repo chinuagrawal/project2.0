@@ -22,6 +22,8 @@
       </span>
     </nav>
   </header>
+  <h3 id="welcome-message"></h3>
+
 
   <section class="home" id="home">
     <div class="carousel">
@@ -53,6 +55,15 @@
   </footer>
 
   <script>
+
+    const welcome = document.getElementById("welcome-message");
+  const userData = localStorage.getItem("user");
+  if (userData) {
+    const user = JSON.parse(userData);
+    welcome.textContent = `Welcome, ${user.firstName} ${user.lastName}!`;
+  }
+
+
     // Carousel slider
     document.addEventListener("DOMContentLoaded", () => {
       let currentIndex = 0;

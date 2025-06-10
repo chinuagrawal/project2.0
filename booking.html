@@ -16,6 +16,15 @@
     .selected { border: 2px solid blue; }
   </style>
 </head>
+<script>
+  // Redirect to login if user is not authenticated
+  const userData = localStorage.getItem("user");
+  if (!userData) {
+    alert("Please log in to access the booking page.");
+    window.location.href = "login.html";
+  }
+</script>
+
 <body>
   <h1>Library Seat Booking</h1>
   <label>Start Date: <input type="date" id="start-date"></label>

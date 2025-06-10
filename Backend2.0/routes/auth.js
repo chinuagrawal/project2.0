@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
-    res.status(200).json({ message: 'Login successful', user: { email: user.email, firstName: user.firstName } });
+    res.status(200).json({ message: 'Login successful', user: { email: user.email, firstName: user.firstName,  lastName: user.lastName} });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
