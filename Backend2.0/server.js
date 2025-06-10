@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
@@ -24,6 +26,7 @@ const User = require('./models/User');
 // Routes
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
+
 
 // Seat availability endpoint
 app.get('/api/available-seats', async (req, res) => {
