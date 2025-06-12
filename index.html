@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Library Seat Booking</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./index.css">
+  <style>
+    
+  </style>
 </head>
 
 <body>
@@ -22,8 +24,8 @@
       </span>
     </nav>
   </header>
-  <h3 id="welcome-message" class="welcome-text"></h3>
 
+  <h3 id="welcome-message" class="welcome-text"></h3>
 
   <section class="home" id="home">
     <div class="carousel">
@@ -35,8 +37,14 @@
         <img src="images/5.webp" alt="Image 5">
       </div>
     </div>
+
     <h1>Welcome to Our Study Room Library</h1>
     <button class="book-now-btn" type="button">Book Now</button>
+  </section>
+
+  <section id="my-bookings" style="display:none; padding: 20px;">
+    <h2>📚 My Booked Seats</h2>
+    <div id="booking-list" class="booking-list"></div>
   </section>
 
   <section id="about">
@@ -55,30 +63,6 @@
   </footer>
 
   <script>
-
-    const welcome = document.getElementById("welcome-message");
-  const userData = localStorage.getItem("user");
-  if (userData) {
-    const user = JSON.parse(userData);
-    welcome.textContent = `Welcome, ${user.firstName} ${user.lastName}!`;
-  }
-
-
-    // Carousel slider
-    document.addEventListener("DOMContentLoaded", () => {
-      let currentIndex = 0;
-      const images = document.querySelectorAll('.carousel-images img');
-      const totalImages = images.length;
-      const carousel = document.querySelector('.carousel-images');
-
-      function showNextImage() {
-        currentIndex = (currentIndex + 1) % totalImages;
-        carousel.style.transform = `translateX(-${currentIndex * 100}vw)`;
-      }
-
-      setInterval(showNextImage, 4000); // 4 seconds delay
-    });
-
     const API_BASE = 'http://localhost:3000/api';
 
     function updateUserUI() {
@@ -96,12 +80,55 @@
     function logout() {
       localStorage.removeItem("user");
       updateUserUI();
+      location.reload(); // refresh to reflect logout changes
     }
 
-    // Book Now button behavior
-    document.addEventListener("DOMContentLoaded", () => {
-      updateUserUI();
+    async function loadBookings() {
+      const userData = localStorage.getItem("user");
+      if (!userData) return;
 
+      const user = JSON.parse(userData);
+      try {
+        const res = await fetch(`${API_BASE}/bookings?email=${user.email}`);
+        const bookings = await res.json(); // or bookings = (await res.json()).bookings;
+
+        const section = document.getElementById("my-bookings");
+        const list = document.getElementById("booking-list");
+
+        if (Array.isArray(bookings) && bookings.length > 0) {
+          section.style.display = "block";
+          list.innerHTML = bookings.map(b => `
+            <div class="booking-card">
+              <p><strong>Seat:</strong> ${b.seatId}</p>
+              <p><strong>Date:</strong> ${b.date}</p>
+              <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error("Error loading bookings:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Carousel
+      let currentIndex = 0;
+      const images = document.querySelectorAll('.carousel-images img');
+      const totalImages = images.length;
+      const carousel = document.querySelector('.carousel-images');
+
+      function showNextImage() {
+        currentIndex = (currentIndex + 1) % totalImages;
+        carousel.style.transform = `translateX(-${currentIndex * 100}vw)`;
+      }
+
+      setInterval(showNextImage, 4000);
+
+      // Initialize UI
+      updateUserUI();
+      loadBookings();
+
+      // Book Now button
       const bookNowBtn = document.querySelector(".book-now-btn");
       bookNowBtn.addEventListener("click", () => {
         const user = localStorage.getItem("user");
@@ -112,9 +139,15 @@
           window.location.href = "booking.html";
         }
       });
+
+      // Welcome message
+      const welcome = document.getElementById("welcome-message");
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        welcome.textContent = `Welcome, ${user.firstName || ''} ${user.lastName || ''}`.trim();
+      }
     });
   </script>
-
 </body>
-
 </html>

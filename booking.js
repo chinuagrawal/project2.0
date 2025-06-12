@@ -4,7 +4,7 @@ const startDateInput = document.getElementById('start-date');
 const durationInput = document.getElementById('duration');
 const shiftInput = document.getElementById('shift');
 const totalSeats = 34;
-let bookings = [];    // HIIIIII
+let bookings = [];
 
 function calculateEndDate(start, months) {
   if (!start) return null;
@@ -74,7 +74,6 @@ function renderSeats() {
   }
 }
 
-
 bookBtn.addEventListener('click', async () => {
   const seat = document.querySelector('.seat.selected');
   if (!seat) return alert('Please select a seat.');
@@ -93,11 +92,17 @@ bookBtn.addEventListener('click', async () => {
     return alert('Invalid start date.');
   }
 
+  const userData = localStorage.getItem('user');
+  const user = JSON.parse(userData);
+  const email = user.email;
+   if (!email) return alert('Please login first.');
+   
+ 
   try {
     const res = await fetch('http://localhost:3000/api/book', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seatId, shift, startDate, endDate })
+      body: JSON.stringify({ seatId, shift, startDate, endDate, email })
     });
 
     const data = await res.json();
