@@ -43,11 +43,13 @@ app.get('/api/available-seats', async (req, res) => {
 
 // Get bookings by date range
 app.get('/api/bookings', async (req, res) => {
-  const { startDate, endDate, email } = req.query;
+  const { startDate, endDate, email, date } = req.query;
 
   const filter = {};
 
-  if (startDate && endDate) {
+  if (date) {
+    filter.date = date;
+  } else if (startDate && endDate) {
     filter.date = { $gte: startDate, $lte: endDate };
   }
 
@@ -63,6 +65,7 @@ app.get('/api/bookings', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 // Create a new booking

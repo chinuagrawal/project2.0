@@ -6,26 +6,7 @@
   <title>Library Seat Booking</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="./index.css">
-  <style>
-    .seat-box {
-      font-weight: 600;
-      font-family: 'Poppins', sans-serif;
-      transition: transform 0.2s;
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 5px;
-      display: inline-block;
-      min-width: 50px;
-      text-align: center;
-      border-radius: 6px;
-    }
-
-    .seat-box:hover {
-      transform: scale(1.05);
-      cursor: default;
-    }
-  </style>
+  
 </head>
 <body>
   <header>
@@ -60,22 +41,23 @@
     </section>
 
     <h1>Welcome to Our Study Room Library</h1>
-    <button class="book-now-btn" type="button">Book Now</button>
-
-   
-    </section>
-    <div style="margin-top: 40px; text-align: center;">
+     <div style="margin-top: 40px; text-align: center;">
   <h2>📅 Check Seat Availability</h2>
   <input type="date" id="calendar-date" style="padding: 8px; font-size: 16px; margin-bottom: 15px;" />
   <div id="calendar-seat-map" style="display: flex; flex-wrap: wrap; justify-content: center; margin-top: 10px;"></div>
   <div style="margin-top: 15px;">
     <strong>Legend:</strong>
     <div><span style="background-color: red; color: white; padding: 5px 10px; margin: 4px; border-radius: 4px;">Fully Booked</span>
-    <span style="background-color: orange; padding: 5px 10px; margin: 4px; border-radius: 4px;">AM or PM Booked</span>
+    <span style="background-color: orange; padding: 5px 10px; margin: 4px; border-radius: 4px;">AM Booked</span>
     <span style="background-color: purple; color: white; padding: 5px 10px; margin: 4px; border-radius: 4px;">PM Booked</span>
-    <span style="background-color: white; padding: 5px 10px; margin: 4px; border-radius: 4px; border: 1px solid #ccc;">Available</span></div>
+    <span style="background-color: rgb(237, 234, 234); color: black;padding: 5px 10px; margin: 4px; border-radius: 4px; border: 1px solid #faf3f3;">Available</span></div>
   </div>
 </div>
+    <button class="book-now-btn" type="button">Book Now</button>
+
+   
+    </section>
+   
 
 
  
@@ -262,10 +244,20 @@
       }
 
       const dateInput = document.getElementById("calendar-date");
-      dateInput.addEventListener("change", (e) => {
-        const selectedDate = e.target.value;
-        loadAvailability(selectedDate);
-      });
+
+// Set today's date in YYYY-MM-DD format
+const today = new Date().toISOString().split("T")[0];
+dateInput.value = today;
+
+// Load today's availability immediately
+loadAvailability(today);
+
+// Listen for date change
+dateInput.addEventListener("change", (e) => {
+  const selectedDate = e.target.value;
+  loadAvailability(selectedDate);
+});
+
     });
   </script>
 </body>
