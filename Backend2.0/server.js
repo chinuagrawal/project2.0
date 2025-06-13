@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const Razorpay = require('razorpay');
 require('dotenv').config();
 
 const app = express();
@@ -12,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
-
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
@@ -27,6 +27,26 @@ const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
+// Razorpay instance
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET_KEY,
+});
+
+// Create Razorpay order
+app.post('/create-order', async (req, res) => {
+  const { amount } = req.body;
+  try {
+    const order = await razorpay.orders.create({
+      amount,
+      currency: 'INR',
+      receipt: 'receipt_' + Date.now()
+    });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: 'Razorpay order failed' });
+  }
+});
 
 // Seat availability endpoint
 app.get('/api/available-seats', async (req, res) => {
@@ -66,15 +86,12 @@ app.get('/api/bookings', async (req, res) => {
   }
 });
 
-
-
 // Create a new booking
 app.post('/api/book', async (req, res) => {
-  const { seatId, startDate, endDate, shift, email } = req.body;
+  const { seatId, startDate, endDate, shift, email, payment } = req.body;
 
-
-  if (!seatId || !startDate || !endDate || !shift) {
-    return res.status(400).json({ message: 'Missing required fields.' });
+  if (!seatId || !startDate || !endDate || !shift || !payment || !payment.razorpay_payment_id) {
+    return res.status(400).json({ message: 'Missing required fields or payment info.' });
   }
 
   const dates = [];

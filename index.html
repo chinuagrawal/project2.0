@@ -34,7 +34,13 @@
         <img src="images/5.webp" alt="Image 5">
       </div>
     </div>
-
+<div id="confirmation-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>✅ Booking Confirmed!</h2>
+    <p id="confirmation-details"></p>
+    <button id="close-modal">OK</button>
+  </div>
+</div>
     <section id="my-bookings" style="display:none; padding: 20px;">
       <h2>📚 My Booked Seats</h2>
       <div id="booking-list" class="booking-list"></div>
@@ -255,11 +261,48 @@ loadAvailability(today);
 
 // Listen for date change
 dateInput.addEventListener("change", (e) => {
+  // Show modal if redirected from booking page
+const params = new URLSearchParams(window.location.search);
+if (params.get('success') === '1') {
+  const seatId = params.get('seatId');
+  const shift = params.get('shift');
+  const startDate = params.get('startDate');
+  const endDate = params.get('endDate');
+  showConfirmationModal(seatId, shift, startDate, endDate);
+}
+
   const selectedDate = e.target.value;
   loadAvailability(selectedDate);
 });
 
     });
+
+  function showConfirmationModal(seatId, shift, startDate, endDate) {
+  const modal = document.getElementById('confirmation-modal');
+  const details = document.getElementById('confirmation-details');
+  const closeBtn = document.getElementById('close-modal');
+
+  details.innerHTML = `
+    Seat <strong>${seatId}</strong> booked for <strong>${shift}</strong> shift<br>
+    From <strong>${startDate}</strong> to <strong>${endDate}</strong>.
+  `;
+
+  modal.classList.remove('hidden');
+
+  closeBtn.onclick = () => {
+    modal.classList.add('hidden');
+    window.location.href = 'index.html'; // 🔁 Redirect and reload to show updated seat
+  };
+}
+  
   </script>
+  <div id="confirmation-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>✅ Booking Confirmed!</h2>
+    <p id="confirmation-details"></p>
+    <button id="close-modal">OK</button>
+  </div>
+</div>
+
 </body>
 </html>

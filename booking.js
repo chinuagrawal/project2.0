@@ -88,34 +88,67 @@ bookBtn.addEventListener('click', async () => {
   }
 
   const endDate = calculateEndDate(startDate, duration);
-  if (!endDate) {
-    return alert('Invalid start date.');
-  }
+  if (!endDate) return alert('Invalid start date.');
 
   const userData = localStorage.getItem('user');
   const user = JSON.parse(userData);
-  const email = user.email;
-   if (!email) return alert('Please login first.');
-   
- 
+  const email = user?.email;
+  if (!email) return alert('Please login first.');
+
+  const amount = shift === 'full' ? 80000 : 60000; // e.g., ₹200 or ₹120
+
   try {
-    const res = await fetch('http://localhost:3000/api/book', {
+    const orderRes = await fetch('http://localhost:3000/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seatId, shift, startDate, endDate, email })
+      body: JSON.stringify({ amount })
     });
 
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || 'Booking failed.');
-    } else {
-      alert('✅ Seat booked!');
-    }
-    fetchBookings();
+    const orderData = await orderRes.json();
+
+    const options = {
+      key: 'rzp_test_n9ZAl4W7UvC5MH', // Replace with env in production
+      amount: orderData.amount,
+      currency: 'INR',
+      name: 'Seat Booking',
+      description: 'Confirm seat',
+      order_id: orderData.id,
+      handler: async function (response) {
+        const payment = {
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature
+        };
+
+        const res = await fetch('http://localhost:3000/api/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.message || 'Booking failed.');
+        } else {
+          // ✅ Show confirmation modal
+          window.location.href = `index.html?success=1&seatId=${seatId}&shift=${shift}&startDate=${startDate}&endDate=${endDate}`;
+
+        }
+      },
+      theme: {
+        color: '#3399cc'
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
   } catch (err) {
-    alert('Booking request failed.');
+    console.error(err);
+    alert('Payment or booking failed.');
   }
 });
+
+
 
 [startDateInput, durationInput, shiftInput].forEach(input => {
   input.addEventListener('change', fetchBookings);
@@ -126,3 +159,4 @@ window.onload = () => {
   startDateInput.value = today;
   fetchBookings();
 };
+
