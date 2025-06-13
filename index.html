@@ -2,15 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Library Seat Booking</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="./index.css">
   <style>
-    
+    .seat-box {
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      transition: transform 0.2s;
+      background-color: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 5px;
+      display: inline-block;
+      min-width: 50px;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .seat-box:hover {
+      transform: scale(1.05);
+      cursor: default;
+    }
   </style>
 </head>
-
 <body>
   <header>
     <h2>Study Room Library</h2>
@@ -37,17 +53,34 @@
         <img src="images/5.webp" alt="Image 5">
       </div>
     </div>
-     <section id="my-bookings" style="display:none; padding: 20px;">
-    <h2>📚 My Booked Seats</h2>
-    <div id="booking-list" class="booking-list"></div>
-  </section>
+
+    <section id="my-bookings" style="display:none; padding: 20px;">
+      <h2>📚 My Booked Seats</h2>
+      <div id="booking-list" class="booking-list"></div>
+    </section>
 
     <h1>Welcome to Our Study Room Library</h1>
     <button class="book-now-btn" type="button">Book Now</button>
-  </section>
+
+   
+    </section>
+    <div style="margin-top: 40px; text-align: center;">
+  <h2>📅 Check Seat Availability</h2>
+  <input type="date" id="calendar-date" style="padding: 8px; font-size: 16px; margin-bottom: 15px;" />
+  <div id="calendar-seat-map" style="display: flex; flex-wrap: wrap; justify-content: center; margin-top: 10px;"></div>
+  <div style="margin-top: 15px;">
+    <strong>Legend:</strong>
+    <div><span style="background-color: red; color: white; padding: 5px 10px; margin: 4px; border-radius: 4px;">Fully Booked</span>
+    <span style="background-color: orange; padding: 5px 10px; margin: 4px; border-radius: 4px;">AM or PM Booked</span>
+    <span style="background-color: purple; color: white; padding: 5px 10px; margin: 4px; border-radius: 4px;">PM Booked</span>
+    <span style="background-color: white; padding: 5px 10px; margin: 4px; border-radius: 4px; border: 1px solid #ccc;">Available</span></div>
+  </div>
+</div>
+
 
  
 
+  
   <section id="about">
     <h2>About Us</h2>
     <p>We offer a peaceful self-study library environment with 34 seats available. Choose from full-day (₹800) or half-day (₹600) shifts to suit your schedule. Perfect for students, exam preparation, or quiet work.</p>
@@ -65,18 +98,18 @@
 
   <script>
     const API_BASE = 'http://localhost:3000/api';
-function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-}
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
 
     function updateUserUI() {
       const userData = localStorage.getItem("user");
       const userSection = document.getElementById("user-section");
-
       if (userData) {
         const user = JSON.parse(userData);
         userSection.innerHTML = `<span>👤 ${user.firstName || user.email} <button onclick="logout()">Logout</button></span>`;
@@ -88,82 +121,113 @@ function formatDate(dateStr) {
     function logout() {
       localStorage.removeItem("user");
       updateUserUI();
-      location.reload(); // refresh to reflect logout changes
+      location.reload();
     }
 
     function groupBookings(bookings) {
-  const groups = [];
-
-  bookings.sort((a, b) => {
-    if (a.seatId !== b.seatId) return a.seatId.localeCompare(b.seatId);
-    if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-    return new Date(a.date) - new Date(b.date);
-  });
-
-  for (let i = 0; i < bookings.length; i++) {
-    const current = bookings[i];
-    const lastGroup = groups[groups.length - 1];
-
-    const currentDate = new Date(current.date);
-    const lastDate = lastGroup ? new Date(lastGroup.end) : null;
-
-    if (
-      lastGroup &&
-      lastGroup.seatId === current.seatId &&
-      lastGroup.shift === current.shift &&
-      currentDate.getTime() === lastDate.getTime() + 86400000 // next day
-    ) {
-      lastGroup.end = current.date;
-    } else {
-      groups.push({
-        seatId: current.seatId,
-        shift: current.shift,
-        start: current.date,
-        end: current.date,
+      const groups = [];
+      bookings.sort((a, b) => {
+        if (a.seatId !== b.seatId) return a.seatId.localeCompare(b.seatId);
+        if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+        return new Date(a.date) - new Date(b.date);
       });
-    }
-  }
 
-  return groups;
-}
+      for (let i = 0; i < bookings.length; i++) {
+        const current = bookings[i];
+        const lastGroup = groups[groups.length - 1];
+        const currentDate = new Date(current.date);
+        const lastDate = lastGroup ? new Date(lastGroup.end) : null;
+
+        if (
+          lastGroup &&
+          lastGroup.seatId === current.seatId &&
+          lastGroup.shift === current.shift &&
+          currentDate.getTime() === lastDate.getTime() + 86400000
+        ) {
+          lastGroup.end = current.date;
+        } else {
+          groups.push({
+            seatId: current.seatId,
+            shift: current.shift,
+            start: current.date,
+            end: current.date,
+          });
+        }
+      }
+      return groups;
+    }
 
     async function loadBookings() {
       const userData = localStorage.getItem("user");
       if (!userData) return;
-
       const user = JSON.parse(userData);
+
       try {
         const res = await fetch(`${API_BASE}/bookings?email=${user.email}`);
-        const bookings = await res.json(); // or bookings = (await res.json()).bookings;
-
+        const bookings = await res.json();
         const section = document.getElementById("my-bookings");
         const list = document.getElementById("booking-list");
 
-       if (Array.isArray(bookings) && bookings.length > 0) {
-  section.style.display = "block";
-
-  const grouped = groupBookings(bookings);
-list.innerHTML = grouped.map(b => `
-  <div class="booking-card">
-    <p><strong>Seat:</strong> ${b.seatId}</p>
-<p><strong>From:</strong> ${formatDate(b.start)}</p>
-<p><strong>To:</strong> ${formatDate(b.end)}</p>
-
-    <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
-  </div>
-`).join('');
-
-
-
-
+        if (Array.isArray(bookings) && bookings.length > 0) {
+          section.style.display = "block";
+          const grouped = groupBookings(bookings);
+          list.innerHTML = grouped.map(b => `
+            <div class="booking-card">
+              <p><strong>Seat:</strong> ${b.seatId}</p>
+              <p><strong>From:</strong> ${formatDate(b.start)}</p>
+              <p><strong>To:</strong> ${formatDate(b.end)}</p>
+              <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
+            </div>
+          `).join('');
         }
       } catch (err) {
         console.error("Error loading bookings:", err);
       }
     }
 
+    async function loadAvailability(date) {
+      if (!date) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/bookings?date=${date}`);
+        const bookings = await response.json();
+
+        const seatStatus = {};
+
+        bookings.forEach(b => {
+          if (!seatStatus[b.seatId]) seatStatus[b.seatId] = [];
+          seatStatus[b.seatId].push(b.shift.toUpperCase());
+        });
+
+        const seatMap = document.getElementById("calendar-seat-map");
+        seatMap.innerHTML = "";
+
+        for (let i = 1; i <= 34; i++) {
+          const seatId = `S${i}`;
+          const shifts = seatStatus[seatId] || [];
+
+          let bg = "white";
+          if (shifts.includes("FULL") || (shifts.includes("AM") && shifts.includes("PM"))) {
+            bg = "red";
+          } else if (shifts.includes("PM") && !shifts.includes("AM")) {
+            bg = "purple";
+          } else if (shifts.length === 1) {
+            bg = "orange";
+          }
+
+          const div = document.createElement("div");
+          div.className = "seat-box";
+          div.textContent = seatId;
+          div.style.backgroundColor = bg;
+          div.style.color = (bg === "purple" || bg === "red") ? "white" : "black";
+          seatMap.appendChild(div);
+        }
+      } catch (err) {
+        console.error("Failed to load seat availability:", err);
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Carousel
       let currentIndex = 0;
       const images = document.querySelectorAll('.carousel-images img');
       const totalImages = images.length;
@@ -176,11 +240,9 @@ list.innerHTML = grouped.map(b => `
 
       setInterval(showNextImage, 4000);
 
-      // Initialize UI
       updateUserUI();
       loadBookings();
 
-      // Book Now button
       const bookNowBtn = document.querySelector(".book-now-btn");
       bookNowBtn.addEventListener("click", () => {
         const user = localStorage.getItem("user");
@@ -192,13 +254,18 @@ list.innerHTML = grouped.map(b => `
         }
       });
 
-      // Welcome message
       const welcome = document.getElementById("welcome-message");
       const userData = localStorage.getItem("user");
       if (userData) {
         const user = JSON.parse(userData);
         welcome.textContent = `Welcome, ${user.firstName || ''} ${user.lastName || ''}`.trim();
       }
+
+      const dateInput = document.getElementById("calendar-date");
+      dateInput.addEventListener("change", (e) => {
+        const selectedDate = e.target.value;
+        loadAvailability(selectedDate);
+      });
     });
   </script>
 </body>

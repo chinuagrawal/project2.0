@@ -138,3 +138,36 @@
       max-width: 600px;
       margin: 0 auto;
     }
+
+
+    .seat-map { display: flex; flex-wrap: wrap; width: 300px; margin-bottom: 20px; }
+    
+    
+    
+    .half-booked { background-color: orange; }
+    .evening-booked { background-color: purple; color: white; }
+    .selected { border: 2px solid blue; }
+
+    .seat {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #ddd;
+}
+
+.booked {
+  background-color: #f44336;
+  color: white;
+  cursor: not-allowed;
+}
+
+.available {
+  background-color: #4caf50;
+  color: white;
+}
