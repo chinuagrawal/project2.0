@@ -124,13 +124,15 @@
 
 
     .booking-card {
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 10px 0;
-      background-color: #f8f9fa;
-      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-    }
+  background: #f5f5f5;
+  color: #111; /* ensures it's readable */
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Poppins', sans-serif;
+}
+
 
     #booking-list {
       max-width: 600px;

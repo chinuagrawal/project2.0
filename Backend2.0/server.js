@@ -43,16 +43,32 @@ app.get('/api/available-seats', async (req, res) => {
 
 // Get bookings by date range
 app.get('/api/bookings', async (req, res) => {
-  const { startDate, endDate } = req.query;
-  const bookings = await Booking.find({
-    date: { $gte: startDate, $lte: endDate },
-  });
-  res.json(bookings);
+  const { startDate, endDate, email } = req.query;
+
+  const filter = {};
+
+  if (startDate && endDate) {
+    filter.date = { $gte: startDate, $lte: endDate };
+  }
+
+  if (email) {
+    filter.email = email;
+  }
+
+  try {
+    const bookings = await Booking.find(filter);
+    res.json(bookings);
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 // Create a new booking
 app.post('/api/book', async (req, res) => {
-  const { seatId, startDate, endDate, shift } = req.body;
+  const { seatId, startDate, endDate, shift, email } = req.body;
+
 
   if (!seatId || !startDate || !endDate || !shift) {
     return res.status(400).json({ message: 'Missing required fields.' });
@@ -95,7 +111,7 @@ app.post('/api/book', async (req, res) => {
     });
   }
 
-  const bookings = dates.map((date) => ({ seatId, date, shift }));
+  const bookings = dates.map((date) => ({ seatId, date, shift, email }));
   await Booking.insertMany(bookings);
   res.json({ success: true });
 });

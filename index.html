@@ -37,15 +37,16 @@
         <img src="images/5.webp" alt="Image 5">
       </div>
     </div>
+     <section id="my-bookings" style="display:none; padding: 20px;">
+    <h2>📚 My Booked Seats</h2>
+    <div id="booking-list" class="booking-list"></div>
+  </section>
 
     <h1>Welcome to Our Study Room Library</h1>
     <button class="book-now-btn" type="button">Book Now</button>
   </section>
 
-  <section id="my-bookings" style="display:none; padding: 20px;">
-    <h2>📚 My Booked Seats</h2>
-    <div id="booking-list" class="booking-list"></div>
-  </section>
+ 
 
   <section id="about">
     <h2>About Us</h2>
@@ -64,6 +65,13 @@
 
   <script>
     const API_BASE = 'http://localhost:3000/api';
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
 
     function updateUserUI() {
       const userData = localStorage.getItem("user");
@@ -83,6 +91,42 @@
       location.reload(); // refresh to reflect logout changes
     }
 
+    function groupBookings(bookings) {
+  const groups = [];
+
+  bookings.sort((a, b) => {
+    if (a.seatId !== b.seatId) return a.seatId.localeCompare(b.seatId);
+    if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
+    return new Date(a.date) - new Date(b.date);
+  });
+
+  for (let i = 0; i < bookings.length; i++) {
+    const current = bookings[i];
+    const lastGroup = groups[groups.length - 1];
+
+    const currentDate = new Date(current.date);
+    const lastDate = lastGroup ? new Date(lastGroup.end) : null;
+
+    if (
+      lastGroup &&
+      lastGroup.seatId === current.seatId &&
+      lastGroup.shift === current.shift &&
+      currentDate.getTime() === lastDate.getTime() + 86400000 // next day
+    ) {
+      lastGroup.end = current.date;
+    } else {
+      groups.push({
+        seatId: current.seatId,
+        shift: current.shift,
+        start: current.date,
+        end: current.date,
+      });
+    }
+  }
+
+  return groups;
+}
+
     async function loadBookings() {
       const userData = localStorage.getItem("user");
       if (!userData) return;
@@ -95,15 +139,23 @@
         const section = document.getElementById("my-bookings");
         const list = document.getElementById("booking-list");
 
-        if (Array.isArray(bookings) && bookings.length > 0) {
-          section.style.display = "block";
-          list.innerHTML = bookings.map(b => `
-            <div class="booking-card">
-              <p><strong>Seat:</strong> ${b.seatId}</p>
-              <p><strong>Date:</strong> ${b.date}</p>
-              <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
-            </div>
-          `).join('');
+       if (Array.isArray(bookings) && bookings.length > 0) {
+  section.style.display = "block";
+
+  const grouped = groupBookings(bookings);
+list.innerHTML = grouped.map(b => `
+  <div class="booking-card">
+    <p><strong>Seat:</strong> ${b.seatId}</p>
+<p><strong>From:</strong> ${formatDate(b.start)}</p>
+<p><strong>To:</strong> ${formatDate(b.end)}</p>
+
+    <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
+  </div>
+`).join('');
+
+
+
+
         }
       } catch (err) {
         console.error("Error loading bookings:", err);
