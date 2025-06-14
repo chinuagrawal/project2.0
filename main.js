@@ -1,5 +1,5 @@
 window.onload = async () => {
-  const res = await fetch('http://localhost:3000/api/available-seats');
+  const res = await fetch('https://seat-booking-backend-b4ka.onrender.com/api/available-seats');
 
   const data = await res.json();
   document.getElementById('available-seats').textContent =

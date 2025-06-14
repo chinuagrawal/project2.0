@@ -137,7 +137,7 @@
       }
 
       try {
-        const res = await fetch("http://localhost:3000/api/signup", {
+        const res = await fetch("https://seat-booking-backend-b4ka.onrender.com/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ firstName, lastName, email, gender, mobile, password, confirmPassword })

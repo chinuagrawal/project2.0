@@ -24,7 +24,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`http://localhost:3000/api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`https://seat-booking-backend-b4ka.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -102,9 +102,8 @@ if (!months || isNaN(months)) {
 const baseAmount = shift === 'full' ? 80000 : 60000;
 const amount = baseAmount * months;
 
-
   try {
-    const orderRes = await fetch('http://localhost:3000/create-order', {
+    const orderRes = await fetch('https://seat-booking-backend-b4ka.onrender.com/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })
@@ -126,7 +125,7 @@ const amount = baseAmount * months;
           razorpay_signature: response.razorpay_signature
         };
 
-        const res = await fetch('http://localhost:3000/api/book', {
+        const res = await fetch('https://seat-booking-backend-b4ka.onrender.com/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
