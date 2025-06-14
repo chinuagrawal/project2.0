@@ -95,7 +95,13 @@ bookBtn.addEventListener('click', async () => {
   const email = user?.email;
   if (!email) return alert('Please login first.');
 
-  const amount = shift === 'full' ? 80000 : 60000; // e.g., ₹200 or ₹120
+  const months = parseInt(duration);
+if (!months || isNaN(months)) {
+  return alert('Invalid duration selected.');
+}
+const baseAmount = shift === 'full' ? 80000 : 60000;
+const amount = baseAmount * months;
+
 
   try {
     const orderRes = await fetch('http://localhost:3000/create-order', {
