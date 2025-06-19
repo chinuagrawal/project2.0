@@ -103,7 +103,7 @@ const baseAmount = shift === 'full' ? 80000 : 60000;
 const amount = baseAmount * months;
 
   try {
-    const orderRes = await fetch('project20-production-e7f5.up.railway.app/create-order', {
+    const orderRes = await fetch('http://project20-production-e7f5.up.railway.app/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })
@@ -125,7 +125,7 @@ const amount = baseAmount * months;
           razorpay_signature: response.razorpay_signature
         };
 
-        const res = await fetch('project20-production-e7f5.up.railway.app/api/book', {
+        const res = await fetch('http://project20-production-e7f5.up.railway.app/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
