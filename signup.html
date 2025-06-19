@@ -137,7 +137,7 @@
       }
 
       try {
-        const res = await fetch("project20-production-e7f5.up.railway.app/api/signup", {
+        const res = await fetch("https://project20-production-e7f5.up.railway.app/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ firstName, lastName, email, gender, mobile, password, confirmPassword })
