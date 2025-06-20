@@ -1,6 +1,6 @@
 async function fetchPendingBookings() {
   try {
-    const res = await fetch('https://project20-production-e7f5.up.railway.app//api/pending-bookings');
+    const res = await fetch('https://project20-production-e7f5.up.railway.app/api/pending-bookings');
     const bookings = await res.json();
 
     const tbody = document.getElementById('pending-bookings-body');
@@ -40,7 +40,7 @@ async function fetchPendingBookings() {
 
 async function markAsPaid(ids) {
   try {
-    const res = await fetch('https://project20-production-e7f5.up.railway.app//api/mark-paid', {
+    const res = await fetch('https://project20-production-e7f5.up.railway.app/api/mark-paid', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids })

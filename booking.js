@@ -40,7 +40,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`https://project20-production-e7f5.up.railway.app//api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -121,7 +121,7 @@ bookBtn.addEventListener('click', async () => {
   // 👇 If payment mode is CASH
   if (paymentMode === 'cash') {
     try {
-      const res = await fetch('https://project20-production-e7f5.up.railway.app//api/book-cash', {
+      const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book-cash', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
@@ -148,7 +148,7 @@ bookBtn.addEventListener('click', async () => {
   const amount = baseAmount * months;
 
   try {
-    const orderRes = await fetch('https://project20-production-e7f5.up.railway.app//create-order', {
+    const orderRes = await fetch('https://project20-production-e7f5.up.railway.app/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })
@@ -170,7 +170,7 @@ bookBtn.addEventListener('click', async () => {
           razorpay_signature: response.razorpay_signature
         };
 
-        const res = await fetch('https://project20-production-e7f5.up.railway.app//api/book', {
+        const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
