@@ -6,6 +6,22 @@ const shiftInput = document.getElementById('shift');
 const totalSeats = 34;
 let bookings = [];
 
+const amountDisplay = document.getElementById('amount-display');
+
+function updateAmount() {
+  const shift = shiftInput.value;
+  const duration = parseInt(durationInput.value);
+
+  if (!shift || !duration || isNaN(duration)) {
+    amountDisplay.innerText = '₹ 0';
+    return;
+  }
+
+  const baseAmount = shift === 'full' ? 800 : 600;
+  const totalAmount = baseAmount * duration;
+  amountDisplay.innerText = `₹ ${totalAmount.toFixed(2)}`;
+}
+
 function calculateEndDate(start, months) {
   if (!start) return null;
   const date = new Date(start);
@@ -24,7 +40,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`https://project20-production-e7f5.up.railway.app//api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -96,14 +112,43 @@ bookBtn.addEventListener('click', async () => {
   if (!email) return alert('Please login first.');
 
   const months = parseInt(duration);
-if (!months || isNaN(months)) {
-  return alert('Invalid duration selected.');
-}
-const baseAmount = shift === 'full' ? 80000 : 60000;
-const amount = baseAmount * months;
+  if (!months || isNaN(months)) {
+    return alert('Invalid duration selected.');
+  }
+
+  const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
+
+  // 👇 If payment mode is CASH
+  if (paymentMode === 'cash') {
+    try {
+      const res = await fetch('https://project20-production-e7f5.up.railway.app//api/book-cash', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
+});
+
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || 'Booking failed.');
+      } else {
+        alert('Cash booking request submitted. Please pay to library in-charge.');
+        window.location.href = `index.html?success=1&cash=1`;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Cash booking request failed.');
+    }
+    return; // exit function after cash request
+  }
+
+  // 👇 Your existing Razorpay Online Payment Flow (untouched)
+  const baseAmount = shift === 'full' ? 80000 : 60000;
+  const amount = baseAmount * months;
 
   try {
-    const orderRes = await fetch('https://project20-production-e7f5.up.railway.app/create-order', {
+    const orderRes = await fetch('https://project20-production-e7f5.up.railway.app//create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount })
@@ -112,7 +157,7 @@ const amount = baseAmount * months;
     const orderData = await orderRes.json();
 
     const options = {
-      key: 'rzp_test_n9ZAl4W7UvC5MH', // Replace with env in production
+      key: 'rzp_test_n9ZAl4W7UvC5MH',
       amount: orderData.amount,
       currency: 'INR',
       name: 'Seat Booking',
@@ -125,7 +170,7 @@ const amount = baseAmount * months;
           razorpay_signature: response.razorpay_signature
         };
 
-        const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book', {
+        const res = await fetch('https://project20-production-e7f5.up.railway.app//api/book', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
@@ -135,14 +180,10 @@ const amount = baseAmount * months;
         if (!res.ok) {
           alert(data.message || 'Booking failed.');
         } else {
-          // ✅ Show confirmation modal
           window.location.href = `index.html?success=1&seatId=${seatId}&shift=${shift}&startDate=${startDate}&endDate=${endDate}`;
-
         }
       },
-      theme: {
-        color: '#3399cc'
-      }
+      theme: { color: '#3399cc' }
     };
 
     const rzp = new Razorpay(options);
@@ -155,13 +196,19 @@ const amount = baseAmount * months;
 
 
 
+
 [startDateInput, durationInput, shiftInput].forEach(input => {
-  input.addEventListener('change', fetchBookings);
+  input.addEventListener('change', () => {
+    fetchBookings();
+    updateAmount();
+  });
 });
+
 
 window.onload = () => {
   const today = new Date().toISOString().split('T')[0];
   startDateInput.value = today;
+  updateAmount(); // ✅ calculate amount at initial load
   fetchBookings();
 };
 

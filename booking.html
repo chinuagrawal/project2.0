@@ -3,60 +3,211 @@
 <head>
   <meta charset="UTF-8">
   <title>Library Seat Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    .seat-map { display: flex; flex-wrap: wrap; width: 300px; margin-bottom: 20px; }
-    .seat {
-      width: 30px; height: 30px; margin: 2px; text-align: center;
-      line-height: 30px; border-radius: 4px; cursor: pointer;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #b2ebf2, #f3e5f5);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
     }
-    .available { background-color: white; border: 1px solid #ccc; }
-    .booked { background-color: red; }
-    .half-booked { background-color: orange; }
-    .evening-booked { background-color: purple; color: white; }
-    .selected { border: 2px solid blue; }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .container, .legend {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      flex: 1 1 320px;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      color: #6a1b9a;
+    }
+
+    label { font-weight: 600; font-size: 0.9rem; margin-bottom: 3px; }
+
+    select, input[type="date"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .seat-map {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .seat {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      line-height: 30px;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .available { background: white; border: 1px solid #ccc; }
+    .booked { background: #e53935; color: white; }
+    .half-booked { background: #ffa726; color: white; }
+    .evening-booked { background: #8e24aa; color: white; }
+    .selected { border: 2px solid #2196f3; }
+
+    .amount-display {
+      font-size: 1.1rem;
+      color: #2e7d32;
+      text-align: center;
+      margin: 5px 0;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f5f5f5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .radio-group input[type="radio"] {
+      accent-color: #7b1fa2;
+      width: 16px;
+      height: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #7b1fa2, #ba68c8);
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .legend {
+      flex: 0 0 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .legend h3 {
+      font-size: 1.2rem;
+      color: #333;
+      text-align: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .color-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    @media(max-width: 768px){
+      .main-wrapper { flex-direction: column; align-items: center; }
+    }
   </style>
 </head>
+
 <script>
-  // Redirect to login if user is not authenticated
   const userData = localStorage.getItem("user");
   if (!userData) {
     alert("Please log in to access the booking page.");
     window.location.href = "login.html";
   }
 </script>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-
 <body>
-  <h1>Library Seat Booking</h1>
-  <label>Start Date: <input type="date" id="start-date"></label>
-  <label>
-    Duration:
-    <select id="duration">
-  <option value="1">1 Month</option>
-  <option value="2">2 Months</option>
-  <option value="3">3 Months</option>
-  <option value="4">4 Months</option>
-  <option value="5">5 Months</option>
-  <option value="6">6 Months</option>
-  <option value="7">7 Months</option>
-  <option value="8">8 Months</option>
-  <option value="9">9 Months</option>
-  <option value="10">10 Months</option>
-  <option value="11">11 Months</option>
-  <option value="12">12 Months</option>
-</select>
+  <div class="main-wrapper">
+    <div class="container">
+      <h1>Library Seat Booking</h1>
 
-  </label>
-  <label>Shift:
-    <select id="shift">
-      <option value="am">Morning</option>
-      <option value="pm">Evening</option>
-      <option value="full">Full Day</option>
-    </select>
-  </label>
-  <div class="seat-map" id="seat-map"></div>
-  <button id="book-btn">Book Seat</button>
+      <div><label>Start Date:</label><input type="date" id="start-date"></div>
+
+      <div><label>Duration:</label>
+        <select id="duration">
+          <option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option>
+          <option value="4">4 Months</option><option value="5">5 Months</option><option value="6">6 Months</option>
+          <option value="7">7 Months</option><option value="8">8 Months</option><option value="9">9 Months</option>
+          <option value="10">10 Months</option><option value="11">11 Months</option><option value="12">12 Months</option>
+        </select>
+      </div>
+
+      <div><label>Shift:</label>
+        <select id="shift">
+          <option value="am">Morning</option><option value="pm">Evening</option><option value="full">Full Day</option>
+        </select>
+      </div>
+
+      <div class="seat-map" id="seat-map"></div>
+
+      <div class="amount-display">Total Amount: <span id="amount-display">₹ 0</span></div>
+
+      <div class="radio-group">
+        <label><input type="radio" name="paymentMode" value="online" checked> Pay Online</label>
+        <label><input type="radio" name="paymentMode" value="cash"> Pay Cash at Library</label>
+      </div>
+
+      <button id="book-btn">Book Seat</button>
+    </div>
+
+    <div class="legend">
+      <h3>Legend</h3>
+      <div class="legend-item"><div class="color-box" style="background:white;"></div> Available</div>
+      <div class="legend-item"><div class="color-box" style="background:#e53935"></div> Fully Booked</div>
+      <div class="legend-item"><div class="color-box" style="background:#ffa726"></div> Morning Booked</div>
+      <div class="legend-item"><div class="color-box" style="background:#8e24aa"></div> Evening Booked</div>
+    </div>
+  </div>
 
   <script src="booking.js"></script>
 </body>
