@@ -12,13 +12,13 @@ html {
 }
 
 body {
-  background-color: #121212;
-  color: white;
+  background: linear-gradient(135deg, #1f1f1f, #121212);
+  color: #f0f0f0;
   line-height: 1.6;
 }
 
 header {
-  background: #000;
+  background: rgba(0, 0, 0, 0.95);
   padding: 1rem 2rem;
   position: sticky;
   top: 0;
@@ -26,7 +26,10 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   animation: slideDown 0.5s ease-in-out;
+  flex-wrap: wrap;
 }
 
 @keyframes slideDown {
@@ -40,12 +43,24 @@ header {
   }
 }
 
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
 header nav a {
   color: white;
-  margin-left: 20px;
+  margin: 10px 15px;
   text-decoration: none;
   font-weight: 500;
   position: relative;
+  transition: color 0.3s;
+}
+
+header nav a:hover {
+  color: #4CAF50;
 }
 
 header nav a::after {
@@ -76,7 +91,10 @@ section {
   width: 100%;
   overflow: hidden;
   position: relative;
-  height: 500px;
+  height: 450px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  margin-bottom: 30px;
 }
 
 .carousel-images {
@@ -95,26 +113,28 @@ section {
 }
 
 .home h1 {
-  font-size: 2.5rem;
+  font-size: 2.7rem;
   margin-top: 20px;
   animation: fadeInUp 1s ease-out;
+  color: #4CAF50;
 }
 
 .book-now-btn {
   background: linear-gradient(135deg, #4CAF50, #81C784);
   border: none;
   color: white;
-  padding: 12px 25px;
-  font-size: 1rem;
-  margin-top: 20px;
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  margin-top: 30px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.3s, transform 0.2s;
+  border-radius: 50px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
 .book-now-btn:hover {
-  background: linear-gradient(135deg, #66bb6a, #a5d6a7);
-  transform: scale(1.05);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(76, 175, 80, 0.6);
 }
 
 footer {
@@ -122,6 +142,7 @@ footer {
   text-align: center;
   padding: 20px;
   font-size: 0.9rem;
+  color: #aaa;
 }
 
 .modal {
@@ -130,21 +151,26 @@ footer {
   z-index: 10;
   left: 0; top: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-  background: #fff;
-  margin: 10% auto;
-  padding: 20px;
-  width: 300px;
-  border-radius: 8px;
+  background: #1f1f1f;
+  margin: 12% auto;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 16px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   animation: fadeIn 0.5s ease-in;
 }
 
 .welcome-text {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: 600;
   background: linear-gradient(to right, #2e63dc, #a2c0f4);
   -webkit-background-clip: text;
@@ -169,17 +195,18 @@ footer {
 }
 
 .booking-card {
-  background: #f5f5f5;
-  color: #111;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transition: transform 0.2s ease;
+  background: #292929;
+  color: #f0f0f0;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .booking-card:hover {
-  transform: scale(1.02);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.5);
 }
 
 #booking-list {
@@ -190,7 +217,7 @@ footer {
 .seat-map {
   display: flex;
   flex-wrap: wrap;
-  width: 300px;
+  width: 100%;
   margin-bottom: 20px;
   justify-content: center;
 }
@@ -243,20 +270,64 @@ footer {
   transition: transform 0.2s;
   background-color: white;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 12px 8px;
   margin: 5px;
   display: inline-block;
-  min-width: 50px;
+  min-width: 45px;
   text-align: center;
-  border-radius: 6px;
+  border-radius: 10px;
   color: #111;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .seat-box:hover {
-  transform: scale(1.05);
-  cursor: default;
+  transform: scale(1.1);
 }
 
 .hidden {
   display: none;
+}
+
+.credit-text {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-left: 20px;
+  white-space: nowrap;
+}
+
+/* FULL MOBILE RESPONSIVE BREAKPOINT */
+@media (max-width: 768px) {
+
+  .carousel {
+    height: 250px;
+    border-radius: 10px;
+  }
+
+  .home h1 {
+    font-size: 2rem;
+  }
+
+  .book-now-btn {
+    width: 90%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  .booking-card {
+    padding: 15px;
+  }
+
+  .seat-box {
+    min-width: 40px;
+    padding: 10px 5px;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header nav {
+    justify-content: center;
+  }
 }
