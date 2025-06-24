@@ -237,6 +237,27 @@ app.post('/api/mark-paid', async (req, res) => {
   }
 });
 
+// Get all bookings (for Seat Status page)
+app.get('/api/admin/bookings', async (req, res) => {
+  try {
+    const bookings = await Booking.find();
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get cash requests (for Cash Requests page)
+app.get('/api/admin/cash-requests', async (req, res) => {
+  try {
+    const cashBookings = await Booking.find({ paymentMode: "Cash", status: "Pending" });
+    res.json(cashBookings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
