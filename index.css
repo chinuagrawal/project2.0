@@ -293,7 +293,7 @@ footer {
   color: #aaa;
   margin-left: 20px;
   white-space: nowrap;
-  text-align: right;
+  align-items: right;
 }
 
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
