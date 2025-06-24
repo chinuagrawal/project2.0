@@ -47,8 +47,10 @@ header nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center; /* add this */
   margin-top: 10px;
 }
+
 
 header nav a {
   color: white;
@@ -295,6 +297,11 @@ footer {
   white-space: nowrap;
   align-items: right;
 }
+#user-section {
+  display: flex;
+  align-items: center;
+}
+
 
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
 @media (max-width: 768px) {
