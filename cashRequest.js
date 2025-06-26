@@ -20,7 +20,6 @@ async function fetchPendingBookings() {
       tbody.appendChild(row);
     });
 
-    // Attach event listeners after rendering
     document.querySelectorAll('button[data-ids]').forEach(button => {
       button.addEventListener('click', () => {
         const ids = button.dataset.ids.split(',');
@@ -36,7 +35,6 @@ async function fetchPendingBookings() {
     alert('Failed to load pending bookings');
   }
 }
-
 
 async function markAsPaid(ids) {
   try {
@@ -58,6 +56,3 @@ async function markAsPaid(ids) {
     alert('Error updating payment status.');
   }
 }
-
-
-window.onload = fetchPendingBookings;

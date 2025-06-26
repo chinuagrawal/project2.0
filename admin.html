@@ -4,32 +4,15 @@
   <meta charset="UTF-8">
   <title>Library Admin Dashboard</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-    }
-    .sidebar {
-      width: 200px;
-      background-color: #343a40;
-      color: white;
-      height: 100vh;
-      padding-top: 20px;
-    }
-    .sidebar a {
-      display: block;
-      padding: 15px;
-      color: white;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .sidebar a:hover {
-      background-color: #495057;
-    }
-    .content {
-      flex: 1;
-      padding: 20px;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; display: flex; }
+    .sidebar { width: 200px; background-color: #343a40; color: white; height: 100vh; padding-top: 20px; }
+    .sidebar a { display: block; padding: 15px; color: white; text-decoration: none; cursor: pointer; }
+    .sidebar a:hover { background-color: #495057; }
+    .content { flex: 1; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    button { padding: 5px 10px; }
   </style>
 </head>
 <body>
@@ -47,19 +30,19 @@
 
   <script>
     function loadSeatStatus() {
-      fetch('/api/admin/bookings')
+      fetch('https://project20-production-e7f5.up.railway.app/api/admin/bookings')
         .then(res => res.json())
         .then(data => {
           let html = '<h2>Seat Status</h2>';
-          html += '<table border="1" cellpadding="5"><tr><th>Seat No</th><th>Name</th><th>Payment Mode</th><th>Status</th><th>Booking Date</th></tr>';
+          html += '<table><tr><th>Seat No</th><th>Name</th><th>Payment Mode</th><th>Status</th><th>Booking Date</th></tr>';
           data.forEach(booking => {
             html += `<tr>
-                      <td>${booking.seatNo}</td>
-                      <td>${booking.name}</td>
-                      <td>${booking.paymentMode}</td>
-                      <td>${booking.status}</td>
-                      <td>${new Date(booking.bookingDate).toLocaleString()}</td>
-                    </tr>`;
+                        <td>${booking.seatNo}</td>
+                        <td>${booking.name}</td>
+                        <td>${booking.paymentMode}</td>
+                        <td>${booking.status}</td>
+                        <td>${new Date(booking.bookingDate).toLocaleString()}</td>
+                      </tr>`;
           });
           html += '</table>';
           document.getElementById('mainContent').innerHTML = html;
@@ -71,6 +54,14 @@
         .then(response => response.text())
         .then(html => {
           document.getElementById('mainContent').innerHTML = html;
+
+          const script = document.createElement('script');
+          script.src = 'cashRequest.js';
+          script.onload = () => {
+            console.log("cashRequest.js loaded");
+            fetchPendingBookings();
+          };
+          document.body.appendChild(script);
         });
     }
   </script>

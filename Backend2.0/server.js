@@ -256,6 +256,15 @@ app.get('/api/admin/cash-requests', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Return all users (for mapping email → full name in seatStatus)
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, 'email firstName lastName'); // only required fields
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users' });
+  }
+});
 
 
 app.listen(PORT, () => {
