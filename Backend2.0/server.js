@@ -265,6 +265,22 @@ app.get('/api/users', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch users' });
   }
 });
+// Delete bookings for a user (admin action)
+app.post('/api/delete-bookings', async (req, res) => {
+  const { seatId, email, shift } = req.body;
+
+  if (!seatId || !email || !shift) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const result = await Booking.deleteMany({ seatId, email, shift });
+    res.json({ success: true, deletedCount: result.deletedCount });
+  } catch (err) {
+    console.error('❌ Failed to delete bookings:', err);
+    res.status(500).json({ message: 'Server error while deleting bookings' });
+  }
+});
 
 
 app.listen(PORT, () => {

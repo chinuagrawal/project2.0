@@ -10,17 +10,11 @@
     * { box-sizing: border-box; margin:0; padding:0; font-family:'Poppins', sans-serif; }
     body { background:#f0f0f5; padding:20px; }
     h1 { text-align:center; color:#4a148c; margin-bottom:20px; }
-    .controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-    input[type=date] { padding:6px; border-radius:6px; border:1px solid #aaa; }
+    .controls { display:flex; justify-content:center; margin-bottom:20px; gap:10px; }
     button { padding:8px 16px; background:#7b1fa2; border:none; color:white; border-radius:6px; cursor:pointer; }
     button:hover { opacity:0.9 }
     .seat-map { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; max-width:300px; margin:auto; }
-    .seat { width:35px; height:35px; border-radius:6px; line-height:35px; text-align:center; font-weight:bold; cursor:pointer; }
-    .available { background:white; border:1px solid #ccc; }
-    .booked { background:#e53935; color:white; }
-    .half-booked { background:#ffa726; color:white; }
-    .evening-booked { background:#8e24aa; color:white; }
-    .today { box-shadow:0 0 4px 3px #2196f3 inset; }
+    .seat { width:35px; height:35px; border-radius:6px; line-height:35px; text-align:center; font-weight:bold; cursor:pointer; background:#fff; border:1px solid #ccc; }
     .selected { border:2px solid #2196f3; }
     .details-panel { background:white; padding:15px; border-radius:10px; box-shadow:0px 0 10px rgba(0,0,0,0.1); margin-top:20px; max-width:800px; margin:auto; }
     table { width:100%; border-collapse: collapse; margin-top:15px; }
@@ -33,8 +27,6 @@
 <h1>Seat Status & PDF Export</h1>
 
 <div class="controls">
-  <label>From: <input type="date" id="filter-start"/></label>
-  <label>To:   <input type="date" id="filter-end"/></label>
   <button id="btn-load">Load</button>
   <button id="btn-export">Export All to PDF</button>
 </div>
@@ -51,43 +43,23 @@
   const detailsPanel = document.getElementById('details-panel');
   const btnLoad = document.getElementById('btn-load');
   const btnExport = document.getElementById('btn-export');
-  const startInput = document.getElementById('filter-start');
-  const endInput = document.getElementById('filter-end');
   let bookings = [];
   let usersByEmail = {};
 
   async function loadBookings() {
-    const start = startInput.value;
-    const end = endInput.value;
-    if (!start || !end) return alert('Please select both dates');
-    const resp = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings?startDate=${start}&endDate=${end}`);
+    const resp = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings`);
     bookings = await resp.json();
     renderSeatMap();
     detailsPanel.innerHTML = '<h2>Select a seat above</h2>';
   }
 
   function renderSeatMap() {
-    const today = new Date().toISOString().split('T')[0];
     seatMap.innerHTML = '';
     for (let i = 1; i <= totalSeats; i++) {
       const seat = `S${i}`;
       const el = document.createElement('div');
       el.className = 'seat';
       el.dataset.seat = seat;
-
-      const sb = bookings.filter(b => b.seatId === seat);
-      const hasFull = sb.some(b => b.shift === 'full');
-      const hasAM = sb.some(b => b.shift === 'am');
-      const hasPM = sb.some(b => b.shift === 'pm');
-      const hasToday = sb.some(b => b.date === today);
-
-      el.classList.add(
-        hasFull ? 'booked' :
-        hasAM && hasPM ? 'booked' :
-        hasAM ? 'half-booked' :
-        hasPM ? 'evening-booked' : 'available'
-      );
-      if (hasToday) el.classList.add('today');
       el.innerText = i;
       el.onclick = () => {
         document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
@@ -101,7 +73,7 @@
   function showDetails(seat) {
     const sb = bookings.filter(b => b.seatId === seat);
     if (!sb.length) {
-      detailsPanel.innerHTML = `<h2>${seat}</h2><p>No bookings in this range.</p>`;
+      detailsPanel.innerHTML = `<h2>${seat}</h2><p>No bookings found.</p>`;
       return;
     }
     const grouped = {};
@@ -112,18 +84,37 @@
         name: fullName,
         shift: b.shift,
         pay: b.paymentMode,
-        dates: []
+        dates: [],
+        seatId: b.seatId,
+        email: b.email
       };
       grouped[key].dates.push(b.date);
     });
 
-    let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th></tr></thead><tbody>`;
+    let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th><th>Action</th></tr></thead><tbody>`;
     Object.values(grouped).forEach(entry => {
       entry.dates.sort();
-      html += `<tr><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td></tr>`;
+      html += `<tr><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td>
+      <td><button onclick="removeBooking('${entry.seatId}', '${entry.email}', '${entry.shift}', '${entry.pay}')">Remove</button></td></tr>`;
     });
     html += '</tbody></table>';
     detailsPanel.innerHTML = html;
+  }
+
+  async function removeBooking(seatId, email, shift, pay) {
+    if (!confirm("Are you sure you want to delete this booking?")) return;
+    const resp = await fetch(`https://project20-production-e7f5.up.railway.app/api/delete-bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatId, email, shift, paymentMode: pay })
+    });
+    const result = await resp.json();
+    if (result.success) {
+      alert("Booking removed.");
+      loadBookings();
+    } else {
+      alert("Failed to remove.");
+    }
   }
 
   function exportPDF() {
@@ -160,24 +151,18 @@
     html2pdf().from(container).set({
       margin: 0.5,
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).save(`SeatReport_${startInput.value}_to_${endInput.value}.pdf`);
+    }).save(`SeatReport.pdf`);
   }
 
   btnLoad.addEventListener('click', loadBookings);
   btnExport.addEventListener('click', exportPDF);
 
   window.onload = async () => {
-    const today = new Date().toISOString().split('T')[0];
-    startInput.value = endInput.value = today;
-
-    // Load all users
     const userResp = await fetch('https://project20-production-e7f5.up.railway.app/api/users');
     const users = await userResp.json();
     users.forEach(u => {
       usersByEmail[u.email] = `${u.firstName || ''} ${u.lastName || ''}`.trim();
     });
-
-    // Then load bookings
     loadBookings();
   };
 </script>
