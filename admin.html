@@ -30,22 +30,15 @@
 
   <script>
     function loadSeatStatus() {
-      fetch('https://project20-production-e7f5.up.railway.app/api/admin/bookings')
-        .then(res => res.json())
-        .then(data => {
-          let html = '<h2>Seat Status</h2>';
-          html += '<table><tr><th>Seat No</th><th>Name</th><th>Payment Mode</th><th>Status</th><th>Booking Date</th></tr>';
-          data.forEach(booking => {
-            html += `<tr>
-                        <td>${booking.seatNo}</td>
-                        <td>${booking.name}</td>
-                        <td>${booking.paymentMode}</td>
-                        <td>${booking.status}</td>
-                        <td>${new Date(booking.bookingDate).toLocaleString()}</td>
-                      </tr>`;
-          });
-          html += '</table>';
+      fetch('seatStatus.html')
+        .then(response => response.text())
+        .then(html => {
           document.getElementById('mainContent').innerHTML = html;
+
+          const script = document.createElement('script');
+          script.src = 'seatStatus.js';
+          script.onload = () => console.log("seatStatus.js loaded");
+          document.body.appendChild(script);
         });
     }
 
