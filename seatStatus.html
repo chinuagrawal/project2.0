@@ -120,7 +120,7 @@
     let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th></tr></thead><tbody>`;
     Object.values(grouped).forEach(entry => {
       entry.dates.sort();
-      html += `<tr><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'N/A'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td></tr>`;
+      html += `<tr><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td></tr>`;
     });
     html += '</tbody></table>';
     detailsPanel.innerHTML = html;
@@ -150,7 +150,7 @@
     Object.values(groupedAll).forEach(entry => {
       entry.dates.sort();
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${entry.seat}</td><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'N/A'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td>`;
+      tr.innerHTML = `<td>${entry.seat}</td><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td>`;
       tbody.appendChild(tr);
     });
 
