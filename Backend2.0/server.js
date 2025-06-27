@@ -257,14 +257,16 @@ app.get('/api/admin/cash-requests', async (req, res) => {
   }
 });
 // Return all users (for mapping email → full name in seatStatus)
+// Return all users (for mapping email → full name in seatStatus)
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await User.find({}, 'email firstName lastName'); // only required fields
+    const users = await User.find({}, 'email firstName lastName mobile'); // ✅ Include mobile here
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch users' });
   }
 });
+
 // Delete bookings for a user (admin action)
 app.post('/api/delete-bookings', async (req, res) => {
   const { seatId, email, shift } = req.body;

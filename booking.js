@@ -133,7 +133,7 @@ bookBtn.addEventListener('click', async () => {
       if (!res.ok) {
         alert(data.message || 'Booking failed.');
       } else {
-        alert('Cash booking request submitted. Please pay to library in-charge.');
+        alert('Cash booking request submitted. Please pay to Bindal E-mitra ,contact 9828130420.');
         window.location.href = `index.html?success=1&cash=1`;
       }
     } catch (err) {

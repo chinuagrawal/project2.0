@@ -7,19 +7,145 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin:0; padding:0; font-family:'Poppins', sans-serif; }
-    body { background:#f0f0f5; padding:20px; }
-    h1 { text-align:center; color:#4a148c; margin-bottom:20px; }
-    .controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-    button { padding:8px 16px; background:#7b1fa2; border:none; color:white; border-radius:6px; cursor:pointer; }
-    button:hover { opacity:0.9 }
-    .seat-map { display:grid; grid-template-columns:repeat(8,1fr); gap:6px; max-width:300px; margin:auto; }
-    .seat { width:35px; height:35px; border-radius:6px; line-height:35px; text-align:center; font-weight:bold; cursor:pointer; border: 1px solid #ccc; background: white; }
-    .selected { border:2px solid #2196f3; }
-    .details-panel { background:white; padding:15apx; border-radius:10px; box-shadow:0px 0 10px rgba(0,0,0,0.1); margin-top:20px; max-width:800px; margin:auto; }
-    table { width:100%; border-collapse: collapse; margin-top:15px; }
-    th,td { border:1px solid #ccc; padding:8px; text-align:left; }
-    th { background:#eee; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #f0f0f5;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4a148c;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 18px;
+      background: #7b1fa2;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #6a1b9a;
+    }
+
+    .seat-map {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+      gap: 6px;
+      max-width: 320px;
+      margin: auto;
+    }
+
+    .seat {
+      width: 35px;
+      height: 35px;
+      border-radius: 6px;
+      line-height: 35px;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .seat:hover {
+      background: #f1f1f1;
+    }
+
+    .selected {
+      border: 2px solid #2196f3;
+      background: #e3f2fd;
+    }
+
+    .details-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 0 10px rgba(0, 0, 0, 0.08);
+      margin-top: 30px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9f9f9;
+      font-weight: 600;
+    }
+
+    td button {
+      background: #d32f2f;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    td button:hover {
+      background: #b71c1c;
+    }
+
+    @media screen and (max-width: 768px) {
+      .seat-map {
+        grid-template-columns: repeat(6, 1fr);
+      }
+
+      .details-panel {
+        padding: 16px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -50,7 +176,11 @@
     const userResp = await fetch('https://project20-production-e7f5.up.railway.app/api/users');
     const users = await userResp.json();
     users.forEach(u => {
-      usersByEmail[u.email] = `${u.firstName || ''} ${u.lastName || ''}`.trim();
+      usersByEmail[u.email] = {
+        name: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+        email: u.email,
+        mobile: u.mobile || 'N/A'
+      };
     });
     renderSeatMap();
   }
@@ -80,19 +210,35 @@
     }
     const grouped = {};
     sb.forEach(b => {
-      const fullName = usersByEmail[b.email] || b.email;
+      const user = usersByEmail[b.email] || { name: b.email, email: b.email, mobile: 'N/A' };
       const key = `${b.email}_${b.shift}`;
-      grouped[key] = grouped[key] || { name: fullName, shift: b.shift, pay: b.paymentMode, dates: [] };
+      grouped[key] = grouped[key] || {
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        shift: b.shift,
+        pay: b.paymentMode,
+        dates: []
+      };
       grouped[key].dates.push(b.date);
     });
 
-    let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th><th>Action</th></tr></thead><tbody>`;
-    Object.entries(grouped).forEach(([key, entry]) => {
+    let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Email</th><th>Mobile</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th><th>Action</th></tr></thead><tbody>`;
+    Object.values(grouped).forEach(entry => {
       entry.dates.sort();
-      const [email, shift] = key.split('_');
-      html += `<tr><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td>
-      <td><button onclick="deleteBooking('${seat}', '${email}', '${shift}')">Remove</button></td></tr>`;
+      html += `<tr>
+        <td>${entry.name}</td>
+        <td>${entry.email}</td>
+        <td>${entry.mobile}</td>
+        <td>${entry.shift}</td>
+        <td>${entry.pay || 'Online'}</td>
+        <td>${entry.dates[0]}</td>
+        <td>${entry.dates.at(-1)}</td>
+        <td>${entry.dates.length}</td>
+        <td><button onclick="deleteBooking('${seat}', '${entry.email}', '${entry.shift}')">Remove</button></td>
+      </tr>`;
     });
+
     html += '</tbody></table>';
     detailsPanel.innerHTML = html;
   }
@@ -122,11 +268,11 @@
 
     const groupedAll = {};
     bookings.forEach(b => {
-      const fullName = usersByEmail[b.email] || b.email;
+      const user = usersByEmail[b.email] || { name: b.email };
       const key = `${b.seatId}_${b.email}_${b.shift}`;
       groupedAll[key] = groupedAll[key] || {
         seat: b.seatId,
-        name: fullName,
+        name: user.name,
         shift: b.shift,
         pay: b.paymentMode,
         dates: []
