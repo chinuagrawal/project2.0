@@ -53,63 +53,60 @@
   </div>
 
   <script>
-  // Toggle password visibility
-  const showHiddenPass = (passId, eyeId) => {
-    const input = document.getElementById(passId),
-          iconEye = document.getElementById(eyeId);
+    // Toggle password visibility
+    const showHiddenPass = (passId, eyeId) => {
+      const input = document.getElementById(passId),
+            iconEye = document.getElementById(eyeId);
 
-    iconEye.addEventListener('click', () => {
-      if (input.type === 'password') {
-        input.type = 'text';
-        iconEye.classList.add('ri-eye-line');
-        iconEye.classList.remove('ri-eye-off-line');
-      } else {
-        input.type = 'password';
-        iconEye.classList.remove('ri-eye-line');
-        iconEye.classList.add('ri-eye-off-line');
-      }
-    });
-  };
-  showHiddenPass('password', 'login-eye');
-
-  // Handle Login Form Submission
-  document.getElementById("login-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const rememberMe = document.querySelector(".login__check-input").checked;
-
-    try {
-      const res = await fetch("https://project20-production-e7f5.up.railway.app/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.user) {
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage.setItem("user", JSON.stringify(data.user));
-        storage.setItem("adminLoggedIn", data.user.role === "admin" ? "true" : "false");
-
-        alert("Login successful!");
-
-        if (data.user.role === "admin") {
-          window.location.href = "admin.html";
+      iconEye.addEventListener('click', () => {
+        if (input.type === 'password') {
+          input.type = 'text';
+          iconEye.classList.add('ri-eye-line');
+          iconEye.classList.remove('ri-eye-off-line');
         } else {
-          window.location.href = "index.html";
+          input.type = 'password';
+          iconEye.classList.remove('ri-eye-line');
+          iconEye.classList.add('ri-eye-off-line');
         }
-      } else {
-        alert(data.message || "Login failed");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Server error");
-    }
-  });
-</script>
+      });
+    };
+    showHiddenPass('password', 'login-eye');
 
+    // Handle Login Form Submission
+    document.getElementById("login-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const res = await fetch("https://project20-production-e7f5.up.railway.app/api/login", {  // ✅ CORRECT URL
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Login successful!");
+      localStorage.setItem("user", JSON.stringify(data.user)); // store user info if needed
+       if (data.user.role === "admin") {
+            window.location.href = "admin.html";
+          } else {
+            window.location.href = "index.html";
+          }
+    } else {
+      alert(data.message || "Login failed");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Server error");
+  }
+});
+
+  </script>
 </body>
 </html>
