@@ -52,6 +52,7 @@
     <h2 style="text-align:center;">Admin</h2>
     <a onclick="loadSeatStatus()">Seat Status</a>
     <a onclick="loadCashRequestPage()">Cash Requests</a>
+    <a onclick="logout()">Logout</a>
   </div>
 
   <div class="content" id="mainContent">
@@ -62,6 +63,13 @@
   </div>
 
   <script>
+    // ✅ Protect admin page
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "admin") {
+      alert("Access denied! Admins only.");
+      window.location.href = "login.html";
+    }
+
     function loadSeatStatus() {
       const iframe = document.createElement('iframe');
       iframe.src = 'seatStatus.html';
@@ -85,6 +93,11 @@
           };
           document.body.appendChild(script);
         });
+    }
+
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
     }
   </script>
 
