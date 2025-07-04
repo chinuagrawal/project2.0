@@ -348,6 +348,11 @@ app.post('/api/delete-bookings', async (req, res) => {
     res.status(500).json({ message: 'Server error while deleting bookings' });
   }
 });
+app.post('/api/payment/callback', (req, res) => {
+  console.log("Callback received from PhonePe:", req.body);
+  res.status(200).send("OK"); // Must respond with 200
+});
+
 
 
 app.listen(PORT, () => {
