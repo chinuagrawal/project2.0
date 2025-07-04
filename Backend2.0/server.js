@@ -168,9 +168,17 @@ app.post('/api/payment/initiate', async (req, res) => {
       res.status(400).json({ message: "PhonePe payment initiation failed" });
     }
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ message: "PhonePe API error" });
-  }
+  console.error("PhonePe Error:", err.response?.data || err.message || err);
+  res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
+}
+console.log("Initiating payment for amount:", amount, "email:", email);
+console.log("merchantId:", merchantId);
+console.log("saltKey:", saltKey);
+console.log("saltIndex:", saltIndex);
+console.log("base64Payload:", base64Payload);
+console.log("X-VERIFY:", xVerify);
+
+
 });
 app.get('/api/payment/status/:txnId', async (req, res) => {
   const txnId = req.params.txnId;
