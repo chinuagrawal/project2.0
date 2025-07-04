@@ -148,6 +148,14 @@ app.post('/api/payment/initiate', async (req, res) => {
     .update(base64Payload + "/pg/v1/pay" + saltKey)
     .digest("hex") + "###" + saltIndex;
 
+  // ✅ MOVE LOGGING HERE
+  console.log("Initiating payment for amount:", amount, "email:", email);
+  console.log("merchantId:", merchantId);
+  console.log("saltKey:", saltKey);
+  console.log("saltIndex:", saltIndex);
+  console.log("base64Payload:", base64Payload);
+  console.log("X-VERIFY:", xVerify);
+
   try {
     const response = await axios.post(
       `${baseUrl}/pg/v1/pay`,
@@ -165,21 +173,15 @@ app.post('/api/payment/initiate', async (req, res) => {
       const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
       res.json({ redirectUrl, merchantTransactionId });
     } else {
-      res.status(400).json({ message: "PhonePe payment initiation failed" });
+      console.error("PhonePe error response:", response.data);
+      res.status(400).json({ message: "PhonePe payment initiation failed", details: response.data });
     }
   } catch (err) {
-  console.error("PhonePe Error:", err.response?.data || err.message || err);
-  res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
-}
-console.log("Initiating payment for amount:", amount, "email:", email);
-console.log("merchantId:", merchantId);
-console.log("saltKey:", saltKey);
-console.log("saltIndex:", saltIndex);
-console.log("base64Payload:", base64Payload);
-console.log("X-VERIFY:", xVerify);
-
-
+    console.error("PhonePe Error:", err.response?.data || err.message || err);
+    res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
+  }
 });
+
 app.get('/api/payment/status/:txnId', async (req, res) => {
   const txnId = req.params.txnId;
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
