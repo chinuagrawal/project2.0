@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const Razorpay = require('razorpay');
+
 require('dotenv').config();
 
 const app = express();
@@ -28,26 +28,9 @@ const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
-// Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET_KEY,
-});
 
-// Create Razorpay order
-app.post('/create-order', async (req, res) => {
-  const { amount } = req.body;
-  try {
-    const order = await razorpay.orders.create({
-      amount,
-      currency: 'INR',
-      receipt: 'receipt_' + Date.now()
-    });
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: 'Razorpay order failed' });
-  }
-});
+
+
 
 // Seat availability endpoint
 app.get('/api/available-seats', async (req, res) => {
@@ -133,6 +116,88 @@ app.post('/api/book', async (req, res) => {
 
   await Booking.insertMany(bookings);
   res.json({ success: true });
+});
+
+
+const crypto = require('crypto');
+const axios = require('axios');
+
+app.post('/api/payment/initiate', async (req, res) => {
+  const { amount, email } = req.body;
+
+  const merchantTransactionId = 'TXN_' + Date.now();
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const saltKey = process.env.PHONEPE_SALT_KEY;
+  const saltIndex = process.env.PHONEPE_SALT_INDEX;
+  const baseUrl = process.env.PHONEPE_BASE_URL;
+
+  const payload = {
+    merchantId,
+    merchantTransactionId,
+    merchantUserId: email,
+    amount: amount * 100,
+    redirectUrl: `https://yourdomain.com/payment-status.html?txnId=${merchantTransactionId}`,
+    redirectMode: "POST",
+    callbackUrl: `https://yourdomain.com/api/payment/callback`,
+    paymentInstrument: { type: "PAY_PAGE" }
+  };
+
+  const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+  const xVerify = crypto
+    .createHash("sha256")
+    .update(base64Payload + "/pg/v1/pay" + saltKey)
+    .digest("hex") + "###" + saltIndex;
+
+  try {
+    const response = await axios.post(
+      `${baseUrl}/pg/v1/pay`,
+      { request: base64Payload },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-VERIFY': xVerify,
+          'X-MERCHANT-ID': merchantId
+        }
+      }
+    );
+
+    if (response.data.success) {
+      const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
+      res.json({ redirectUrl, merchantTransactionId });
+    } else {
+      res.status(400).json({ message: "PhonePe payment initiation failed" });
+    }
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ message: "PhonePe API error" });
+  }
+});
+app.get('/api/payment/status/:txnId', async (req, res) => {
+  const txnId = req.params.txnId;
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const saltKey = process.env.PHONEPE_SALT_KEY;
+  const saltIndex = process.env.PHONEPE_SALT_INDEX;
+  const baseUrl = process.env.PHONEPE_BASE_URL;
+
+  const url = `/pg/v1/status/${merchantId}/${txnId}`;
+  const xVerify = crypto
+    .createHash("sha256")
+    .update(url + saltKey)
+    .digest("hex") + "###" + saltIndex;
+
+  try {
+    const response = await axios.get(`${baseUrl}${url}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-VERIFY': xVerify,
+        'X-MERCHANT-ID': merchantId
+      }
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to check payment status" });
+  }
 });
 
 // Create CASH booking request

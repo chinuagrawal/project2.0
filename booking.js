@@ -1,3 +1,5 @@
+// UPDATED booking.js (with PhonePe integration)
+
 const seatMap = document.getElementById('seat-map');
 const bookBtn = document.getElementById('book-btn');
 const startDateInput = document.getElementById('start-date');
@@ -64,18 +66,17 @@ function renderSeats() {
     const selectedShift = shiftInput.value;
     let isSelectable = true;
 
-    // Set visual color
     if (hasFull || (hasAM && hasPM)) {
-      seat.classList.add('booked'); // 🔴 red
+      seat.classList.add('booked');
       isSelectable = false;
     } else if (hasAM) {
-      seat.classList.add('half-booked'); // 🟠 orange
+      seat.classList.add('half-booked');
       if (selectedShift === 'full' || selectedShift === 'am') isSelectable = false;
     } else if (hasPM) {
-      seat.classList.add('evening-booked'); // 🟣 purple
+      seat.classList.add('evening-booked');
       if (selectedShift === 'full' || selectedShift === 'pm') isSelectable = false;
     } else {
-      seat.classList.add('available'); // ⚪ white
+      seat.classList.add('available');
     }
 
     if (isSelectable) {
@@ -99,9 +100,7 @@ bookBtn.addEventListener('click', async () => {
   const startDate = startDateInput.value;
   const duration = durationInput.value;
 
-  if (!startDate || !duration || !shift) {
-    return alert('Fill all booking details.');
-  }
+  if (!startDate || !duration || !shift) return alert('Fill all booking details.');
 
   const endDate = calculateEndDate(startDate, duration);
   if (!endDate) return alert('Invalid start date.');
@@ -112,22 +111,17 @@ bookBtn.addEventListener('click', async () => {
   if (!email) return alert('Please login first.');
 
   const months = parseInt(duration);
-  if (!months || isNaN(months)) {
-    return alert('Invalid duration selected.');
-  }
+  if (!months || isNaN(months)) return alert('Invalid duration selected.');
 
   const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
 
-  // 👇 If payment mode is CASH
   if (paymentMode === 'cash') {
     try {
       const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book-cash', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
-});
-
-
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -140,62 +134,36 @@ bookBtn.addEventListener('click', async () => {
       console.error(err);
       alert('Cash booking request failed.');
     }
-    return; // exit function after cash request
+    return;
   }
 
-  // 👇 Your existing Razorpay Online Payment Flow (untouched)
-  const baseAmount = shift === 'full' ? 80000 : 60000;
+  // 🟣 Online booking via PhonePe
+  const baseAmount = shift === 'full' ? 800 : 600;
   const amount = baseAmount * months;
 
   try {
-    const orderRes = await fetch('https://project20-production-e7f5.up.railway.app/create-order', {
+    const res = await fetch('https://project20-production-e7f5.up.railway.app/api/payment/initiate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount })
+      body: JSON.stringify({ amount, email })
     });
 
-    const orderData = await orderRes.json();
+    const data = await res.json();
 
-    const options = {
-      key: 'rzp_test_n9ZAl4W7UvC5MH',
-      amount: orderData.amount,
-      currency: 'INR',
-      name: 'Seat Booking',
-      description: 'Confirm seat',
-      order_id: orderData.id,
-      handler: async function (response) {
-        const payment = {
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature
-        };
+    if (!res.ok || !data.redirectUrl) {
+      return alert(data.message || 'Payment initiation failed.');
+    }
 
-        const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seatId, shift, startDate, endDate, email, payment })
-        });
+    sessionStorage.setItem('pendingBooking', JSON.stringify({
+      seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
+    }));
 
-        const data = await res.json();
-        if (!res.ok) {
-          alert(data.message || 'Booking failed.');
-        } else {
-          window.location.href = `index.html?success=1&seatId=${seatId}&shift=${shift}&startDate=${startDate}&endDate=${endDate}`;
-        }
-      },
-      theme: { color: '#3399cc' }
-    };
-
-    const rzp = new Razorpay(options);
-    rzp.open();
+    window.location.href = data.redirectUrl;
   } catch (err) {
     console.error(err);
     alert('Payment or booking failed.');
   }
 });
-
-
-
 
 [startDateInput, durationInput, shiftInput].forEach(input => {
   input.addEventListener('change', () => {
@@ -204,11 +172,9 @@ bookBtn.addEventListener('click', async () => {
   });
 });
 
-
 window.onload = () => {
   const today = new Date().toISOString().split('T')[0];
   startDateInput.value = today;
-  updateAmount(); // ✅ calculate amount at initial load
+  updateAmount();
   fetchBookings();
 };
-
