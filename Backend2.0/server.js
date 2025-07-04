@@ -136,9 +136,9 @@ app.post('/api/payment/initiate', async (req, res) => {
     merchantTransactionId,
     merchantUserId: email,
     amount: amount * 100,
-    redirectUrl: `https://yourdomain.com/payment-status.html?txnId=${merchantTransactionId}`,
+    redirectUrl: `https://kanhalibrary.in/payment-status.html?txnId=${merchantTransactionId}`,
     redirectMode: "POST",
-    callbackUrl: `https://yourdomain.com/api/payment/callback`,
+    callbackUrl: `https://kanhalibrary.in/api/payment/callback`,
     paymentInstrument: { type: "PAY_PAGE" }
   };
 
