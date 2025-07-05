@@ -97,9 +97,10 @@ app.post('/api/payment/initiate', async (req, res) => {
       }
     };
 
-    const response = await axios.post(
-      `${baseUrl}/apis/pg/v1/pay`
-,
+   
+      const response = await axios.post(
+  `${baseUrl}/apis/pg/checkout/v2/pay`,  // ✅ correct for V2
+  
       payload,
       {
         headers: {
@@ -305,7 +306,8 @@ app.get('/api/payment/status', async (req, res) => {
   try {
     // ✅ Step 1: Get Access Token
     const tokenRes = await axios.post(
-      `${baseUrl}/apis/pg/v1/oauth/token`,
+  `https://api.phonepe.com/apis/identity-manager/v1/oauth/token`,
+
       new URLSearchParams({
         client_id: clientId,
         client_secret: clientSecret,
