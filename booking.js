@@ -139,7 +139,7 @@ bookBtn.addEventListener('click', async () => {
 
   // 🟣 Online booking via PhonePe
   const baseAmount = shift === 'full' ? 800 : 600;
-  const amount = baseAmount * months;
+  const amount =Math.round(baseAmount * months);
 
   try {
     const res = await fetch('https://project20-production-e7f5.up.railway.app/api/payment/initiate', {
