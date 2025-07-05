@@ -93,6 +93,7 @@ app.post('/api/payment/initiate', async (req, res) => {
       metaInfo: { udf1: email },
       paymentFlow: {
         type: 'PG_CHECKOUT',
+        redirectMode: 'AUTO',
         merchantUrls: {
           redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`
         }
