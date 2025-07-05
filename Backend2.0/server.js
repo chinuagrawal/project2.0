@@ -328,7 +328,13 @@ app.get('/api/payment/status', async (req, res) => {
       }
     });
 
-    res.json({ success: true, data: response.data });
+    const paymentStatus = response.data.data.state;
+
+if (paymentStatus === 'COMPLETED') {
+  res.json({ code: 'PAYMENT_SUCCESS' });
+} else {
+  res.json({ code: 'PAYMENT_FAILED', status: paymentStatus });
+}
   } catch (err) {
     console.error("❌ PhonePe status check error:", err.response?.data || err.message);
     res.status(500).json({
