@@ -92,50 +92,66 @@ app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
-  const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
   const baseUrl = process.env.PHONEPE_BASE_URL;
 
-  const payload = {
-    merchantId,
-    merchantTransactionId,
-    merchantUserId: email,
-    amount: amount * 100,
-    redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`,
-    redirectMode: "POST",
-    callbackUrl: `https://kanhalibrary.in/api/payment/callback`,
-    paymentInstrument: { type: "PAY_PAGE" }
-  };
-
-  const payloadStr = JSON.stringify(payload);
-  const base64Payload = Buffer.from(payloadStr).toString("base64");
-  const hmac = crypto.createHmac("sha256", clientSecret)
-    .update(base64Payload + "/pg/v3/charge")
-    .digest("base64");
-  const authorization = `Bearer ${hmac}`;
+  const tokenUrl = `${baseUrl}/v3/authorize`;
+  const chargeUrl = `${baseUrl}/pg/v3/charge`;
 
   try {
-    const response = await axios.post(
-      `${baseUrl}/pg/v3/charge`,
+    // Step 1: Get OAuth access token
+    const tokenResponse = await axios.post(
+      tokenUrl,
+      {
+        clientId: process.env.PHONEPE_CLIENT_ID,
+        clientSecret: process.env.PHONEPE_CLIENT_SECRET,
+      },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    const accessToken = tokenResponse.data.data.accessToken;
+    if (!accessToken) throw new Error('Access token not received');
+
+    // Step 2: Prepare charge payload
+    const payload = {
+      merchantId,
+      merchantTransactionId,
+      merchantUserId: email,
+      amount: amount * 100,
+      redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`,
+      redirectMode: "POST",
+      callbackUrl: `https://kanhalibrary.in/api/payment/callback`,
+      paymentInstrument: { type: "PAY_PAGE" }
+    };
+
+    const payloadStr = JSON.stringify(payload);
+    const base64Payload = Buffer.from(payloadStr).toString("base64");
+
+    // Step 3: Make PG Charge request
+    const chargeResponse = await axios.post(
+      chargeUrl,
       { request: base64Payload },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authorization,
+          'Authorization': `Bearer ${accessToken}`,
           'X-MERCHANT-ID': merchantId
         }
       }
     );
 
-    if (response.data.success) {
-      const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
-      res.json({ redirectUrl, merchantTransactionId });
-    } else {
-      res.status(400).json({ message: "PhonePe payment initiation failed", details: response.data });
+    const data = chargeResponse.data;
+    if (!data.success) {
+      return res.status(400).json({ message: 'Payment initiation failed', details: data });
     }
+
+    const redirectUrl = data.data.instrumentResponse.redirectInfo.url;
+    res.json({ redirectUrl, merchantTransactionId });
   } catch (err) {
-    res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
+    console.error("❌ PhonePe Payment Initiation Error:", err.response?.data || err.message);
+    res.status(500).json({ message: "PhonePe V2 error", error: err.message, response: err.response?.data });
   }
 });
+
 
 app.post('/api/book-cash', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, duration } = req.body;
