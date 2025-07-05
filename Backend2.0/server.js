@@ -92,26 +92,31 @@ app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const clientId = process.env.PHONEPE_CLIENT_ID;
+  const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
   const baseUrl = process.env.PHONEPE_BASE_URL;
 
-  const tokenUrl = `${baseUrl}/v3/authorize`;
-  const chargeUrl = `${baseUrl}/pg/v3/charge`;
-
   try {
-    // Step 1: Get OAuth access token
-    const tokenResponse = await axios.post(
-      tokenUrl,
+    // Step 1: Get Auth Token
+    const tokenRes = await axios.post(
+      `${baseUrl}/apis/pg-sandbox/v1/oauth/token`,
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        client_version: '1'
+      }).toString(),
       {
-        clientId: process.env.PHONEPE_CLIENT_ID,
-        clientSecret: process.env.PHONEPE_CLIENT_SECRET,
-      },
-      { headers: { 'Content-Type': 'application/json' } }
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
     );
 
-    const accessToken = tokenResponse.data.data.accessToken;
-    if (!accessToken) throw new Error('Access token not received');
+    const accessToken = tokenRes.data.access_token;
+    console.log("✅ Access Token:", accessToken);
 
-    // Step 2: Prepare charge payload
+    // Step 2: Create Payment Request
     const payload = {
       merchantId,
       merchantTransactionId,
@@ -126,31 +131,31 @@ app.post('/api/payment/initiate', async (req, res) => {
     const payloadStr = JSON.stringify(payload);
     const base64Payload = Buffer.from(payloadStr).toString("base64");
 
-    // Step 3: Make PG Charge request
-    const chargeResponse = await axios.post(
-      chargeUrl,
+    const response = await axios.post(
+      `${baseUrl}/pg/v3/charge`,
       { request: base64Payload },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `O-Bearer ${accessToken}`,
           'X-MERCHANT-ID': merchantId
         }
       }
     );
 
-    const data = chargeResponse.data;
-    if (!data.success) {
-      return res.status(400).json({ message: 'Payment initiation failed', details: data });
+    if (response.data.success) {
+      const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
+      res.json({ redirectUrl, merchantTransactionId });
+    } else {
+      res.status(400).json({ message: "PhonePe payment initiation failed", details: response.data });
     }
 
-    const redirectUrl = data.data.instrumentResponse.redirectInfo.url;
-    res.json({ redirectUrl, merchantTransactionId });
   } catch (err) {
-    console.error("❌ PhonePe Payment Initiation Error:", err.response?.data || err.message);
-    res.status(500).json({ message: "PhonePe V2 error", error: err.message, response: err.response?.data });
+    console.error("❌ PhonePe API V2 Error:", err.response?.data || err.message);
+    res.status(500).json({ message: "PhonePe V2 API error", details: err.response?.data || err.message });
   }
 });
+
 
 
 app.post('/api/book-cash', async (req, res) => {
