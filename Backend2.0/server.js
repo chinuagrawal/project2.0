@@ -100,7 +100,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
 
-  const merchantId = process.env.PHONEPE_CLIENT_ID;
+   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const saltKey = process.env.PHONEPE_SALT_KEY;
   const saltIndex = process.env.PHONEPE_SALT_INDEX;
   const baseUrl = process.env.PHONEPE_BASE_URL;
@@ -156,7 +156,8 @@ app.post('/api/payment/initiate', async (req, res) => {
 // ✅ PhonePe Status Check
 app.get('/api/payment/status/:txnId', async (req, res) => {
   const txnId = req.params.txnId;
-  const merchantId = process.env.PHONEPE_CLIENT_ID;
+  // In server.js, inside /api/payment/initiate and /api/payment/status/:txnId routes:
+const merchantId = process.env.PHONEPE_MERCHANT_ID; // Use the correct Merchant ID env variable
   const saltKey = process.env.PHONEPE_SALT_KEY;
   const saltIndex = process.env.PHONEPE_SALT_INDEX;
   const baseUrl = process.env.PHONEPE_BASE_URL;
