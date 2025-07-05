@@ -27,12 +27,12 @@ app.use('/api', authRoutes);
 
 // Utility function: get PhonePe Access Token
 const getPhonePeAccessToken = async () => {
-  const baseUrl = process.env.PHONEPE_BASE_URL;
+  const baseUrl = 'https://api.phonepe.com/apis/identity-manager';
   const clientId = process.env.PHONEPE_CLIENT_ID;
   const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
 
   const response = await axios.post(
-    `${baseUrl}/apis/pg/v1/oauth/token`,
+    `${baseUrl}/v1/oauth/token`,
     new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
