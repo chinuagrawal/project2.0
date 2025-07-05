@@ -98,7 +98,7 @@ app.post('/api/payment/initiate', async (req, res) => {
     };
 
     const response = await axios.post(
-      `${baseUrl}/apis/pg/checkout/v2/pay`,
+      `${baseUrl}/pg/v1/pay`,
       payload,
       {
         headers: {
