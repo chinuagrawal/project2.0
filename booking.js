@@ -20,7 +20,7 @@ function updateAmount() {
   }
 
   const baseAmount = shift === 'full' ? 800 : 600;
-  const totalAmount = baseAmount * duration;
+  const totalAmount =Math.round(baseAmount * duration);
   amountDisplay.innerText = `₹ ${totalAmount.toFixed(2)}`;
 }
 
