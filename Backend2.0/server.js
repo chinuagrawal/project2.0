@@ -289,6 +289,7 @@ app.post('/api/book', async (req, res) => {
   res.json({ success: true });
 });
 // 📦 Status Check Route
+// ✅ PhonePe Payment Status using latest Order Status API
 app.get('/api/payment/status', async (req, res) => {
   const { txnId } = req.query;
 
@@ -296,10 +297,10 @@ app.get('/api/payment/status', async (req, res) => {
     return res.status(400).json({ message: 'Missing transaction ID' });
   }
 
-  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const baseUrl = process.env.PHONEPE_BASE_URL;
   const clientId = process.env.PHONEPE_CLIENT_ID;
   const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
-  const baseUrl = process.env.PHONEPE_BASE_URL;
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
 
   try {
     // Step 1: Get Access Token
@@ -311,34 +312,36 @@ app.get('/api/payment/status', async (req, res) => {
         grant_type: 'client_credentials',
         client_version: '1'
       }).toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
 
     const accessToken = tokenRes.data.access_token;
 
-    // Step 2: Call Status API
-    const response = await axios.get(`${baseUrl}/pg/v1/status/${merchantId}/${txnId}`, {
-      headers: {
-        'Authorization': `O-Bearer ${accessToken}`,
-        'X-MERCHANT-ID': merchantId
+    // Step 2: Get Payment Status from new Order Status API
+    const statusRes = await axios.get(
+      `${baseUrl}/checkout/v2/order/${txnId}/status?details=false`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `O-Bearer ${accessToken}`
+        }
       }
-    });
+    );
 
-    const paymentStatus = response.data.data.state;
+    const state = statusRes.data.state;
 
-if (paymentStatus === 'COMPLETED') {
-  res.json({ code: 'PAYMENT_SUCCESS' });
-} else {
-  res.json({ code: 'PAYMENT_FAILED', status: paymentStatus });
-}
+    if (state === 'COMPLETED') {
+      res.json({ code: 'PAYMENT_SUCCESS' });
+    } else if (state === 'FAILED') {
+      res.json({ code: 'PAYMENT_FAILED' });
+    } else {
+      res.json({ code: 'PAYMENT_PENDING' });
+    }
+
   } catch (err) {
     console.error("❌ PhonePe status check error:", err.response?.data || err.message);
     res.status(500).json({
-      success: false,
+      code: 'PAYMENT_ERROR',
       message: 'PhonePe status check failed',
       error: err.response?.data || err.message
     });
