@@ -1,5 +1,4 @@
-// backend/server.js
-
+// ✅ Updated server.js for PhonePe PG V2 API
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -15,35 +14,31 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Models
 const Booking = require('./models/Booking');
 const User = require('./models/User');
-
-// Auth Routes
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
-// Seat availability
 app.get('/api/available-seats', async (req, res) => {
   try {
     const totalSeats = 34;
     const bookings = await Booking.find({ status: 'paid' });
     const bookedSeats = new Set(bookings.map(b => b.seatId));
-    res.json({ available: totalSeats - bookedSeats.size });
+    const available = totalSeats - bookedSeats.size;
+    res.json({ available });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get bookings (by date/email)
 app.get('/api/bookings', async (req, res) => {
   const { startDate, endDate, email, date } = req.query;
   const filter = { status: 'paid' };
+
   if (date) filter.date = date;
   else if (startDate && endDate) filter.date = { $gte: startDate, $lte: endDate };
   if (email) filter.email = email;
@@ -56,12 +51,10 @@ app.get('/api/bookings', async (req, res) => {
   }
 });
 
-// Razorpay Booking (optional fallback)
 app.post('/api/book', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, payment } = req.body;
-
   if (!seatId || !startDate || !endDate || !shift || !payment || !payment.razorpay_payment_id) {
-    return res.status(400).json({ message: 'Missing fields or payment info.' });
+    return res.status(400).json({ message: 'Missing required fields or payment info.' });
   }
 
   const dates = [];
@@ -73,8 +66,8 @@ app.post('/api/book', async (req, res) => {
   }
 
   const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
-
   const conflicts = [];
+
   for (const date of dates) {
     const dayBookings = existing.filter(b => b.date === date);
     const hasFull = dayBookings.some(b => b.shift === 'full');
@@ -87,7 +80,7 @@ app.post('/api/book', async (req, res) => {
   }
 
   if (conflicts.length > 0) {
-    return res.status(400).json({ message: 'Seat already booked.', conflicts });
+    return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
   }
 
   const bookings = dates.map(date => ({ seatId, date, shift, email, status: 'paid' }));
@@ -95,14 +88,11 @@ app.post('/api/book', async (req, res) => {
   res.json({ success: true });
 });
 
-// 📲 PhonePe Payment Initiation
 app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
-
-   const merchantId = process.env.PHONEPE_MERCHANT_ID;
-  const saltKey = process.env.PHONEPE_SALT_KEY;
-  const saltIndex = process.env.PHONEPE_SALT_INDEX;
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
   const baseUrl = process.env.PHONEPE_BASE_URL;
 
   const payload = {
@@ -112,31 +102,25 @@ app.post('/api/payment/initiate', async (req, res) => {
     amount: amount * 100,
     redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`,
     redirectMode: "POST",
-    callbackUrl: "https://kanhalibrary.in/api/payment/callback",
+    callbackUrl: `https://kanhalibrary.in/api/payment/callback`,
     paymentInstrument: { type: "PAY_PAGE" }
   };
 
-  const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
-  const xVerify = crypto
-    .createHash("sha256")
-    .update(base64Payload + "/pg/v1/pay" + saltKey)
-    .digest("hex") + "###" + saltIndex;
-  // 👇 ADD LOGGING HERE
-  console.log("Initiating payment for amount:", amount, "email:", email);
-  console.log("merchantId:", merchantId);
-  console.log("saltKey:", saltKey);
-  console.log("saltIndex:", saltIndex);
-  console.log("base64Payload:", base64Payload);
-  console.log("X-VERIFY:", xVerify);
+  const payloadStr = JSON.stringify(payload);
+  const base64Payload = Buffer.from(payloadStr).toString("base64");
+  const hmac = crypto.createHmac("sha256", clientSecret)
+    .update(base64Payload + "/pg/v3/charge")
+    .digest("base64");
+  const authorization = `Bearer ${hmac}`;
 
   try {
     const response = await axios.post(
-      `${baseUrl}/pg/v1/pay`,
+      `${baseUrl}/pg/v3/charge`,
       { request: base64Payload },
       {
         headers: {
           'Content-Type': 'application/json',
-          'X-VERIFY': xVerify,
+          'Authorization': authorization,
           'X-MERCHANT-ID': merchantId
         }
       }
@@ -146,59 +130,22 @@ app.post('/api/payment/initiate', async (req, res) => {
       const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
       res.json({ redirectUrl, merchantTransactionId });
     } else {
-      res.status(400).json({ message: "PhonePe failed", details: response.data });
+      res.status(400).json({ message: "PhonePe payment initiation failed", details: response.data });
     }
   } catch (err) {
-    res.status(500).json({ message: "PhonePe error", details: err.response?.data || err.message });
+    res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
   }
 });
 
-// ✅ PhonePe Status Check
-app.get('/api/payment/status/:txnId', async (req, res) => {
-  const txnId = req.params.txnId;
-  // In server.js, inside /api/payment/initiate and /api/payment/status/:txnId routes:
-const merchantId = process.env.PHONEPE_MERCHANT_ID; // Use the correct Merchant ID env variable
-  const saltKey = process.env.PHONEPE_SALT_KEY;
-  const saltIndex = process.env.PHONEPE_SALT_INDEX;
-  const baseUrl = process.env.PHONEPE_BASE_URL;
-
-  const url = `/pg/v1/status/${merchantId}/${txnId}`;
-  const xVerify = crypto
-    .createHash("sha256")
-    .update(url + saltKey)
-    .digest("hex") + "###" + saltIndex;
-
-  try {
-    const response = await axios.get(`${baseUrl}${url}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-VERIFY': xVerify,
-        'X-MERCHANT-ID': merchantId
-      }
-    });
-
-    res.json(response.data);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to check payment status" });
-  }
-});
-
-// ✅ PhonePe Callback
-app.post('/api/payment/callback', (req, res) => {
-  console.log("Callback received:", req.body);
-  res.status(200).send("OK");
-});
-
-// Cash booking (pending)
 app.post('/api/book-cash', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, duration } = req.body;
-
   if (!seatId || !startDate || !endDate || !shift || !email || !duration) {
-    return res.status(400).json({ message: 'Missing fields.' });
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
   const months = parseInt(duration);
-  const amount = (shift === 'full' ? 800 : 600) * months;
+  const baseAmount = shift === 'full' ? 800 : 600;
+  const amount = baseAmount * months;
 
   const dates = [];
   let current = new Date(startDate);
@@ -209,8 +156,8 @@ app.post('/api/book-cash', async (req, res) => {
   }
 
   const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
-
   const conflicts = [];
+
   for (const date of dates) {
     const dayBookings = existing.filter(b => b.date === date);
     const hasFull = dayBookings.some(b => b.shift === 'full');
@@ -223,15 +170,17 @@ app.post('/api/book-cash', async (req, res) => {
   }
 
   if (conflicts.length > 0) {
-    return res.status(400).json({ message: 'Seat already booked.', conflicts });
+    return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
   }
 
-  const bookings = dates.map(date => ({
-    seatId, date, shift, email, paymentMode: 'cash', status: 'pending', amount
-  }));
-
+  const bookings = dates.map(date => ({ seatId, date, shift, email, paymentMode: 'cash', status: 'pending', amount }));
   await Booking.insertMany(bookings);
   res.json({ success: true });
+});
+
+app.post('/api/payment/callback', (req, res) => {
+  console.log("Callback received from PhonePe:", req.body);
+  res.status(200).send("OK");
 });
 
 // Pending cash booking summary (admin)
