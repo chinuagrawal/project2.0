@@ -1,24 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Payment Status</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checking Payment Status...</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(to right, #f3e5f5, #e1f5fe);
+    }
+    h2 {
+      color: #6a1b9a;
+    }
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #6a1b9a;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h2>Checking Payment Status...</h2>
+  <h2>✅ Checking Payment Status, please wait...</h2>
+  <div class="spinner"></div>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const txnId = urlParams.get('txnId');
-
     const booking = JSON.parse(sessionStorage.getItem('pendingBooking'));
 
     if (!txnId || !booking) {
-      document.body.innerHTML = "<h2>Missing payment details.</h2>";
+      document.body.innerHTML = "<h2>❌ Missing payment details.</h2>";
     } else {
-      fetch(`https://project20-production-e7f5.up.railway.app/api/payment/status/${txnId}`)
+      fetch(`https://project20-production-e7f5.up.railway.app/api/payment/status?txnId=${txnId}`)
         .then(res => res.json())
         .then(async data => {
           if (data.code === "PAYMENT_SUCCESS") {
-            // Send to backend to store booking
+            // Send to backend to confirm booking
             const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -30,17 +57,20 @@
 
             const result = await res.json();
             if (res.ok) {
-              window.location.href = `index.html?success=1&seatId=${booking.seatId}`;
+              // Clear pending booking and redirect
+              sessionStorage.removeItem('pendingBooking');
+              const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}`;
+              window.location.href = `index.html${query}`;
             } else {
-              document.body.innerHTML = `<h2>${result.message || 'Booking failed'}</h2>`;
+              document.body.innerHTML = `<h2>❌ Booking failed: ${result.message || 'Unknown error'}</h2>`;
             }
           } else {
-            document.body.innerHTML = `<h2>Payment failed or cancelled.</h2>`;
+            document.body.innerHTML = `<h2>❌ Payment failed or was cancelled.</h2>`;
           }
         })
         .catch(err => {
           console.error(err);
-          document.body.innerHTML = `<h2>Error checking payment.</h2>`;
+          document.body.innerHTML = `<h2>⚠️ Error checking payment status.</h2>`;
         });
     }
   </script>
