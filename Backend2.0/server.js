@@ -297,7 +297,7 @@ app.get('/api/payment/status', async (req, res) => {
     return res.status(400).json({ code: 'MISSING_TXN_ID', message: 'Missing transaction ID' });
   }
 
-  const baseUrl = 'https://api-preprod.phonepe.com'; // 🔐 UAT base
+  const baseUrl = 'https://api.phonepe.com'; // 🔐 UAT base
   const clientId = process.env.PHONEPE_CLIENT_ID;
   const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
 
