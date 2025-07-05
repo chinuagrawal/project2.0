@@ -155,6 +155,9 @@ app.post('/api/payment/initiate', async (req, res) => {
   console.log("saltIndex:", saltIndex);
   console.log("base64Payload:", base64Payload);
   console.log("X-VERIFY:", xVerify);
+console.log("Merchant ID (env):", merchantId);
+console.log("Using base64Payload:", base64Payload);
+console.log("X-VERIFY Header:", xVerify);
 
   try {
     const response = await axios.post(
