@@ -288,6 +288,56 @@ app.post('/api/book', async (req, res) => {
   await Booking.insertMany(bookings);
   res.json({ success: true });
 });
+// 📦 Status Check Route
+app.get('/api/payment/status', async (req, res) => {
+  const { txnId } = req.query;
+
+  if (!txnId) {
+    return res.status(400).json({ message: 'Missing transaction ID' });
+  }
+
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const clientId = process.env.PHONEPE_CLIENT_ID;
+  const clientSecret = process.env.PHONEPE_CLIENT_SECRET;
+  const baseUrl = process.env.PHONEPE_BASE_URL;
+
+  try {
+    // Step 1: Get Access Token
+    const tokenRes = await axios.post(
+      `${baseUrl}/apis/pg-sandbox/v1/oauth/token`,
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials',
+        client_version: '1'
+      }).toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    const accessToken = tokenRes.data.access_token;
+
+    // Step 2: Call Status API
+    const response = await axios.get(`${baseUrl}/pg/v1/status/${merchantId}/${txnId}`, {
+      headers: {
+        'Authorization': `O-Bearer ${accessToken}`,
+        'X-MERCHANT-ID': merchantId
+      }
+    });
+
+    res.json({ success: true, data: response.data });
+  } catch (err) {
+    console.error("❌ PhonePe status check error:", err.response?.data || err.message);
+    res.status(500).json({
+      success: false,
+      message: 'PhonePe status check failed',
+      error: err.response?.data || err.message
+    });
+  }
+});
 
 // Start Server
 app.listen(PORT, () => {
