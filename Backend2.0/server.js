@@ -4,13 +4,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const crypto = require('crypto');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
@@ -24,59 +24,44 @@ mongoose.connect(process.env.MONGO_URI)
 const Booking = require('./models/Booking');
 const User = require('./models/User');
 
-// Routes
+// Auth Routes
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
-
-
-
-
-// Seat availability endpoint
+// Seat availability
 app.get('/api/available-seats', async (req, res) => {
   try {
     const totalSeats = 34;
     const bookings = await Booking.find({ status: 'paid' });
-
     const bookedSeats = new Set(bookings.map(b => b.seatId));
-    const available = totalSeats - bookedSeats.size;
-    res.json({ available });
+    res.json({ available: totalSeats - bookedSeats.size });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get bookings by date range (only paid bookings)
+// Get bookings (by date/email)
 app.get('/api/bookings', async (req, res) => {
   const { startDate, endDate, email, date } = req.query;
-
   const filter = { status: 'paid' };
-
-  if (date) {
-    filter.date = date;
-  } else if (startDate && endDate) {
-    filter.date = { $gte: startDate, $lte: endDate };
-  }
-
-  if (email) {
-    filter.email = email;
-  }
+  if (date) filter.date = date;
+  else if (startDate && endDate) filter.date = { $gte: startDate, $lte: endDate };
+  if (email) filter.email = email;
 
   try {
     const bookings = await Booking.find(filter);
     res.json(bookings);
   } catch (err) {
-    console.error("Error fetching bookings:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Create new ONLINE booking (Razorpay)
+// Razorpay Booking (optional fallback)
 app.post('/api/book', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, payment } = req.body;
 
   if (!seatId || !startDate || !endDate || !shift || !payment || !payment.razorpay_payment_id) {
-    return res.status(400).json({ message: 'Missing required fields or payment info.' });
+    return res.status(400).json({ message: 'Missing fields or payment info.' });
   }
 
   const dates = [];
@@ -87,12 +72,7 @@ app.post('/api/book', async (req, res) => {
     current.setDate(current.getDate() + 1);
   }
 
-  const existing = await Booking.find({
-  seatId,
-  date: { $in: dates },
-  status: 'paid'  // ✅ Only paid bookings block seats
-});
-
+  const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
 
   const conflicts = [];
   for (const date of dates) {
@@ -107,26 +87,20 @@ app.post('/api/book', async (req, res) => {
   }
 
   if (conflicts.length > 0) {
-    return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
+    return res.status(400).json({ message: 'Seat already booked.', conflicts });
   }
 
-  const bookings = dates.map(date => ({
-    seatId, date, shift, email, status: 'paid'
-  }));
-
+  const bookings = dates.map(date => ({ seatId, date, shift, email, status: 'paid' }));
   await Booking.insertMany(bookings);
   res.json({ success: true });
 });
 
-
-const crypto = require('crypto');
-const axios = require('axios');
-
+// 📲 PhonePe Payment Initiation
 app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email } = req.body;
-
   const merchantTransactionId = 'TXN_' + Date.now();
-  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+
+  const merchantId = process.env.PHONEPE_CLIENT_ID;
   const saltKey = process.env.PHONEPE_SALT_KEY;
   const saltIndex = process.env.PHONEPE_SALT_INDEX;
   const baseUrl = process.env.PHONEPE_BASE_URL;
@@ -136,9 +110,9 @@ app.post('/api/payment/initiate', async (req, res) => {
     merchantTransactionId,
     merchantUserId: email,
     amount: amount * 100,
-    redirectUrl: `https://kanhalibrary.in/payment-status.html?txnId=${merchantTransactionId}`,
+    redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`,
     redirectMode: "POST",
-    callbackUrl: `https://kanhalibrary.in/api/payment/callback`,
+    callbackUrl: "https://kanhalibrary.in/api/payment/callback",
     paymentInstrument: { type: "PAY_PAGE" }
   };
 
@@ -147,17 +121,6 @@ app.post('/api/payment/initiate', async (req, res) => {
     .createHash("sha256")
     .update(base64Payload + "/pg/v1/pay" + saltKey)
     .digest("hex") + "###" + saltIndex;
-
-  // ✅ MOVE LOGGING HERE
-  console.log("Initiating payment for amount:", amount, "email:", email);
-  console.log("merchantId:", merchantId);
-  console.log("saltKey:", saltKey);
-  console.log("saltIndex:", saltIndex);
-  console.log("base64Payload:", base64Payload);
-  console.log("X-VERIFY:", xVerify);
-console.log("Merchant ID (env):", merchantId);
-console.log("Using base64Payload:", base64Payload);
-console.log("X-VERIFY Header:", xVerify);
 
   try {
     const response = await axios.post(
@@ -176,18 +139,17 @@ console.log("X-VERIFY Header:", xVerify);
       const redirectUrl = response.data.data.instrumentResponse.redirectInfo.url;
       res.json({ redirectUrl, merchantTransactionId });
     } else {
-      console.error("PhonePe error response:", response.data);
-      res.status(400).json({ message: "PhonePe payment initiation failed", details: response.data });
+      res.status(400).json({ message: "PhonePe failed", details: response.data });
     }
   } catch (err) {
-    console.error("PhonePe Error:", err.response?.data || err.message || err);
-    res.status(500).json({ message: "PhonePe API error", details: err.response?.data || err.message });
+    res.status(500).json({ message: "PhonePe error", details: err.response?.data || err.message });
   }
 });
 
+// ✅ PhonePe Status Check
 app.get('/api/payment/status/:txnId', async (req, res) => {
   const txnId = req.params.txnId;
-  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const merchantId = process.env.PHONEPE_CLIENT_ID;
   const saltKey = process.env.PHONEPE_SALT_KEY;
   const saltIndex = process.env.PHONEPE_SALT_INDEX;
   const baseUrl = process.env.PHONEPE_BASE_URL;
@@ -213,17 +175,22 @@ app.get('/api/payment/status/:txnId', async (req, res) => {
   }
 });
 
-// Create CASH booking request
+// ✅ PhonePe Callback
+app.post('/api/payment/callback', (req, res) => {
+  console.log("Callback received:", req.body);
+  res.status(200).send("OK");
+});
+
+// Cash booking (pending)
 app.post('/api/book-cash', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, duration } = req.body;
 
   if (!seatId || !startDate || !endDate || !shift || !email || !duration) {
-    return res.status(400).json({ message: 'Missing required fields.' });
+    return res.status(400).json({ message: 'Missing fields.' });
   }
 
   const months = parseInt(duration);
-  const baseAmount = shift === 'full' ? 800 : 600;
-  const amount = baseAmount * months;
+  const amount = (shift === 'full' ? 800 : 600) * months;
 
   const dates = [];
   let current = new Date(startDate);
@@ -233,12 +200,7 @@ app.post('/api/book-cash', async (req, res) => {
     current.setDate(current.getDate() + 1);
   }
 
-  const existing = await Booking.find({
-  seatId,
-  date: { $in: dates },
-  status: 'paid'  // ✅ Only paid bookings block seats
-});
-
+  const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
 
   const conflicts = [];
   for (const date of dates) {
@@ -253,7 +215,7 @@ app.post('/api/book-cash', async (req, res) => {
   }
 
   if (conflicts.length > 0) {
-    return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
+    return res.status(400).json({ message: 'Seat already booked.', conflicts });
   }
 
   const bookings = dates.map(date => ({
@@ -264,7 +226,7 @@ app.post('/api/book-cash', async (req, res) => {
   res.json({ success: true });
 });
 
-// Fetch all pending cash bookings (admin panel)
+// Pending cash booking summary (admin)
 app.get('/api/pending-bookings', async (req, res) => {
   try {
     const bookings = await Booking.aggregate([
@@ -273,9 +235,9 @@ app.get('/api/pending-bookings', async (req, res) => {
         $group: {
           _id: { seatId: "$seatId", shift: "$shift", email: "$email", amount: "$amount" },
           ids: { $push: "$_id" },
-          firstId: { $min: "$_id" },  // 👈 capture first inserted document _id
           startDate: { $min: "$date" },
-          endDate: { $max: "$date" }
+          endDate: { $max: "$date" },
+          firstId: { $min: "$_id" }
         }
       },
       {
@@ -284,38 +246,33 @@ app.get('/api/pending-bookings', async (req, res) => {
           shift: "$_id.shift",
           email: "$_id.email",
           amount: "$_id.amount",
-          ids: 1,
           startDate: 1,
           endDate: 1,
-          firstId: 1
+          ids: 1
         }
       },
-      { $sort: { firstId: -1 } }  // 👈 sort newest inserted first
+      { $sort: { firstId: -1 } }
     ]);
     res.json(bookings);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-
-// Mark cash bookings as paid
+// Mark cash bookings paid
 app.post('/api/mark-paid', async (req, res) => {
   const { ids } = req.body;
-
-  if (!ids || !Array.isArray(ids)) return res.status(400).json({ message: 'Booking IDs required.' });
+  if (!ids || !Array.isArray(ids)) return res.status(400).json({ message: 'Booking IDs required' });
 
   try {
     await Booking.updateMany({ _id: { $in: ids } }, { $set: { status: 'paid' } });
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to update bookings.' });
+    res.status(500).json({ message: 'Update failed' });
   }
 });
 
-// Get all bookings (for Seat Status page)
+// Admin booking data
 app.get('/api/admin/bookings', async (req, res) => {
   try {
     const bookings = await Booking.find();
@@ -325,7 +282,6 @@ app.get('/api/admin/bookings', async (req, res) => {
   }
 });
 
-// Get cash requests (for Cash Requests page)
 app.get('/api/admin/cash-requests', async (req, res) => {
   try {
     const cashBookings = await Booking.find({ paymentMode: "Cash", status: "Pending" });
@@ -334,39 +290,28 @@ app.get('/api/admin/cash-requests', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Return all users (for mapping email → full name in seatStatus)
-// Return all users (for mapping email → full name in seatStatus)
+// Admin user list
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await User.find({}, 'email firstName lastName mobile'); // ✅ Include mobile here
+    const users = await User.find({}, 'email firstName lastName mobile');
     res.json(users);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch users' });
+    res.status(500).json({ message: 'User fetch failed' });
   }
 });
 
-// Delete bookings for a user (admin action)
+// Delete user bookings (admin)
 app.post('/api/delete-bookings', async (req, res) => {
   const { seatId, email, shift } = req.body;
-
-  if (!seatId || !email || !shift) {
-    return res.status(400).json({ message: 'Missing required fields' });
-  }
+  if (!seatId || !email || !shift) return res.status(400).json({ message: 'Missing fields' });
 
   try {
     const result = await Booking.deleteMany({ seatId, email, shift });
     res.json({ success: true, deletedCount: result.deletedCount });
   } catch (err) {
-    console.error('❌ Failed to delete bookings:', err);
-    res.status(500).json({ message: 'Server error while deleting bookings' });
+    res.status(500).json({ message: 'Delete failed' });
   }
 });
-app.post('/api/payment/callback', (req, res) => {
-  console.log("Callback received from PhonePe:", req.body);
-  res.status(200).send("OK"); // Must respond with 200
-});
-
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
