@@ -121,6 +121,13 @@ app.post('/api/payment/initiate', async (req, res) => {
     .createHash("sha256")
     .update(base64Payload + "/pg/v1/pay" + saltKey)
     .digest("hex") + "###" + saltIndex;
+  // 👇 ADD LOGGING HERE
+  console.log("Initiating payment for amount:", amount, "email:", email);
+  console.log("merchantId:", merchantId);
+  console.log("saltKey:", saltKey);
+  console.log("saltIndex:", saltIndex);
+  console.log("base64Payload:", base64Payload);
+  console.log("X-VERIFY:", xVerify);
 
   try {
     const response = await axios.post(
