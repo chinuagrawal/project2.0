@@ -84,10 +84,12 @@ app.post('/api/payment/initiate', async (req, res) => {
 
   try {
     const accessToken = await getPhonePeAccessToken();
+
     const payload = {
+      merchantId,
       merchantOrderId: merchantTransactionId,
       amount: amount * 100,
-      expireAfter: 1200,
+      expireAfter: 1200, // 20 mins
       metaInfo: { udf1: email },
       paymentFlow: {
         type: 'PG_CHECKOUT',
@@ -97,10 +99,8 @@ app.post('/api/payment/initiate', async (req, res) => {
       }
     };
 
-   
-      const response = await axios.post(
-  `${baseUrl}/apis/pg/checkout/v2/pay`,  // ✅ correct for V2
-  
+    const response = await axios.post(
+      `${baseUrl}/apis/pg/checkout/v2/pay`,
       payload,
       {
         headers: {
