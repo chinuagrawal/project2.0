@@ -158,20 +158,25 @@ bookBtn.addEventListener('click', async () => {
       seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
     }));
 
-    if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
+ if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
   window.PhonePeCheckout.transact({
     tokenUrl: data.redirectUrl,
     callback: function (response) {
       console.log("📦 PhonePe response:", response);
       if (response === 'CONCLUDED') {
         alert('Payment Completed! Redirecting...');
-        window.location.href = `index.html?success=1`;
+        // ❌ WRONG:
+        // window.location.href = `index.html?success=1`;
+
+        // ✅ CORRECT:
+        window.location.href = `payment-status.html?txnId=${data.merchantTransactionId}`;
       } else if (response === 'USER_CANCEL') {
         alert('Payment Cancelled by User');
       }
     },
     type: "IFRAME" // or "REDIRECT" if you prefer full page
   });
+
 } else {
   alert("PhonePe SDK not loaded");
 }
