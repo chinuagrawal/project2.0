@@ -130,7 +130,7 @@ img {
 
 /* ✅ Floating label fix */
 .login__input:focus + .login__label,
-.login__input:not(:placeholder-shown) + .login__label {
+.login__input:not(:placeholder-shown):not(:focus) + .login__label {
   top: -12px;
   font-size: var(--small-font-size);
 }
