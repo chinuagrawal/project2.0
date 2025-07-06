@@ -196,9 +196,9 @@ app.get('/api/pending-bookings', async (req, res) => {
         $group: {
           _id: { seatId: "$seatId", shift: "$shift", email: "$email", amount: "$amount" },
           ids: { $push: "$_id" },
+          firstId: { $min: "$_id" },  // 👈 capture first inserted document _id
           startDate: { $min: "$date" },
-          endDate: { $max: "$date" },
-          firstId: { $min: "$_id" }
+          endDate: { $max: "$date" }
         }
       },
       {
@@ -207,15 +207,17 @@ app.get('/api/pending-bookings', async (req, res) => {
           shift: "$_id.shift",
           email: "$_id.email",
           amount: "$_id.amount",
+          ids: 1,
           startDate: 1,
           endDate: 1,
-          ids: 1
+          firstId: 1
         }
       },
-      { $sort: { firstId: -1 } }
+      { $sort: { firstId: -1 } }  // 👈 sort newest inserted first
     ]);
     res.json(bookings);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
