@@ -234,7 +234,7 @@
         <td>${entry.pay || 'Online'}</td>
         <td>${entry.dates[0]}</td>
         <td>${entry.dates.at(-1)}</td>
-        <td>${entry.dates.length}</td>
+        <td>${calculateDays(entry.dates[0], entry.dates.at(-1))}</td>
         <td><button onclick="deleteBooking('${seat}', '${entry.email}', '${entry.shift}')">Remove</button></td>
       </tr>`;
     });
@@ -289,7 +289,7 @@
     sortedEntries.forEach(entry => {
       entry.dates.sort();
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${entry.seat}</td><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${entry.dates.length}</td>`;
+      tr.innerHTML = `<td>${entry.seat}</td><td>${entry.name}</td><td>${entry.shift}</td><td>${entry.pay || 'Online'}</td><td>${entry.dates[0]}</td><td>${entry.dates.at(-1)}</td><td>${calculateDays(entry.dates[0], entry.dates.at(-1))}</td>`;
       tbody.appendChild(tr);
     });
 
@@ -304,6 +304,15 @@
 
   btnExport.addEventListener('click', exportPDF);
   window.onload = loadAll;
+
+  function calculateDays(from, to) {
+  const start = new Date(from);
+  const end = new Date(to);
+  const diffTime = end - start;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  return diffDays;
+}
+
 </script>
 
 </body>
