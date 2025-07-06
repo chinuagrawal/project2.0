@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recent Bookings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4a148c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #ede7f6;
+      color: #4a148c;
+    }
+
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      tr { margin-bottom: 1rem; }
+      th, td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+      }
+      th::before, td::before {
+        position: absolute;
+        left: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+      td::before {
+        content: attr(data-label);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Recent Bookings</h2>
+
+<table id="booking-table">
+  <thead>
+    <tr>
+      <th>Seat</th>
+      <th>Name</th>
+      <th>Mobile</th>
+      <th>Email</th>
+      <th>Shift</th>
+      <th>Payment</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Days</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  async function loadRecentBookings() {
+    const bookingsRes = await fetch("https://project20-production-e7f5.up.railway.app/api/bookings");
+    const all = await bookingsRes.json();
+    const usersRes = await fetch("https://project20-production-e7f5.up.railway.app/api/users");
+    const users = await usersRes.json();
+
+    const usersByEmail = {};
+    users.forEach(u => {
+      usersByEmail[u.email] = {
+        name: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+        mobile: u.mobile || 'N/A'
+      };
+    });
+
+    const grouped = {};
+    all.forEach(b => {
+      const key = `${b.email}_${b.seatId}_${b.shift}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          email: b.email,
+          seat: b.seatId,
+          shift: b.shift,
+          pay: b.paymentMode,
+          createdAts: [],
+          dates: []
+        };
+      }
+      grouped[key].dates.push(b.date);
+      grouped[key].createdAts.push(new Date(b.createdAt));
+    });
+
+    const sortedGrouped = Object.values(grouped)
+      .map(g => {
+        g.dates.sort();
+        g.from = g.dates[0];
+        g.to = g.dates.at(-1);
+        g.days = Math.ceil((new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24)) + 1;
+        g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
+        return g;
+      })
+      .sort((a, b) => new Date(b.latestCreated) - new Date(a.latestCreated));
+
+    const tbody = document.querySelector("#booking-table tbody");
+    tbody.innerHTML = "";
+    sortedGrouped.forEach(entry => {
+      const user = usersByEmail[entry.email] || { name: entry.email, mobile: 'N/A' };
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td data-label="Seat">${entry.seat}</td>
+        <td data-label="Name">${user.name}</td>
+        <td data-label="Mobile">${user.mobile}</td>
+        <td data-label="Email">${entry.email}</td>
+        <td data-label="Shift">${entry.shift}</td>
+        <td data-label="Payment">${entry.pay || 'Online'}</td>
+        <td data-label="From">${entry.from}</td>
+        <td data-label="To">${entry.to}</td>
+        <td data-label="Days">${entry.days}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  loadRecentBookings();
+</script>
+</body>
+</html>
