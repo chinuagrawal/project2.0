@@ -44,22 +44,24 @@ router.post('/signup', async (req, res) => {
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { loginId, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [{ email: loginId }, { mobile: loginId }]
+    });
+
     if (!user) return res.status(400).json({ message: 'User not found' });
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
     res.status(200).json({
-      
       user: {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role // ✅ Include role here
+        role: user.role
       }
     });
   } catch (err) {

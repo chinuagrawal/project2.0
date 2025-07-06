@@ -16,12 +16,12 @@
       <h1 class="login__title">Login</h1>
 
       <div class="login__content">
-        <!-- Email -->
+        <!-- Login ID (Email or Mobile) -->
         <div class="login__box">
-          <i class="ri-mail-line login__icon"></i>
+          <i class="ri-user-line login__icon"></i>
           <div class="login__box-input">
-            <input type="email" id="email" required class="login__input" placeholder="">
-            <label class="login__label">Email</label>
+            <input type="text" id="loginId" required class="login__input" placeholder="">
+            <label class="login__label">Email or Mobile</label>
           </div>
         </div>
 
@@ -74,39 +74,38 @@
 
     // Handle Login Form Submission
     document.getElementById("login-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
+      e.preventDefault();
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+      const loginId = document.getElementById("loginId").value.trim();
+      const password = document.getElementById("password").value;
 
-  try {
-    const res = await fetch("https://project20-production-e7f5.up.railway.app/api/login", {  // ✅ CORRECT URL
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
+      try {
+        const res = await fetch("https://project20-production-e7f5.up.railway.app/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ loginId, password })  // ✅ send loginId
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (res.ok) {
-      alert("Login successful!");
-      localStorage.setItem("user", JSON.stringify(data.user)); // store user info if needed
-       if (data.user.role === "admin") {
+        if (res.ok) {
+          alert("Login successful!");
+          localStorage.setItem("user", JSON.stringify(data.user));
+          if (data.user.role === "admin") {
             window.location.href = "admin.html";
           } else {
             window.location.href = "index.html";
           }
-    } else {
-      alert(data.message || "Login failed");
-    }
-  } catch (error) {
-    console.error(error);
-    alert("Server error");
-  }
-});
-
+        } else {
+          alert(data.message || "Login failed");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Server error");
+      }
+    });
   </script>
 </body>
 </html>
