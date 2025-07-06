@@ -118,7 +118,7 @@
         g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
         return g;
       })
-      .sort((a, b) => new Date(b.latestCreated) - new Date(a.latestCreated));
+      .sort((a, b) => b.latestCreated.getTime() - a.latestCreated.getTime());
 
     const tbody = document.querySelector("#booking-table tbody");
     tbody.innerHTML = "";
