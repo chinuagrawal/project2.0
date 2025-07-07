@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4a148c">
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Library Seat Booking</title>
@@ -110,6 +113,12 @@
 
 
   <script>
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('✅ Service Worker Registered'))
+    .catch(err => console.error('Service Worker Failed:', err));
+}
+
     const API_BASE = 'https://project20-production-e7f5.up.railway.app/api';
 
     function formatDate(dateStr) {
