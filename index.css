@@ -302,6 +302,30 @@ footer {
   align-items: center;
 }
 
+.install-app-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 20px;
+  background-color: #4a148c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.install-app-btn:hover {
+  background-color: #38006b;
+}
+
+.install-icon {
+  width: 24px;
+  height: 24px;
+}
+
 
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
 @media (max-width: 768px) {

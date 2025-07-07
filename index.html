@@ -54,8 +54,9 @@
       <h2>📚 My Booked Seats</h2>
       <div id="booking-list" class="booking-list"></div>
     </section>
-<button id="installBtn" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 16px; background-color: #4a148c; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 999;">
-  Install App
+<button id="installBtn" style="display: none;" class="install-app-btn">
+  <img src="icon-192.png" alt="App Icon" class="install-icon">
+  Download KanhaLibrary App
 </button>
 
     <h1>Welcome to Our Kanha Library</h1>
@@ -338,24 +339,23 @@ if (params.get('success') === '1') {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    document.getElementById('installBtn').style.display = 'block';
-  });
+    const installBtn = document.getElementById('installBtn');
+    installBtn.style.display = 'flex';
 
-  document.getElementById('installBtn').addEventListener('click', () => {
-    if (deferredPrompt) {
+    installBtn.addEventListener('click', () => {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then(choiceResult => {
         if (choiceResult.outcome === 'accepted') {
           console.log('✅ App installed');
         } else {
-          console.log('❌ User dismissed install prompt');
+          console.log('❌ User dismissed');
         }
-        deferredPrompt = null;
-        document.getElementById('installBtn').style.display = 'none';
+        installBtn.style.display = 'none';
       });
-    }
+    });
   });
 </script>
+
 
   <div id="confirmation-modal" class="modal hidden">
   <div class="modal-content">
