@@ -82,9 +82,9 @@
 
 <script>
   async function loadRecentBookings() {
-    const bookingsRes = await fetch("https://project20-production-e7f5.up.railway.app/api/bookings");
+    const bookingsRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/bookings");
     const all = await bookingsRes.json();
-    const usersRes = await fetch("https://project20-production-e7f5.up.railway.app/api/users");
+    const usersRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/users");
     const users = await usersRes.json();
 
     const usersByEmail = {};

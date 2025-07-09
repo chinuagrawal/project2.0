@@ -42,7 +42,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`https://kanha-backend-bw7a.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -117,7 +117,7 @@ bookBtn.addEventListener('click', async () => {
 
   if (paymentMode === 'cash') {
     try {
-      const res = await fetch('https://project20-production-e7f5.up.railway.app/api/book-cash', {
+      const res = await fetch('https://kanha-backend-bw7a.onrender.com/api/book-cash', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
@@ -142,7 +142,7 @@ bookBtn.addEventListener('click', async () => {
   const amount =Math.round(baseAmount * months);
 
   try {
-    const res = await fetch('https://project20-production-e7f5.up.railway.app/api/payment/initiate', {
+    const res = await fetch('https://kanha-backend-bw7a.onrender.com/api/payment/initiate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount, email })

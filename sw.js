@@ -3,16 +3,7 @@ const assetsToCache = [
   '/',
   '/index.html',
   '/login.html',
-  '/admin.html',
-  '/recent-bookings.html',
-  '/styles.css',
   '/login.css',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/booking.html',
-  '/booking.js',
-  '/signup.html',
-  '/signup.css',
   // add other CSS/JS/image files if needed
 ];
 

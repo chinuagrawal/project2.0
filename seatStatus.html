@@ -174,9 +174,9 @@
   let usersByEmail = {};
 
   async function loadAll() {
-    const resp = await fetch(`https://project20-production-e7f5.up.railway.app/api/bookings`);
+    const resp = await fetch(`https://kanha-backend-bw7a.onrender.com/api/bookings`);
     bookings = await resp.json();
-    const userResp = await fetch('https://project20-production-e7f5.up.railway.app/api/users');
+    const userResp = await fetch('https://kanha-backend-bw7a.onrender.com/api/users');
     const users = await userResp.json();
     users.forEach(u => {
       usersByEmail[u.email] = {
@@ -248,7 +248,7 @@
 
   async function deleteBooking(seatId, email, shift) {
     if (!confirm('Are you sure you want to delete this booking?')) return;
-    const res = await fetch('https://project20-production-e7f5.up.railway.app/api/delete-bookings', {
+    const res = await fetch('https://kanha-backend-bw7a.onrender.com/api/delete-bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ seatId, email, shift })
