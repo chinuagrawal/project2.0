@@ -398,16 +398,42 @@ footer {
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
 /* 📱 Mobile Friendly Styling */
 @media (max-width: 768px) {
-  /* Keep nav horizontal as desktop, just reduce spacing */
+  /* Nav horizontal scroll */
   header nav {
-    flex-wrap: nowrap; /* prevent wrapping */
-    justify-content: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
   }
-  
   header nav a {
-    margin: 8px 10px;
+    display: inline-block;
+    white-space: nowrap;
+    margin: 8px 12px;
     font-size: 0.9rem;
   }
+
+  /* Seat layout horizontal scroll */
+  .seat-layout {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+  }
+
+  .row {
+    display: inline-flex;
+    white-space: nowrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  /* Smaller seat boxes */
+  .seat-box {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+  }
+
 
   /* User section */
   #user-section {
@@ -450,23 +476,9 @@ footer {
     max-width: 100%;
   }
 
-  .seat-layout {
-    gap: 15px;
-  }
-
-  .row {
-    gap: 8px;
-    justify-content: flex-end; /* keep right-aligned same as desktop */
-    flex-wrap: nowrap; /* no wrap, keep same layout */
-  }
-
+  
   /* Seat boxes smaller but same shape */
-  .seat-box {
-    width: 38px;
-    height: 38px;
-    font-size: 0.85rem;
-    border-radius: 8px;
-  }
+ 
 
   /* AC and fan icons smaller but same style */
   .ac-icon, .fan-icon {
