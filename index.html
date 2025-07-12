@@ -63,7 +63,22 @@
   <h2>📅 Check Seat Availability</h2>
   <h3>Select Date  👇</h3>
   <input type="date" id="calendar-date" style="padding: 8px; font-size: 16px; margin-bottom: 15px;" />
-  <div id="calendar-seat-map" style="display: flex; flex-wrap: wrap; justify-content: center; margin-top: 10px;"></div>
+   <div class="seat-layout-container">
+        <div class="fans-top">
+          <div class="fan-icon">🌀 Fan</div>
+          <div class="fan-icon">🌀 Fan</div>
+        </div>
+        <div class="seat-layout">
+          <div class="row" id="row3"></div>
+          <div class="row" id="row2"></div>
+          <div class="row" id="row1"></div>
+        </div>
+        <div class="fan-bottom">
+          <div class="fan-icon">🌀 Fan</div>
+          <div class="fan-icon">🌀 Fan</div>
+          <div class="fan-icon">🌀 Fan</div>
+        </div>
+      </div>
   <div style="margin-top: 15px;">
     
     <div><span style="background-color: red; color: white; padding: 5px 10px; margin: 4px; border-radius: 4px;">Fully Booked</span>
@@ -215,49 +230,83 @@
       }
     }
 
-    async function loadAvailability(date) {
-      if (!date) return;
+    function renderSeatLayout() {
+  const rows = [
+    { id: 'row1', count: 12 },
+    { id: 'row2', count: 11 },
+    { id: 'row3', count: 11 },
+  ];
 
-      try {
-        const response = await fetch(`${API_BASE}/bookings?date=${date}`);
-        const bookings = await response.json();
+  let seatCounter = 1;
 
-        const seatStatus = {};
+  rows.forEach(row => {
+    const container = document.getElementById(row.id);
+    if (!container) return;
 
-        bookings.forEach(b => {
-          if (!seatStatus[b.seatId]) seatStatus[b.seatId] = [];
-          seatStatus[b.seatId].push(b.shift.toUpperCase());
-        });
-
-        const seatMap = document.getElementById("calendar-seat-map");
-        seatMap.innerHTML = "";
-
-        for (let i = 1; i <= 34; i++) {
-          const seatId = `S${i}`;
-          const shifts = seatStatus[seatId] || [];
-
-          let bg = "white";
-          if (shifts.includes("FULL") || (shifts.includes("AM") && shifts.includes("PM"))) {
-            bg = "red";
-          } else if (shifts.includes("PM") && !shifts.includes("AM")) {
-            bg = "purple";
-          } else if (shifts.length === 1) {
-            bg = "orange";
-          }
-
-          const div = document.createElement("div");
-          div.className = "seat-box";
-          div.textContent = seatId;
-          div.style.backgroundColor = bg;
-          div.style.color = (bg === "purple" || bg === "red") ? "white" : "black";
-          seatMap.appendChild(div);
-        }
-      } catch (err) {
-        console.error("Failed to load seat availability:", err);
-      }
+    if (row.id === 'row2') {
+      const leftAC = document.createElement('div');
+      leftAC.className = 'ac-icon';
+      leftAC.textContent = '❄️ AC';
+      container.appendChild(leftAC);
     }
 
+    for (let i = 0; i < row.count; i++) {
+      const div = document.createElement('div');
+      div.className = 'seat-box';
+      div.textContent = `S${seatCounter}`;
+      container.appendChild(div);
+      seatCounter++;
+    }
+
+    if (row.id === 'row2') {
+      const rightAC = document.createElement('div');
+      rightAC.className = 'ac-icon';
+      rightAC.textContent = '❄️ AC';
+      container.appendChild(rightAC);
+    }
+  });
+}
+
+
+   async function loadAvailability(date) {
+  if (!date) return;
+  const API_BASE = 'https://kanha-backend-bw7a.onrender.com/api';
+
+  try {
+    const response = await fetch(`${API_BASE}/bookings?date=${date}`);
+    const bookings = await response.json();
+
+    const seatStatus = {};
+    bookings.forEach(b => {
+      if (!seatStatus[b.seatId]) seatStatus[b.seatId] = [];
+      seatStatus[b.seatId].push(b.shift.toUpperCase());
+    });
+
+    const seats = document.querySelectorAll('.seat-box');
+    seats.forEach(seat => {
+      const seatId = seat.textContent.trim();
+      const shifts = seatStatus[seatId] || [];
+
+      let bg = "white";
+      if (shifts.includes("FULL") || (shifts.includes("AM") && shifts.includes("PM"))) {
+        bg = "red";
+      } else if (shifts.includes("PM") && !shifts.includes("AM")) {
+        bg = "purple";
+      } else if (shifts.length === 1) {
+        bg = "orange";
+      }
+
+      seat.style.backgroundColor = bg;
+      seat.style.color = (bg === "purple" || bg === "red") ? "white" : "black";
+    });
+  } catch (err) {
+    console.error("Failed to load seat availability:", err);
+  }
+}
+
+
     document.addEventListener("DOMContentLoaded", () => {
+      renderSeatLayout();
       let currentIndex = 0;
       const images = document.querySelectorAll('.carousel-images img');
       const totalImages = images.length;

@@ -326,6 +326,74 @@ footer {
   height: 24px;
 }
 
+.seat-layout-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 40px auto;
+      gap: 20px;
+      position: relative;
+    }
+    .fans-top, .fan-bottom {
+      display: flex;
+      gap: 100px;
+      justify-content: center;
+    }
+    .fan-icon {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 18px;
+      color: #FF6F00;
+      user-select: none;
+      cursor: default;
+      min-width: 60px;
+      justify-content: center;
+    }
+    .seat-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      align-items: center;
+      width: fit-content;
+      position: relative;
+    }
+    .ac-icon {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 18px;
+      color: #007BFF;
+      user-select: none;
+      cursor: default;
+      min-width: 50px;
+      justify-content: center;
+    }
+    .seat-box {
+      width: 50px;
+      height: 50px;
+      background-color: #4caf50;
+      color: #fff;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      cursor: default;
+      user-select: none;
+    }
+    .seat-box:hover {
+      background-color: #388e3c;
+    }
+
 
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
 @media (max-width: 768px) {
