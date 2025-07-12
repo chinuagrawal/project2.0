@@ -396,38 +396,125 @@ footer {
 
 
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
+/* 📱 Mobile Friendly Styling */
 @media (max-width: 768px) {
+  /* HEADER */
+  header {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
 
+  header nav {
+    flex-direction: column;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  header nav a {
+    margin: 8px 0;
+  }
+
+  #user-section {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  /* CAROUSEL */
   .carousel {
     height: 250px;
     border-radius: 10px;
   }
 
+  .carousel-images img {
+    width: 100vw;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* HOME HEADING */
   .home h1 {
     font-size: 2rem;
   }
 
+  .welcome-text {
+    font-size: 1.8rem;
+  }
+
+  /* BOOK NOW BUTTON */
   .book-now-btn {
     width: 90%;
     padding: 12px;
     font-size: 1rem;
   }
 
+  /* SEAT LAYOUT */
+  .seat-layout-container {
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .seat-layout {
+    gap: 15px;
+  }
+
+  .row {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .seat-box {
+    width: 42px;
+    height: 42px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  .ac-icon, .fan-icon {
+    font-size: 14px;
+    min-width: 40px;
+  }
+
+  .fans-top, .fan-bottom {
+    gap: 40px;
+  }
+
+  /* BOOKING LIST */
+  #booking-list {
+    padding: 0 10px;
+  }
+
   .booking-card {
     padding: 15px;
   }
 
-  .seat-box {
-    min-width: 40px;
-    padding: 10px 5px;
+  /* DATE PICKER */
+  #calendar-date {
+    width: 90%;
+    font-size: 15px;
   }
 
-  header {
-    flex-direction: column;
-    align-items: center;
+  /* MODAL */
+  .modal-content {
+    padding: 20px;
+    font-size: 0.95rem;
+    width: 90%;
   }
 
-  header nav {
+  /* INSTALL APP BUTTON */
+  .install-app-btn {
+    width: 90%;
+    margin: 20px auto;
     justify-content: center;
+    font-size: 1rem;
+  }
+
+  /* MAP */
+  iframe {
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
 }
