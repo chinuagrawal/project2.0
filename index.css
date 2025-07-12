@@ -398,33 +398,26 @@ footer {
 /* FULL MOBILE RESPONSIVE BREAKPOINT */
 /* 📱 Mobile Friendly Styling */
 @media (max-width: 768px) {
-  /* HEADER */
-  header {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-
+  /* Keep nav horizontal as desktop, just reduce spacing */
   header nav {
-    flex-direction: column;
-    width: 100%;
-    padding: 10px 0;
-    text-align: center;
-  }
-
-  header nav a {
-    margin: 8px 0;
-  }
-
-  #user-section {
+    flex-wrap: nowrap; /* prevent wrapping */
     justify-content: center;
-    margin-top: 10px;
+  }
+  
+  header nav a {
+    margin: 8px 10px;
+    font-size: 0.9rem;
   }
 
-  /* CAROUSEL */
+  /* User section */
+  #user-section {
+    margin-left: 10px;
+  }
+
+  /* Carousel height smaller but same style */
   .carousel {
-    height: 250px;
-    border-radius: 10px;
+    height: 280px;
+    border-radius: 12px;
   }
 
   .carousel-images img {
@@ -433,7 +426,7 @@ footer {
     object-fit: cover;
   }
 
-  /* HOME HEADING */
+  /* Heading smaller but same style */
   .home h1 {
     font-size: 2rem;
   }
@@ -442,17 +435,19 @@ footer {
     font-size: 1.8rem;
   }
 
-  /* BOOK NOW BUTTON */
+  /* Book Now Button smaller */
   .book-now-btn {
-    width: 90%;
-    padding: 12px;
+    padding: 12px 30px;
     font-size: 1rem;
+    margin-top: 20px;
   }
 
-  /* SEAT LAYOUT */
+  /* Seat Layout Container scaled down but keep layout */
   .seat-layout-container {
-    gap: 10px;
+    gap: 15px;
+    margin: 30px auto;
     padding: 0 10px;
+    max-width: 100%;
   }
 
   .seat-layout {
@@ -460,58 +455,56 @@ footer {
   }
 
   .row {
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 8px;
+    justify-content: flex-end; /* keep right-aligned same as desktop */
+    flex-wrap: nowrap; /* no wrap, keep same layout */
   }
 
+  /* Seat boxes smaller but same shape */
   .seat-box {
-    width: 42px;
-    height: 42px;
-    font-size: 0.9rem;
+    width: 38px;
+    height: 38px;
+    font-size: 0.85rem;
     border-radius: 8px;
   }
 
+  /* AC and fan icons smaller but same style */
   .ac-icon, .fan-icon {
     font-size: 14px;
-    min-width: 40px;
+    min-width: 45px;
   }
 
   .fans-top, .fan-bottom {
-    gap: 40px;
+    gap: 60px;
   }
 
-  /* BOOKING LIST */
-  #booking-list {
-    padding: 0 10px;
-  }
-
+  /* Booking card smaller padding */
   .booking-card {
     padding: 15px;
+    font-size: 0.9rem;
   }
 
-  /* DATE PICKER */
+  /* Date picker width smaller */
   #calendar-date {
     width: 90%;
-    font-size: 15px;
+    font-size: 14px;
   }
 
-  /* MODAL */
+  /* Modal smaller */
   .modal-content {
+    width: 90%;
     padding: 20px;
     font-size: 0.95rem;
-    width: 90%;
   }
 
-  /* INSTALL APP BUTTON */
+  /* Install button smaller width */
   .install-app-btn {
     width: 90%;
-    margin: 20px auto;
-    justify-content: center;
     font-size: 1rem;
+    margin: 20px auto;
   }
 
-  /* MAP */
+  /* Map responsive */
   iframe {
     width: 100% !important;
     height: auto;
