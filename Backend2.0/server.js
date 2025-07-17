@@ -15,16 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-// ✅ Serve static files with no-cache headers
-app.use(express.static(__dirname, {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-    }
-  }
-}));
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -367,10 +358,7 @@ app.get('/api/payment/status', async (req, res) => {
   }
 });
 
-const path = require('path');
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+
 
 // Start Server
 app.listen(PORT, () => {
