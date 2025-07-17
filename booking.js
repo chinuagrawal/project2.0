@@ -138,7 +138,7 @@ bookBtn.addEventListener('click', async () => {
   }
 
   // 🟣 Online booking via PhonePe
-  const baseAmount = shift === 'full' ? 2 : 1;
+  const baseAmount = shift === 'full' ? 800 : 600;
   const amount =Math.round(baseAmount * months);
 
   try {
