@@ -27,7 +27,10 @@ const Booking = require('./models/Booking');
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
+const webhookRoutes = require('./routes/webhook');
 
+
+app.use('/api/payment', webhookRoutes); // Mount at /api/payment
 // Utility function: get PhonePe Access Token
 const getPhonePeAccessToken = async () => {
   const baseUrl = 'https://api.phonepe.com/apis/identity-manager';
