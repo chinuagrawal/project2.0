@@ -231,12 +231,13 @@ app.get('/api/pending-bookings', async (req, res) => {
 // Endpoint: Admin get users
 app.get('/api/users', async (req, res) => {
   try {
-    const users = await User.find({}, 'email firstName lastName mobile');
+    const users = await User.find({}, '-password'); // exclude password only
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'User fetch failed' });
   }
 });
+
 
 // Endpoint: Admin delete bookings
 app.post('/api/delete-bookings', async (req, res) => {
