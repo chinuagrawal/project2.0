@@ -80,7 +80,16 @@
   <tbody></tbody>
 </table>
 
-<script>
+
+ <script>
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
+  }
+
   async function loadRecentBookings() {
     const bookingsRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/bookings");
     const all = await bookingsRes.json();
@@ -135,8 +144,8 @@
         <td data-label="Email">${entry.email}</td>
         <td data-label="Shift">${entry.shift}</td>
         <td data-label="Payment">${entry.pay || 'Online'}</td>
-        <td data-label="From">${entry.from}</td>
-        <td data-label="To">${entry.to}</td>
+        <td data-label="From">${formatDate(entry.from)}</td>
+        <td data-label="To">${formatDate(entry.to)}</td>
         <td data-label="Days">${entry.days}</td>
       `;
       tbody.appendChild(tr);
@@ -145,5 +154,6 @@
 
   loadRecentBookings();
 </script>
+
 </body>
 </html>
