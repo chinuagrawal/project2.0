@@ -56,6 +56,7 @@
     <a onclick="loadSeatStatus()">Seat Status</a>
     <a onclick="loadCashRequestPage()">Cash Requests</a>
     <a onclick="loadRecentBookings()">Recent Bookings</a>
+    <a onclick="loadregisteredUsers()">Registered Users</a>
 
     <a onclick="logout()">Logout</a>
   </div>
@@ -107,6 +108,13 @@ function loadRecentBookings() {
   mainContent.appendChild(iframe);
 }
 
+function loadregisteredUsers() {
+  const iframe = document.createElement('iframe');
+  iframe.src = 'registeredUsers.html';
+  const mainContent = document.getElementById('mainContent');
+  mainContent.innerHTML = '';
+  mainContent.appendChild(iframe);
+}
     function logout() {
       localStorage.removeItem("user");
       window.location.href = "login.html";
