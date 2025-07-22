@@ -16,9 +16,21 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Passwords do not match.' });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { mobile }]
+    });
+
     if (existingUser) {
-      return res.status(409).json({ message: 'Email already exists.' });
+      const isEmailTaken = existingUser.email === email;
+      const isMobileTaken = existingUser.mobile === mobile;
+
+      return res.status(409).json({
+        message: isEmailTaken
+          ? 'Email already exists.'
+          : isMobileTaken
+          ? 'Mobile number already exists.'
+          : 'User already exists.'
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -40,6 +52,7 @@ router.post('/signup', async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
 
 
 // POST /api/auth/login
