@@ -8,6 +8,23 @@ const shiftInput = document.getElementById('shift');
 const totalSeats = 34;
 let bookings = [];
 
+const urlParams = new URLSearchParams(window.location.search);
+const isExtension = urlParams.get('extend') === '1';
+
+
+
+let lockedSeatId = null;
+let lockedShift = null;
+let lockedFromDate = null;
+let lockedToDate = null;
+
+if (isExtension) {
+  lockedSeatId = urlParams.get('seatId');
+  lockedShift = urlParams.get('shift');
+  lockedFromDate = urlParams.get('fromDate');
+  lockedToDate = urlParams.get('toDate');
+}
+
 const amountDisplay = document.getElementById('amount-display');
 
 function updateAmount() {
@@ -79,12 +96,15 @@ function renderSeats() {
       seat.classList.add('available');
     }
 
-    if (isSelectable) {
-      seat.addEventListener('click', () => {
-        document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
-        seat.classList.add('selected');
-      });
-    }
+   if (isSelectable && (!isExtension || seatId === lockedSeatId)) {
+  seat.addEventListener('click', () => {
+    document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
+    seat.classList.add('selected');
+  });
+} else {
+  seat.classList.add('disabled'); // Optionally style it as unclickable
+}
+
 
     seat.innerText = i;
     seatMap.appendChild(seat);
@@ -92,12 +112,18 @@ function renderSeats() {
 }
 
 bookBtn.addEventListener('click', async () => {
+  let seatId;
+if (isExtension) {
+  seatId = lockedSeatId;
+} else {
   const seat = document.querySelector('.seat.selected');
   if (!seat) return alert('Please select a seat.');
+  seatId = seat.dataset.seatId;
+}
 
-  const seatId = seat.dataset.seatId;
-  const shift = shiftInput.value;
-  const startDate = startDateInput.value;
+  const shift = isExtension ? lockedShift : shiftInput.value;
+const startDate = startDateInput.value;
+
   const duration = durationInput.value;
 
   if (!startDate || !duration || !shift) return alert('Fill all booking details.');
@@ -187,7 +213,32 @@ window.PhonePeCheckout.transact({
 
 window.onload = () => {
   const today = new Date().toISOString().split('T')[0];
-  startDateInput.value = today;
+
+  if (isExtension && lockedSeatId && lockedShift && lockedToDate) {
+    const nextDate = new Date(new Date(lockedToDate).getTime() + 86400000); // +1 day
+    const nextDateStr = nextDate.toISOString().split('T')[0];
+
+    startDateInput.value = nextDateStr;
+    startDateInput.min = nextDateStr;
+    startDateInput.disabled = true;
+
+    shiftInput.value = lockedShift;
+    shiftInput.disabled = true;
+
+    // Disable seat map interaction
+    fetchBookings().then(() => {
+      renderSeats(); // highlight selected seat
+      const targetSeat = document.querySelector(`[data-seat-id="${lockedSeatId}"]`);
+      if (targetSeat) {
+        targetSeat.classList.add('selected');
+      }
+    });
+
+  } else {
+    startDateInput.value = today;
+    fetchBookings();
+  }
+
   updateAmount();
-  fetchBookings();
 };
+

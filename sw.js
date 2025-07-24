@@ -1,9 +1,7 @@
-const cacheName = 'kanha-library-cache-v2'; // ✅ update version when deploying new changes
+const cacheName = 'kanha-library-cache-v3'; // ✅ update version when deploying new changes
 const assetsToCache = [
   '/',
-  '/index.html',
-  '/login.html',
-  '/login.css',
+  
   // Add more assets if needed (JS, images, etc.)
 ];
 

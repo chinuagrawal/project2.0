@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MS3QJRDZ7C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-MS3QJRDZ7C');
+</script>
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#4a148c">
 
   <meta charset="UTF-8">
-  <title>Library Seat Booking</title>
+  <title>Kanha Library Seat Booking</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -151,7 +160,16 @@
       height: 20px;
       border-radius: 4px;
       border: 1px solid #ccc;
+
+
     }
+
+    .seat.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 
     @media(max-width: 768px){
       .main-wrapper { flex-direction: column; align-items: center; }

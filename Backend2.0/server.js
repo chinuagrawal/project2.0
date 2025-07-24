@@ -29,6 +29,10 @@ const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 const webhookRoutes = require('./routes/webhook');
 
+const extendRoutes = require('./routes/extend');
+app.use('/api/extend', extendRoutes);
+
+
 
 app.use('/api/payment', webhookRoutes); // Mount at /api/payment
 // Utility function: get PhonePe Access Token

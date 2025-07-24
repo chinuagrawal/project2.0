@@ -7,7 +7,8 @@ const bookingSchema = new mongoose.Schema({
   email: String,
   paymentMode: String,
   status: String,
-  amount: Number,  // Add this
+  amount: Number,
+  createdAt: Date,  // Add this
 
   paymentTxnId: String,        // This stores PhonePe's `merchantOrderId`
   transactionId: String,       // PhonePe's actual transaction id

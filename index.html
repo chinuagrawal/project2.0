@@ -10,9 +10,9 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Library Seat Booking</title>
+  <title>Kanha Library Seat Booking - best library in kota</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="./index.css?v=1.0.4">
+  <link rel="stylesheet" href="./index.css?v=1.0.5">
   
 
   <!-- Google tag (gtag.js) -->
@@ -238,14 +238,53 @@
         if (Array.isArray(bookings) && bookings.length > 0) {
           section.style.display = "block";
           const grouped = groupBookings(bookings);
-          list.innerHTML = grouped.map(b => `
-            <div class="booking-card">
-              <p><strong>Seat:</strong> ${b.seatId}</p>
-              <p><strong>From:</strong> ${formatDate(b.start)}</p>
-              <p><strong>To:</strong> ${formatDate(b.end)}</p>
-              <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
-            </div>
-          `).join('');
+         
+          list.innerHTML = grouped.map(b => {
+  const today = new Date().toISOString().split('T')[0];
+  const isExtendable = new Date(b.end) >= new Date(today);
+  return `
+    <div class="booking-card">
+      <p><strong>Seat:</strong> ${b.seatId}</p>
+      <p><strong>From:</strong> ${formatDate(b.start)}</p>
+      <p><strong>To:</strong> ${formatDate(b.end)}</p>
+      <p><strong>Shift:</strong> ${b.shift.toUpperCase()}</p>
+      ${isExtendable ? `<button class="extend-btn" 
+        data-seat="${b.seatId}" 
+        data-shift="${b.shift}" 
+        data-from="${b.start}" 
+        data-to="${b.end}">Extend</button>` : ''}
+    </div>
+  `;
+}).join('');
+document.querySelectorAll(".extend-btn").forEach(btn => {
+  btn.addEventListener("click", async (e) => {
+    const seatId = e.target.dataset.seat;
+    const shift = e.target.dataset.shift;
+    const fromDate = e.target.dataset.from;
+    const toDate = e.target.dataset.to;
+
+    // Check extend availability
+    try {
+      const res = await fetch(`${API_BASE}/extend/check?seatId=${seatId}&shift=${shift}&fromDate=${fromDate}&toDate=${toDate}&email=${user.email}`);
+
+      const data = await res.json();
+
+      if (!data.canExtend) {
+        alert("⚠️ Cannot extend: seat already booked for future dates.");
+        return;
+      }
+
+      // Redirect to booking page with locked parameters
+      window.location.href = `booking.html?extend=1&seatId=${seatId}&shift=${shift}&fromDate=${fromDate}&toDate=${toDate}`;
+    } catch (err) {
+      console.error("Failed to check extension availability:", err);
+      alert("Server error while checking extend eligibility.");
+    }
+  });
+});
+
+
+
         }
       } catch (err) {
         console.error("Error loading bookings:", err);
@@ -432,11 +471,8 @@ if (params.get('success') === '1') {
 </script>
 
 
-  <div id="confirmation-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2>✅ Booking Confirmed!</h2>
-    <p id="confirmation-details"></p>
-    <button id="close-modal">OK</button>
+
+
   </div>
 </div>
 
