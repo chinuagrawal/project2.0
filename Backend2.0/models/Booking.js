@@ -8,11 +8,11 @@ const bookingSchema = new mongoose.Schema({
   paymentMode: String,
   status: String,
   amount: Number,
-  createdAt: Date,  // Add this
+  
 
   paymentTxnId: String,        // This stores PhonePe's `merchantOrderId`
   transactionId: String,       // PhonePe's actual transaction id
   paymentConfirmedVia: String 
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);
