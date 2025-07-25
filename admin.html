@@ -8,45 +8,93 @@
   <title>Library Admin Dashboard</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f6fa;
       display: flex;
-      height: 100vh;
-      overflow: hidden;
+      justify-content: center;
+      align-items: center;
+      height: 300vh;
     }
 
-    .sidebar {
-      width: 200px;
-      background-color: #343a40;
-      color: white;
-      height: 100vh;
-      padding-top: 20px;
-      box-sizing: border-box;
-    }
-
-    .sidebar a {
-      display: block;
-      padding: 15px;
-      color: white;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .sidebar a:hover {
-      background-color: #495057;
-    }
-
-    .content {
-      flex: 1;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    iframe {
+    .form-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
       width: 100%;
-      height: 100%;
-      border: none;
+      max-width: 500px;
     }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #4a148c;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      width: 100%;
+      background-color: #4a148c;
+      color: #fff;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #6a1b9a;
+    }
+
+    h3 {
+      margin: 30px 0 10px;
+      color: #4a148c;
+    }
+
+    .autocomplete-list {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  z-index: 1000;
+  width: 35%;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: none;
+}
+
+.autocomplete-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.autocomplete-item:hover {
+  background-color: #f0eafc;
+}
+
   </style>
 </head>
 <body>
@@ -61,12 +109,14 @@
     <a onclick="logout()">Logout</a>
   </div>
 
+  
+
   <div class="content" id="mainContent">
-    <div style="padding: 20px;">
-      <h2>Welcome Admin</h2>
-      <p>Select an option from the menu</p>
-    </div>
+  <div class="welcome-container">
+    <h1>Welcome Admin Ji</h1>
+    <p>Side panel mai option select kijiye</p>
   </div>
+</div>
 
   <script>
     // ✅ Protect admin page
