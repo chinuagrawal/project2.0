@@ -212,20 +212,11 @@
     }
 
     function loadCashRequestPage() {
-      fetch('cashRequest.html')
-        .then(response => response.text())
-        .then(html => {
-          const mainContent = document.getElementById('mainContent');
-          mainContent.innerHTML = html;
-
-          const script = document.createElement('script');
-          script.src = 'cashRequest.js';
-          script.onload = () => {
-            console.log("cashRequest.js loaded");
-            fetchPendingBookings();
-          };
-          document.body.appendChild(script);
-        });
+      const iframe = document.createElement('iframe');
+      iframe.src = 'cashRequest.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
     }
 function loadRecentBookings() {
   const iframe = document.createElement('iframe');
