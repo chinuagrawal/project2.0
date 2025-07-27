@@ -3,29 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin - Cash Bookings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background-color: #f2f2f2; }
-    button { padding: 5px 10px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #e0e0e0;
+      font-weight: 600;
+      color: #333;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    button {
+      padding: 6px 12px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* ✅ Responsive Styles */
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 15px;
+        background-color: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      td {
+        position: relative;
+        padding-left: 50%;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        font-weight: bold;
+        color: #555;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Library Admin Panel - Cash Bookings</h1>
 
- <table>
-  <thead>
-    <tr>
-      <th>Seat</th>
-      <th>Date</th>
-      <th>Shift</th>
-      <th>Email</th>
-      <th>Amount</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="pending-bookings-body"></tbody>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th>Seat</th>
+        <th>Date</th>
+        <th>Shift</th>
+        <th>Email</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+      <tbody id="pending-bookings-body"></tbody>
+
+  </table>
 
 </body>
 </html>
