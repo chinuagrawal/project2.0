@@ -2,198 +2,209 @@
 <html lang="en">
 <head>
   <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
-
+  <meta name="theme-color" content="#4a148c">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Library Admin Dashboard</title>
   <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    background: linear-gradient(135deg, #e3e3e3, #f9f9f9);
-    overflow: hidden;
-  }
-
-  .sidebar {
-    width: 220px;
-    background: #1e1e2f;
-    color: white;
-    height: 100vh;
-    padding-top: 20px;
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .sidebar h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 24px;
-    background: linear-gradient(90deg, #ff4081, #7c4dff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .sidebar a {
-    display: block;
-    padding: 15px 20px;
-    color: #f1f1f1;
-    text-decoration: none;
-    font-weight: 500;
-    border-radius: 8px;
-    margin: 10px;
-    transition: background 0.3s, transform 0.2s;
-    cursor: pointer;
-  }
-
-  .sidebar a:hover {
-    background: #4e4e70;
-    transform: translateX(5px);
-    box-shadow: 2px 2px 8px rgba(255, 255, 255, 0.1);
-  }
-
-  .content {
-    flex: 1;
-    margin: 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    border-radius: 16px;
-  }
-
-  .welcome-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    text-align: center;
-    animation: fadeInUp 1.2s ease-out;
-    padding: 20px;
-  }
-
-  .welcome-container h1 {
-    font-size: 48px;
-    background: linear-gradient(to right, #e78d16, #1879ce);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-  }
-
-  .welcome-container p {
-    font-size: 20px;
-    color: #555;
-    animation: fadeIn 2s ease-in;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* ✅ Responsive Styles for Mobile Devices */
-  @media (max-width: 768px) {
     body {
-      flex-direction: column;
-      overflow-y: auto;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      background: linear-gradient(135deg, #e3e3e3, #f9f9f9);
+      overflow: hidden;
     }
 
     .sidebar {
-      width: 100%;
-      height: auto;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      border-radius: 0;
-      box-shadow: none;
-      padding: 10px 0;
+      width: 220px;
+      background: #1e1e2f;
+      color: white;
+      height: 100vh;
+      padding-top: 20px;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      transition: all 0.3s ease-in-out;
     }
 
     .sidebar h2 {
-      flex: 100%;
-      font-size: 20px;
-      margin-bottom: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      background: linear-gradient(90deg, #ff4081, #7c4dff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .sidebar a {
-      margin: 5px;
-      padding: 10px 15px;
-      font-size: 14px;
-      border-radius: 6px;
+      display: block;
+      padding: 15px 20px;
+      color: #f1f1f1;
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 8px;
+      margin: 10px;
+      transition: background 0.3s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .sidebar a:hover {
+      background: #4e4e70;
+      transform: translateX(5px);
     }
 
     .content {
-      margin: 10px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* ✅ ADD THIS */
+  margin: 20px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+
+    .welcome-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      animation: fadeInUp 1.2s ease-out;
+      padding: 20px;
     }
 
     .welcome-container h1 {
-      font-size: 32px;
+      font-size: 48px;
+      background: linear-gradient(to right, #e78d16, #1879ce);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .welcome-container p {
-      font-size: 16px;
+      font-size: 20px;
+      color: #555;
+      animation: fadeIn 2s ease-in;
     }
-  }
-</style>
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Hamburger button */
+    .hamburger {
+      display: none;
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background-color: #1e1e2f;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 999;
+    }
+
+    /* ✅ Responsive Styles for Mobile Devices */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        
+      }
+
+      .hamburger {
+        display: block;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: column;
+        display: none;
+        padding: 10px 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .sidebar.show {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .sidebar h2 {
+        flex: 100%;
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .sidebar a {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 14px;
+        border-radius: 6px;
+      }
+
+      
+.content {
+    margin: 10px;
+    border-radius: 12px;
+}
+      .welcome-container h1 {
+        font-size: 32px;
+      }
+
+      .welcome-container p {
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <h2 style="text-align:center;">Admin</h2>
+  <button class="hamburger" onclick="toggleSidebar()">☰ Menu</button>
+
+  <div class="sidebar" id="sidebar">
+    <h2>Admin</h2>
     <a onclick="loadSeatStatus()">Seat Status</a>
     <a onclick="loadCashRequestPage()">Cash Requests</a>
     <a onclick="loadRecentBookings()">Recent Bookings</a>
     <a onclick="loadregisteredUsers()">Registered Users</a>
-
     <a onclick="logout()">Logout</a>
   </div>
 
-  
-
   <div class="content" id="mainContent">
-  <div class="welcome-container">
-    <h1>Welcome Admin Ji</h1>
-    <p>Side panel mai option select kijiye</p>
+    <div class="welcome-container">
+      <h1>Welcome Admin Ji</h1>
+      <p>Side panel mai option select kijiye</p>
+    </div>
   </div>
-</div>
 
   <script>
     // ✅ Protect admin page
@@ -201,6 +212,11 @@
     if (!user || user.role !== "admin") {
       alert("Access denied! Admins only.");
       window.location.href = "login.html";
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("show");
     }
 
     function loadSeatStatus() {
@@ -218,26 +234,27 @@
       mainContent.innerHTML = '';
       mainContent.appendChild(iframe);
     }
-function loadRecentBookings() {
-  const iframe = document.createElement('iframe');
-  iframe.src = 'recent-booking.html';
-  const mainContent = document.getElementById('mainContent');
-  mainContent.innerHTML = '';
-  mainContent.appendChild(iframe);
-}
 
-function loadregisteredUsers() {
-  const iframe = document.createElement('iframe');
-  iframe.src = 'registeredUsers.html';
-  const mainContent = document.getElementById('mainContent');
-  mainContent.innerHTML = '';
-  mainContent.appendChild(iframe);
-}
+    function loadRecentBookings() {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'recent-booking.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
+    }
+
+    function loadregisteredUsers() {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'registeredUsers.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
+    }
+
     function logout() {
       localStorage.removeItem("user");
       window.location.href = "login.html";
     }
-    
   </script>
 
 </body>
