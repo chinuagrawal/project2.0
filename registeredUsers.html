@@ -119,34 +119,42 @@
   </table>
 
   <script>
-    fetch('https://kanha-backend-bw7a.onrender.com/api/users')
-      .then(response => response.json())
-      .then(users => {
-        const tbody = document.querySelector('#users-table tbody');
-        users.forEach((user, i) => {
-          const createdAt = user.createdAt ? new Date(user.createdAt) : null;
-          const dateStr = createdAt && !isNaN(createdAt.getTime())
-            ? createdAt.toLocaleDateString('en-GB') // DD/MM/YYYY
-            : 'N/A';
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td data-label="#">${i + 1}</td>
-            <td data-label="Name">${user.firstName} ${user.lastName}</td>
-            <td data-label="Gender">${user.gender}</td>
-            <td data-label="Mobile">${user.mobile}</td>
-            <td data-label="Email">${user.email}</td>
-            <td data-label="Role">${user.role}</td>
-            <td data-label="Registered On">${dateStr}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      })
-      .catch(err => {
-        console.error('Error fetching users:', err);
-        alert('Failed to load users.');
+  fetch('https://kanha-backend-bw7a.onrender.com/api/users')
+    .then(response => response.json())
+    .then(users => {
+      // Sort users by createdAt descending (newest first)
+      users.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA;
       });
-  </script>
+
+      const tbody = document.querySelector('#users-table tbody');
+      users.forEach((user, i) => {
+        const createdAt = user.createdAt ? new Date(user.createdAt) : null;
+        const dateStr = createdAt && !isNaN(createdAt.getTime())
+          ? createdAt.toLocaleDateString('en-GB') // DD/MM/YYYY
+          : 'N/A';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="#">${i + 1}</td>
+          <td data-label="Name">${user.firstName} ${user.lastName}</td>
+          <td data-label="Gender">${user.gender}</td>
+          <td data-label="Mobile">${user.mobile}</td>
+          <td data-label="Email">${user.email}</td>
+          <td data-label="Role">${user.role}</td>
+          <td data-label="Registered On">${dateStr}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching users:', err);
+      alert('Failed to load users.');
+    });
+</script>
+
 
 </body>
 </html>

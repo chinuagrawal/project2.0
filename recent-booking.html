@@ -106,6 +106,7 @@
       <th>From</th>
       <th>To</th>
       <th>Days</th>
+      <th>Booking Date</th> 
     </tr>
   </thead>
   <tbody></tbody>
@@ -113,13 +114,17 @@
 
 
  <script>
-  function formatDate(dateStr) {
-    const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = String(d.getFullYear()).slice(-2);
-    return `${day}/${month}/${year}`;
-  }
+ function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 'N/A'; // fallback if date is invalid
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = String(d.getFullYear()).slice(-2);
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
 
   async function loadRecentBookings() {
     const bookingsRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/bookings");
@@ -149,19 +154,25 @@
         };
       }
       grouped[key].dates.push(b.date);
-      grouped[key].createdAts.push(new Date(b.createdAt));
+      grouped[key].createdAts.push(b.createdAt ? new Date(b.createdAt) : new Date(0)); // fallback to epoch (1970)
     });
 
     const sortedGrouped = Object.values(grouped)
-      .map(g => {
-        g.dates.sort();
-        g.from = g.dates[0];
-        g.to = g.dates.at(-1);
-        g.days = Math.ceil((new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24)) + 1;
-        g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
-        return g;
-      })
-      .sort((a, b) => b.latestCreated.getTime() - a.latestCreated.getTime());
+  .map(g => {
+    g.dates.sort();
+    g.from = g.dates[0];
+    g.to = g.dates.at(-1);
+    g.days = Math.ceil((new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24)) + 1;
+    g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
+    return g;
+  })
+  .sort((a, b) => {
+  const timeDiff = b.latestCreated - a.latestCreated;
+  if (timeDiff !== 0) return timeDiff;
+  return new Date(b.from) - new Date(a.from); // DESCENDING
+});
+
+
 
     const tbody = document.querySelector("#booking-table tbody");
     tbody.innerHTML = "";
@@ -178,6 +189,7 @@
         <td data-label="From">${formatDate(entry.from)}</td>
         <td data-label="To">${formatDate(entry.to)}</td>
         <td data-label="Days">${entry.days}</td>
+        <td data-label="Booking Date">${formatDate(entry.latestCreated)}</td>
       `;
       tbody.appendChild(tr);
     });
