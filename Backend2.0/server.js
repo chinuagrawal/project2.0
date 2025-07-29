@@ -5,7 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 require('dotenv').config();
-
+const router = express.Router();
 const app = express();
 app.get("/", (req, res) => res.send("Server is running"));
 const PORT = process.env.PORT || 3000;
@@ -88,11 +88,8 @@ app.get('/api/bookings', async (req, res) => {
   }
 });
 
-// Endpoint: Initiate PhonePe V2 Payment
-const express = require('express');
-const axios = require('axios');
-const router = express.Router();
-const Booking = require('../models/Booking'); // Adjust path if needed
+
+
 
 router.post('/api/payment/initiate', async (req, res) => {
   const { amount, email, seatId, shift, startDate, endDate } = req.body;
