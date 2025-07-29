@@ -5,7 +5,7 @@ const Booking = require('../models/Booking'); // Adjust path if needed
 
 // POST /api/payment/webhook
 router.post('/payment/webhook', async (req, res) => {
-  
+  console.log("📩 Webhook Event:", JSON.stringify(req.body, null, 2));
   const event = req.body;
   console.log('📩 Webhook Received:', event);
 
