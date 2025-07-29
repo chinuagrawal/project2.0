@@ -181,12 +181,12 @@ section h3 {
 
 .welcome-text {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: 600;
-  margin: 2rem 0;
-  color: var(--text-primary);
-  animation: fadeIn 1s ease-in;
-}
+  background: linear-gradient(to right, #2e63dc, #a2c0f4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeIn 1s ease-in;}
 
 .credit-text {
   display: block;
