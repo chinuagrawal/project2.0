@@ -37,7 +37,7 @@ app.use('/api/extend', extendRoutes);
 
 
 
-app.use('/api/payment', webhookRoutes); // Mount at /api/payment
+
 // Utility function: get PhonePe Access Token
 const getPhonePeAccessToken = async () => {
   const baseUrl = 'https://api.phonepe.com/apis/identity-manager';
