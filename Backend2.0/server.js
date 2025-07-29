@@ -89,14 +89,20 @@ app.get('/api/bookings', async (req, res) => {
 });
 
 // Endpoint: Initiate PhonePe V2 Payment
-app.post('/api/payment/initiate', async (req, res) => {
+const express = require('express');
+const axios = require('axios');
+const router = express.Router();
+const Booking = require('../models/Booking'); // Adjust path if needed
+
+router.post('/api/payment/initiate', async (req, res) => {
   const { amount, email, seatId, shift, startDate, endDate } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
+  const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
 
   try {
-    // ✅ 1. Save "pending" booking
+    // ✅ Step 1: Save booking with 'pending' status
     await Booking.create({
       seatId,
       email,
@@ -109,24 +115,28 @@ app.post('/api/payment/initiate', async (req, res) => {
       paymentConfirmedVia: null,
     });
 
-    // ✅ 2. Get token and initiate payment
+    // ✅ Step 2: Get PhonePe Access Token
     const accessToken = await getPhonePeAccessToken();
 
+    // ✅ Step 3: Prepare payment payload
     const payload = {
       merchantId,
       merchantOrderId: merchantTransactionId,
-      amount: amount * 100,
-      expireAfter: 1200,
-      metaInfo: { udf1: email },
+      amount: amount * 100, // In paisa
+      expireAfter: 1200,     // 20 minutes
+      metaInfo: {
+        udf1: email,        // Extra data that returns in webhook
+      },
       paymentFlow: {
         type: 'PG_CHECKOUT',
         redirectMode: 'AUTO',
         merchantUrls: {
-          redirectUrl: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`
-        }
-      }
+          redirectUrl: redirectUrl,
+        },
+      },
     };
 
+    // ✅ Step 4: Initiate payment with PhonePe
     const response = await axios.post(
       `${baseUrl}/apis/pg/checkout/v2/pay`,
       payload,
@@ -138,14 +148,25 @@ app.post('/api/payment/initiate', async (req, res) => {
       }
     );
 
-    const redirectUrl = response.data.redirectUrl;
-    res.json({ redirectUrl, merchantTransactionId });
+    const redirectUrlFromResponse = response.data.redirectUrl || redirectUrl;
+
+    console.log(`✅ PhonePe Payment initiated for ${email}, TXN: ${merchantTransactionId}`);
+    res.json({
+      redirectUrl: redirectUrlFromResponse,
+      merchantTransactionId
+    });
 
   } catch (err) {
     console.error("❌ PhonePe V2 API Error:", err.response?.data || err.message);
-    res.status(500).json({ message: 'PhonePe V2 API error', details: err.response?.data || err.message });
+    res.status(500).json({
+      message: 'PhonePe V2 API error',
+      details: err.response?.data || err.message
+    });
   }
 });
+
+
+module.exports = router;
 
 
 // Endpoint: Payment callback
