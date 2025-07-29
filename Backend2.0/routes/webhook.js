@@ -4,38 +4,43 @@ const auth = require('basic-auth');
 const Booking = require('../models/Booking'); // Adjust path if needed
 
 // POST /api/payment/webhook
-router.post('/payment/webhook', async (req, res) => {
+app.post("/api/payment/webhook", async (req, res) => {
   console.log("📩 Webhook Event:", JSON.stringify(req.body, null, 2));
-  const event = req.body;
-  console.log('📩 Webhook Received:', event);
 
-  if (event.event === 'pg.order.completed') {
-    const merchantOrderId = event.data.merchantOrderId;
-    const txnId = event.data.transactionId;
+  const txnId = req.body.transactionId;
+  const status = req.body.state;
 
+  if (status === "COMPLETED") {
     try {
-      const booking = await Booking.findOne({
-        paymentTxnId: merchantOrderId,
-        status: 'pending',
-      });
+      // Fetch pending booking from DB or Redis (if you're storing)
+      // OR decode it from metadata/merchantOrderId if stored in session
+      const bookingDetails = await PendingBooking.findOne({ txnId });
 
-      if (booking) {
-        booking.status = 'paid';
-        booking.paymentConfirmedVia = 'webhook';
-        booking.transactionId = txnId;
-        await booking.save();
+      if (bookingDetails) {
+        // Save confirmed booking in Booking collection
+        await Booking.insertMany(bookingDetails.bookings.map(b => ({
+          ...b,
+          status: "paid"
+        })));
 
-        console.log('✅ Booking confirmed via webhook for:', merchantOrderId);
+        // Clean up pending data
+        await PendingBooking.deleteOne({ txnId });
+
+        console.log("✅ Seat booked via webhook for:", bookingDetails.email);
       } else {
-        console.log('⚠️ No pending booking found for:', merchantOrderId);
+        console.warn("⚠️ No pending booking found for", txnId);
       }
-    } catch (err) {
-      console.error('❌ Error processing webhook:', err);
-      return res.status(500).send('Internal Error');
-    }
-  }
 
-  res.status(200).send('Webhook received');
+      res.status(200).send("OK");
+    } catch (err) {
+      console.error("❌ Webhook booking failed:", err);
+      res.status(500).send("Internal Server Error");
+    }
+  } else {
+    console.log("❌ Payment failed or not completed.");
+    res.status(200).send("No booking action");
+  }
 });
+
 
 module.exports = router;
