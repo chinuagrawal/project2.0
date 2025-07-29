@@ -14,7 +14,7 @@
   --secondary-color: #2575fc;
   --accent-color: #ff7e5f;
   --accent-hover-color: #feb47b;
-  --background-dark: #121212;
+ --background-dark:linear-gradient(-80deg, #12C2E9 , #F64F59);
   --background-light: #1e1e1e;
   --text-primary: #f5f5f5;
   --text-secondary: #b0b0b0;
@@ -25,7 +25,9 @@
   --info-color: #8e44ad;
   --shadow-color: rgba(0, 0, 0, 0.5);
   --shadow-light: rgba(0, 0, 0, 0.25);
+  --welcome-text-gradient: linear-gradient(100deg,#6a11cb, #2575fc );
 }
+
 
 * {
   margin: 0;
@@ -38,6 +40,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
 
 body {
   font-family: 'Poppins', sans-serif;
@@ -183,7 +187,7 @@ section h3 {
   text-align: center;
   font-size: 2.3rem;
   font-weight: 600;
-  background: linear-gradient(to right, #2e63dc, #a2c0f4);
+  background: var(--welcome-text-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: fadeIn 1s ease-in;}
