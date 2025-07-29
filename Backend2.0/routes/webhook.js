@@ -5,11 +5,7 @@ const Booking = require('../models/Booking'); // Adjust path if needed
 
 // POST /api/payment/webhook
 router.post('/payment/webhook', async (req, res) => {
-  const credentials = auth(req);
-  if (!credentials || credentials.name !== 'chinu' || credentials.pass !== 'chinu123') {
-    return res.status(401).send('Unauthorized');
-  }
-
+  
   const event = req.body;
   console.log('📩 Webhook Received:', event);
 

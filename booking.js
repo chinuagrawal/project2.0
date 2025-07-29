@@ -164,7 +164,7 @@ const startDate = startDateInput.value;
   }
  
   // 🟣 Online booking via PhonePe
-  const baseAmount = shift === 'full' ? 816 : 612;
+  const baseAmount = shift === 'full' ? 2 : 1;
   const amount =Math.round(baseAmount * months);
 
   try {

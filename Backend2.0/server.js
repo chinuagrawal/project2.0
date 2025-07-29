@@ -87,19 +87,33 @@ app.get('/api/bookings', async (req, res) => {
 
 // Endpoint: Initiate PhonePe V2 Payment
 app.post('/api/payment/initiate', async (req, res) => {
-  const { amount, email } = req.body;
+  const { amount, email, seatId, shift, startDate, endDate } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
 
   try {
+    // ✅ 1. Save "pending" booking
+    await Booking.create({
+      seatId,
+      email,
+      startDate,
+      endDate,
+      shift,
+      amount,
+      status: 'pending',
+      paymentTxnId: merchantTransactionId,
+      paymentConfirmedVia: null,
+    });
+
+    // ✅ 2. Get token and initiate payment
     const accessToken = await getPhonePeAccessToken();
 
     const payload = {
       merchantId,
       merchantOrderId: merchantTransactionId,
       amount: amount * 100,
-      expireAfter: 1200, // 20 mins
+      expireAfter: 1200,
       metaInfo: { udf1: email },
       paymentFlow: {
         type: 'PG_CHECKOUT',
@@ -129,6 +143,7 @@ app.post('/api/payment/initiate', async (req, res) => {
     res.status(500).json({ message: 'PhonePe V2 API error', details: err.response?.data || err.message });
   }
 });
+
 
 // Endpoint: Payment callback
 app.post('/api/payment/callback', (req, res) => {
