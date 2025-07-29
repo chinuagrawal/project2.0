@@ -91,7 +91,7 @@ app.get('/api/bookings', async (req, res) => {
 
 
 
-router.post('/api/payment/initiate', async (req, res) => {
+app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email, seatId, shift, startDate, endDate } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
