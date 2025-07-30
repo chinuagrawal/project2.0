@@ -1,100 +1,62 @@
-// routes/webhook.js
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
-const auth = require('basic-auth');
-const Booking = require('../models/Booking');
-const PendingBooking = require('../models/PendingBooking');
 
-const WEBHOOK_USERNAME = 'chinu';
-const WEBHOOK_PASSWORD = 'chinu123';
+// Replace with actual credentials set on PhonePe dashboard
+const PHONEPE_USERNAME = 'chinu';
+const PHONEPE_PASSWORD = 'chinu123';
 
-// Utility: Get all dates in range
-function getAllDatesInRange(startDateStr, endDateStr) {
-  const startDate = new Date(startDateStr);
-  const endDate = new Date(endDateStr);
-  const dates = [];
-  let current = new Date(startDate);
+// SHA256(username:password)
+const expectedAuth = crypto
+  .createHash('sha256')
+  .update(`${PHONEPE_USERNAME}:${PHONEPE_PASSWORD}`)
+  .digest('hex');
 
-  while (current <= endDate) {
-    dates.push(new Date(current));
-    current.setDate(current.getDate() + 1);
-  }
+// Route to handle PhonePe webhooks
+router.post('/api/payment/webhook', express.json({ limit: '1mb' }), async (req, res) => {
+  try {
+    const receivedAuth = req.headers['authorization'];
 
-  return dates;
-}
-
-router.post("/webhook", async (req, res) => {
-  // ✅ Basic Auth
-  const credentials = auth(req);
-  if (
-    !credentials ||
-    credentials.name !== WEBHOOK_USERNAME ||
-    credentials.pass !== WEBHOOK_PASSWORD
-  ) {
-    return res.status(401).send("Unauthorized");
-  }
-
-  console.log("📩 Webhook Event Received:", JSON.stringify(req.body, null, 2));
-
-  const txnId = req.body.merchantOrderId;
-  const transactionId = req.body.transactionId;
-  const status = req.body.state;
-
-  if (!txnId) {
-    console.error("❌ merchantOrderId is not defined in webhook body");
-    return res.status(400).send("Invalid payload");
-  }
-
-  if (status === "COMPLETED") {
-    try {
-      const pending = await PendingBooking.findOne({ txnId, status: 'pending' });
-
-      if (!pending) {
-        console.warn("⚠️ No pending booking found for txn:", txnId);
-        return res.status(200).send("No pending booking found");
-      }
-
-      const { email, amount, seatId, shift, startDate, endDate } = pending;
-
-      // Generate all dates
-      const allDates = getAllDatesInRange(startDate, endDate);
-
-      const bookings = allDates.map(date => ({
-        seatId,
-        date,
-        shift,
-        email,
-        amount,
-        status: "paid",
-        paymentTxnId: txnId,
-        transactionId: transactionId || '',
-        paymentConfirmedVia: "webhook"
-      }));
-
-      // Optional: Check for already existing bookings before insert
-      const existing = await Booking.find({
-        seatId,
-        shift,
-        date: { $in: allDates }
-      });
-
-      if (existing.length > 0) {
-        console.warn("⚠️ Booking already exists for one or more dates, skipping insert");
-      } else {
-        await Booking.insertMany(bookings);
-        console.log(`✅ ${bookings.length} bookings created via webhook for`, email);
-      }
-
-      await PendingBooking.deleteOne({ txnId });
-
-      return res.status(200).send("Booking successful");
-    } catch (err) {
-      console.error("❌ Webhook processing error:", err);
-      return res.status(500).send("Internal Server Error");
+    if (!receivedAuth) {
+      console.warn('[Webhook] Missing Authorization header');
+      return res.status(401).send('Unauthorized');
     }
-  } else {
-    console.log("❌ Payment not completed or irrelevant status:", status);
-    return res.status(200).send("No booking action taken");
+
+    if (receivedAuth !== expectedAuth) {
+      console.warn('[Webhook] Invalid Authorization header');
+      return res.status(401).send('Unauthorized');
+    }
+
+    const { event, payload } = req.body;
+
+    console.log('[Webhook] Event received:', event);
+    console.log('[Webhook] Payload:', payload);
+
+    // Only process confirmed payments
+    if (event === 'checkout.order.completed' && payload?.state === 'COMPLETED') {
+      const { merchantOrderId, amount, paymentDetails } = payload;
+      const txnId = paymentDetails?.[0]?.transactionId;
+
+      // TODO: Update booking in DB or confirm pending transaction here
+      console.log(`[Webhook] Payment SUCCESS: Order ${merchantOrderId}, Txn ID: ${txnId}, Amount: ${amount}`);
+      // Example: mark as paid
+      // await Booking.updateOne({ txnId: merchantOrderId }, { $set: { status: 'paid' } });
+
+      return res.status(200).send('Webhook received and processed');
+    }
+
+    // You may handle failed cases too
+    if (event === 'checkout.order.failed' || payload?.state === 'FAILED') {
+      console.warn(`[Webhook] Payment FAILED: ${payload?.merchantOrderId}`);
+      // Optional: Log failed transaction, update status
+      return res.status(200).send('Payment failed');
+    }
+
+    console.log('[Webhook] Unhandled event or incomplete state');
+    res.status(200).send('Ignored');
+  } catch (error) {
+    console.error('[Webhook] Error processing webhook:', error.message);
+    res.status(500).send('Internal Server Error');
   }
 });
 
