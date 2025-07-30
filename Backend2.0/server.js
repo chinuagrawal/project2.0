@@ -34,6 +34,7 @@ app.use('/api/payment', webhookRoutes);
 
 
 const extendRoutes = require('./routes/extend');
+const PendingBooking = require('./models/PendingBooking');
 app.use('/api/extend', extendRoutes);
 
 
@@ -101,7 +102,7 @@ app.post('/api/payment/initiate', async (req, res) => {
 
   try {
     // ✅ Step 1: Save booking with 'pending' status
-    await Booking.create({
+    await PendingBooking.create({
       seatId,
       email,
       startDate,
