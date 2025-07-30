@@ -153,7 +153,7 @@ header nav a:hover::after {
 /* ========================================================================== */
 
 section {
-  padding: 80px 10%; /* Use percentage for responsive padding */
+  padding: 80px 5%; /* Use percentage for responsive padding */
   max-width: 1200px;
   margin: 0 auto;
 }
