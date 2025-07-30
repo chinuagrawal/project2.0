@@ -13,7 +13,7 @@ const expectedAuth = crypto
   .digest('hex');
 
 // Route to handle PhonePe webhooks
-router.post('/api/payment/webhook', express.json({ limit: '1mb' }), async (req, res) => {
+router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
   try {
     const receivedAuth = req.headers['authorization'];
 
