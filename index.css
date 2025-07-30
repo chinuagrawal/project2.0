@@ -12,7 +12,7 @@
 :root {
   --primary-color: #6a11cb;
   --secondary-color: #2575fc;
-  --accent-color: #ff7e5f;
+  --accent-color: #fe5e36;
   --accent-hover-color: #feb47b;
  --background-dark:linear-gradient(-80deg, #12C2E9 , #F64F59);
   --background-light: #1e1e1e;
@@ -186,11 +186,32 @@ section h3 {
 .welcome-text {
   text-align: center;
   font-size: 2.3rem;
-  font-weight: 600;
-  background: var(--welcome-text-gradient);
+  font-weight: 700;
+  background: linear-gradient(
+    270deg,
+    #ff0080,
+    #00ffff,
+    #ffcc00,
+    #00ff00,
+    #ff0080
+  );
+  background-size: 1000% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: fadeIn 1s ease-in;}
+  animation: flowingGradient 8s linear infinite;
+}
+
+@keyframes flowingGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
 .credit-text {
   display: block;
@@ -334,25 +355,45 @@ section h3 {
 
 /* 6. BUTTONS & INTERACTIVE ELEMENTS
 /* ========================================================================== */
-
 .book-now-btn {
-  background: linear-gradient(45deg, var(--accent-color), var(--accent-hover-color));
-  border: none;
+  padding: 16px 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
   color: white;
-  padding: 16px 45px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 30px;
-  cursor: pointer;
+  border: none;
   border-radius: 50px;
+  cursor: pointer;
+  text-transform: uppercase;
+
+  /* Flashy flowing animation */
+  background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet, red);
+  background-size: 1000% 100%;
+  animation: flowingColors 5s linear infinite;
+
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 8px 25px rgba(255, 126, 95, 0.3);
+
+  /* Push button down to avoid overlap */
+  margin-top: 50px;
+  z-index: 1;
+  position: relative;
 }
 
 .book-now-btn:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 12px 30px rgba(255, 126, 95, 0.4);
+  transform: scale(1.1);
+  box-shadow: 0 0 30px white;
 }
+
+@keyframes flowingColors {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+
 
 .install-app-btn {
   display: flex;
@@ -391,7 +432,7 @@ section h3 {
   z-index: 2000;
   left: 0; top: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.76);
   backdrop-filter: blur(5px);
   opacity: 0;
   visibility: hidden;
@@ -441,10 +482,15 @@ section h3 {
 }
 
 #my-bookings {
-    background-color: var(--background-light);
-    border-radius: 16px;
-    padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.05); /* Light frosted layer */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
+
 
 #booking-list {
   display: grid;
@@ -455,17 +501,14 @@ section h3 {
 }
 
 .booking-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  background: var(--background-dark);
   color: var(--text-primary);
   padding: 1.5rem;
   border-radius: 12px;
+  box-shadow: 0 6px 18px var(--shadow-light);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
 }
-
 
 .booking-card:hover {
   transform: translateY(-5px);
@@ -553,6 +596,78 @@ footer {
     transform: translateY(0);
   }
 }
+
+
+/* Base section style */
+section {
+  padding: 4rem 2rem;
+  max-width: 1000px;
+  margin: 3rem auto;
+  border-radius: 16px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Home Section - light with subtle fade-in */
+#home {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  color: #222;
+  animation: pulseGlow 3s ease-in-out infinite;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(74, 20, 140, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(74, 20, 140, 0.7);
+  }
+}
+
+/* About Section - glassmorphism with gentle pulse */
+#about {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  color: #222;
+  animation: pulseGlow 3s ease-in-out infinite;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(74, 20, 140, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(74, 20, 140, 0.7);
+  }
+}
+
+
+
+/* Footer - subtle fade and slight scale */
+footer {
+  background: #111;
+  color: #bbb;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  animation: footerFadeScale 2s ease forwards;
+}
+
+@keyframes footerFadeScale {
+  from { opacity: 0; transform: scale(0.95);}
+  to { opacity: 1; transform: scale(1);}
+}
+
+
+
+
 
 /* 10. RESPONSIVE DESIGN
 /* ========================================================================== */
