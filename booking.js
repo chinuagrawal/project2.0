@@ -59,7 +59,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`https://kanha-backend-bw7a.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -143,7 +143,7 @@ const startDate = startDateInput.value;
 
   if (paymentMode === 'cash') {
     try {
-      const res = await fetch('https://kanha-backend-bw7a.onrender.com/api/book-cash', {
+      const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
@@ -168,7 +168,7 @@ const startDate = startDateInput.value;
   const amount =Math.round(baseAmount * months);
 
   try {
-    const res = await fetch('https://kanha-backend-bw7a.onrender.com/api/payment/initiate', {
+    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount, email })

@@ -127,9 +127,9 @@
 
 
   async function loadRecentBookings() {
-    const bookingsRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/bookings");
+    const bookingsRes = await fetch("https://kanha-backend-yfx1.onrender.com/api/bookings");
     const all = await bookingsRes.json();
-    const usersRes = await fetch("https://kanha-backend-bw7a.onrender.com/api/users");
+    const usersRes = await fetch("https://kanha-backend-yfx1.onrender.com/api/users");
     const users = await usersRes.json();
 
     const usersByEmail = {};
