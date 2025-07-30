@@ -145,6 +145,7 @@ const startDate = startDateInput.value;
     try {
       const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
         method: 'POST',
+        
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
       });
