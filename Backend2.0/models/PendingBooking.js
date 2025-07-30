@@ -9,7 +9,7 @@ const pendingBookingSchema = new mongoose.Schema({
 
   // Add full booking info
   seatId: String,
-  startdate: String,
+  startDate: String,
   endDate: String,
   shift: String,
 }, { timestamps: true });
