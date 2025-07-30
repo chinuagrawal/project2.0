@@ -104,16 +104,15 @@ app.post('/api/payment/initiate', async (req, res) => {
   try {
     // ✅ Save pending booking
     await PendingBooking.create({
-      seatId,
-      email,
-      startDate,
-      endDate,
-      shift,
-      amount,
-      txnId: merchantTransactionId,
-      status: 'pending',
-      paymentConfirmedVia: null,
-    });
+  txnId: merchantOrderId,
+  email,
+  amount,
+  status: 'pending',
+  seatId,
+  date,
+  shift
+});
+
 
     // ✅ Get PhonePe token
     const accessToken = await getPhonePeAccessToken();

@@ -1,16 +1,16 @@
-// models/PendingBooking.js
 const mongoose = require('mongoose');
 
-const pendingSchema = new mongoose.Schema({
-  seatId: String,
-  startDate: String,
-  endDate: String,
-  shift: String,
+const pendingBookingSchema = new mongoose.Schema({
+  txnId: String,
   email: String,
   amount: Number,
-  txnId: String, // transactionId from PhonePe (merchantOrderId)
   status: String, // 'pending'
-  paymentConfirmedVia: String, // 'webhook' or 'redirect' if needed
+  paymentConfirmedVia: String,
+
+  // Add full booking info
+  seatId: String,
+  date: String,
+  shift: String,
 }, { timestamps: true });
 
-module.exports = mongoose.model('PendingBooking', pendingSchema);
+module.exports = mongoose.model('PendingBooking', pendingBookingSchema);
