@@ -253,11 +253,14 @@ section h3 {
   margin: 40px auto;
   gap: 20px;
   padding: 2rem;
-  background-color: var(--background-light);
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 16px;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   width: 100%;
-  overflow-x: auto; /* Allow horizontal scrolling on small screens */
+  overflow-x: auto;
 }
 
 .seat-layout {
@@ -452,14 +455,17 @@ section h3 {
 }
 
 .booking-card {
-  background: var(--background-dark);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 6px 18px var(--shadow-light);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid var(--border-color);
 }
+
 
 .booking-card:hover {
   transform: translateY(-5px);
