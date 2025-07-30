@@ -104,7 +104,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   try {
     // ✅ Save pending booking
     await PendingBooking.create({
-  txnId: merchantOrderId,
+  txnId: merchantTransactionId,
   email,
   amount,
   status: 'pending',
