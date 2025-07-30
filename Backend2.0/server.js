@@ -93,6 +93,7 @@ app.get('/api/bookings', async (req, res) => {
 
 
 
+// routes/initiate.js or in your main route file
 app.post('/api/payment/initiate', async (req, res) => {
   const { amount, email, seatId, shift, startDate, endDate } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
@@ -101,7 +102,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
 
   try {
-    // ✅ Step 1: Save booking with 'pending' status
+    // ✅ Save pending booking
     await PendingBooking.create({
       seatId,
       email,
@@ -109,33 +110,32 @@ app.post('/api/payment/initiate', async (req, res) => {
       endDate,
       shift,
       amount,
+      txnId: merchantTransactionId,
       status: 'pending',
-      paymentTxnId: merchantTransactionId,
       paymentConfirmedVia: null,
     });
 
-    // ✅ Step 2: Get PhonePe Access Token
+    // ✅ Get PhonePe token
     const accessToken = await getPhonePeAccessToken();
 
-    // ✅ Step 3: Prepare payment payload
+    // ✅ Create payload
     const payload = {
       merchantId,
       merchantOrderId: merchantTransactionId,
-      amount: amount * 100, // In paisa
-      expireAfter: 1200,     // 20 minutes
+      amount: amount * 100,
+      expireAfter: 1200,
       metaInfo: {
-        udf1: email,        // Extra data that returns in webhook
+        udf1: email,
       },
       paymentFlow: {
         type: 'PG_CHECKOUT',
         redirectMode: 'AUTO',
         merchantUrls: {
-          redirectUrl: redirectUrl,
+          redirectUrl,
         },
       },
     };
 
-    // ✅ Step 4: Initiate payment with PhonePe
     const response = await axios.post(
       `${baseUrl}/apis/pg/checkout/v2/pay`,
       payload,
@@ -156,13 +156,11 @@ app.post('/api/payment/initiate', async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ PhonePe V2 API Error:", err.response?.data || err.message);
-    res.status(500).json({
-      message: 'PhonePe V2 API error',
-      details: err.response?.data || err.message
-    });
+    console.error("❌ PhonePe API Error:", err.response?.data || err.message);
+    res.status(500).json({ message: 'PhonePe API error', details: err.response?.data || err.message });
   }
 });
+
 
 
 module.exports = router;
