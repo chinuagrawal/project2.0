@@ -4,7 +4,7 @@ const auth = require('basic-auth');
 const Booking = require('../models/Booking'); // Adjust path if needed
 
 // POST /api/payment/webhook
-router.post("/api/payment/webhook", async (req, res) => {
+router.post("/webhook", async (req, res) => {
   console.log("📩 Webhook Event:", JSON.stringify(req.body, null, 2));
 
   const txnId = req.body.transactionId;
