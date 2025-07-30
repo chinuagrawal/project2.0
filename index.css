@@ -153,7 +153,7 @@ header nav a:hover::after {
 /* ========================================================================== */
 
 section {
-  padding: 80px 5%; /* Use percentage for responsive padding */
+  padding: 80px 10%; /* Use percentage for responsive padding */
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -184,6 +184,7 @@ section h3 {
 }
 
 .welcome-text {
+  padding: 20px;
   text-align: center;
   font-size: 2.3rem;
   font-weight: 700;
@@ -226,17 +227,18 @@ section h3 {
 /* ========================================================================== */
 
 .home {
-  padding-top: 40px;
+  padding-top: 5px;
+
 }
 
 .carousel {
   width: 100%;
   overflow: hidden;
-  position: relative;
+  position: center;
   height: 450px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  margin-bottom: 30px;
+  margin-bottom: 5px;
 }
 
 .carousel-images {
@@ -247,7 +249,7 @@ section h3 {
 }
 
 .carousel-images img {
-  width: 90vw;
+  width: 100vw;
   height: 100%;
   object-fit: cover;
   flex-shrink: 0;}
@@ -611,23 +613,6 @@ section {
   overflow: hidden;
 }
 
-/* Home Section - light with subtle fade-in */
-#home {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  color: #222;
-  animation: pulseGlow 3s ease-in-out infinite;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(74, 20, 140, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(74, 20, 140, 0.7);
-  }
-}
 
 /* About Section - glassmorphism with gentle pulse */
 #about {
@@ -685,7 +670,7 @@ footer {
     width: 100%;
     overflow-x: auto;
     justify-content: flex-start;
-    padding-bottom: 10px; /* space for scrollbar */
+    padding-bottom:10px; /* space for scrollbar */
   }
 
   header nav a {
@@ -693,7 +678,7 @@ footer {
   }
 
   section {
-    padding: 60px 5%;
+    padding: 30px 5%;
   }
 
   section h1 { font-size: 2.2rem; }
@@ -735,8 +720,8 @@ footer {
   }
 
   .seat-box {
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 55px;
     font-size: 0.90rem;
   }
 
