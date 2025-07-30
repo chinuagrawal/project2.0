@@ -8,6 +8,21 @@ const PendingBooking = require('../models/PendingBooking');
 const WEBHOOK_USERNAME = 'chinu';
 const WEBHOOK_PASSWORD = 'chinu123';
 
+// Utility: Get all dates in range
+function getAllDatesInRange(startDateStr, endDateStr) {
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
+  const dates = [];
+  let current = new Date(startDate);
+
+  while (current <= endDate) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
 router.post("/webhook", async (req, res) => {
   // ✅ Basic Auth
   const credentials = auth(req);
@@ -21,8 +36,7 @@ router.post("/webhook", async (req, res) => {
 
   console.log("📩 Webhook Event Received:", JSON.stringify(req.body, null, 2));
 
-  // ✅ Safely extract merchantOrderId and transactionId
-  const txnId = req.body.merchantOrderId; // This is your original txnId used in PendingBooking
+  const txnId = req.body.merchantOrderId;
   const transactionId = req.body.transactionId;
   const status = req.body.state;
 
@@ -33,29 +47,47 @@ router.post("/webhook", async (req, res) => {
 
   if (status === "COMPLETED") {
     try {
-      const bookingDetails = await PendingBooking.findOne({ txnId, status: 'pending' });
+      const pending = await PendingBooking.findOne({ txnId, status: 'pending' });
 
-      if (bookingDetails) {
-        await Booking.create({
-          seatId: bookingDetails.seatId,
-          date: bookingDetails.startDate,
-          shift: bookingDetails.shift,
-          email: bookingDetails.email,
-          amount: bookingDetails.amount,
-          status: "paid",
-          paymentTxnId: txnId,
-          transactionId: transactionId || '', // fallback if null
-          paymentConfirmedVia: "webhook"
-        });
-
-        await PendingBooking.deleteOne({ txnId });
-
-        console.log("✅ Seat booked via webhook for:", bookingDetails.email);
-      } else {
+      if (!pending) {
         console.warn("⚠️ No pending booking found for txn:", txnId);
+        return res.status(200).send("No pending booking found");
       }
 
-      return res.status(200).send("OK");
+      const { email, amount, seatId, shift, startDate, endDate } = pending;
+
+      // Generate all dates
+      const allDates = getAllDatesInRange(startDate, endDate);
+
+      const bookings = allDates.map(date => ({
+        seatId,
+        date,
+        shift,
+        email,
+        amount,
+        status: "paid",
+        paymentTxnId: txnId,
+        transactionId: transactionId || '',
+        paymentConfirmedVia: "webhook"
+      }));
+
+      // Optional: Check for already existing bookings before insert
+      const existing = await Booking.find({
+        seatId,
+        shift,
+        date: { $in: allDates }
+      });
+
+      if (existing.length > 0) {
+        console.warn("⚠️ Booking already exists for one or more dates, skipping insert");
+      } else {
+        await Booking.insertMany(bookings);
+        console.log(`✅ ${bookings.length} bookings created via webhook for`, email);
+      }
+
+      await PendingBooking.deleteOne({ txnId });
+
+      return res.status(200).send("Booking successful");
     } catch (err) {
       console.error("❌ Webhook processing error:", err);
       return res.status(500).send("Internal Server Error");
@@ -67,5 +99,3 @@ router.post("/webhook", async (req, res) => {
 });
 
 module.exports = router;
-
-
