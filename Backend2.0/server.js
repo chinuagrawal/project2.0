@@ -26,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI)
 const Booking = require('./models/Booking');
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
+app.use('/api', authRoutes);
 
 
 const webhookRoutes = require('./routes/webhook');
