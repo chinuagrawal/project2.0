@@ -109,7 +109,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   amount,
   status: 'pending',
   seatId,
-  date,
+  date: startDate,
   shift
 });
 
