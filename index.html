@@ -342,7 +342,7 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
     for (let i = 0; i < row.count; i++) {
       const div = document.createElement('div');
       div.className = 'seat-box';
-      div.textContent = `S${seatCounter}`;
+      div.textContent = `${seatCounter}`;
       container.appendChild(div);
       seatCounter++;
     }
