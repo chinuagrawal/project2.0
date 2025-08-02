@@ -70,7 +70,7 @@ async function fetchBookings() {
 function renderSeats() {
   seatMap.innerHTML = '';
   for (let i = 1; i <= totalSeats; i++) {
-    const seatId = `S${i}`;
+    const seatId = `${i}`;
     const seat = document.createElement('div');
     seat.classList.add('seat');
     seat.dataset.seatId = seatId;
