@@ -200,7 +200,7 @@ td button:hover {
   function renderSeatMap() {
     seatMap.innerHTML = '';
     for (let i = 1; i <= totalSeats; i++) {
-      const seat = `S${i}`;
+      const seat = `${i}`;
       const el = document.createElement('div');
       el.className = 'seat';
       el.dataset.seat = seat;
@@ -235,7 +235,7 @@ td button:hover {
       grouped[key].dates.push(b.date);
     });
 
-    let html = `<h2>${seat} – Bookings</h2><table><thead><tr><th>User</th><th>Email</th><th>Mobile</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th><th>Action</th></tr></thead><tbody>`;
+    let html = `<h2>Seat Number - ${seat}</h2><table><thead><tr><th>User</th><th>Email</th><th>Mobile</th><th>Shift</th><th>Payment</th><th>From</th><th>To</th><th>Days</th><th>Action</th></tr></thead><tbody>`;
     Object.values(grouped).forEach(entry => {
       entry.dates.sort();
       html += `<tr>
