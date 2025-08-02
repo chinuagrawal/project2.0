@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <meta charset="UTF-8" />
   <title>Registered Users - Kanha Library</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -146,16 +148,28 @@
     })
   : 'N/A';
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td data-label="#">${i + 1}</td>
-          <td data-label="Name">${user.firstName} ${user.lastName}</td>
-          <td data-label="Gender">${user.gender}</td>
-          <td data-label="Mobile">${user.mobile}</td>
-          <td data-label="Email">${user.email}</td>
-          <td data-label="Role">${user.role}</td>
-          <td data-label="Registered On">${dateStr}</td>
-        `;
+     const tr = document.createElement('tr');
+const phone = user.mobile || '';
+
+// Phone actions
+const whatsappLink = `https://wa.me/91${phone}`;
+const callLink = `tel:${phone}`;
+const smsLink = `sms:${phone}`;
+
+tr.innerHTML = `
+  <td data-label="#">${i + 1}</td>
+  <td data-label="Name">${user.firstName} ${user.lastName}</td>
+  <td data-label="Gender">${user.gender}</td>
+  <td data-label="Mobile">
+    ${phone}<br/>
+    <a href="${whatsappLink}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:8px;"></i></a>
+    <a href="${callLink}" title="Call"><i class="fas fa-phone" style="color:#2c3e50; margin-right:8px;"></i></a>
+    <a href="${smsLink}" title="SMS"><i class="fas fa-comment-dots" style="color:#007bff;"></i></a>
+  </td>
+  <td data-label="Email">${user.email}</td>
+  <td data-label="Role">${user.role}</td>
+  <td data-label="Registered On">${dateStr}</td>
+`;
         tbody.appendChild(tr);
       });
     })
