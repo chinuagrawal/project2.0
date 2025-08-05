@@ -206,14 +206,37 @@
   border-top: 1px solid #ccc;
 }
 .loader {
-    margin: 10px auto;
-    border: 6px solid #eee;
-    border-top: 6px solid #3498db;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-  }
+  margin: 10px auto;
+  border: 6px solid #eee;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#payment-warning {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.96);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
+}
+
+
 
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -274,13 +297,19 @@
       
 
       <button id="book-btn">Book Seat</button>
-    </div>
 
-      <div id="payment-warning" style="display: none; text-align: center; margin-top: 20px;">
-  <h2>⚠️ Please do not press back or close this tab</h2>
-  <p>We are redirecting you to PhonePe for secure payment...</p>
+      
+    </div>
+    <div id="payment-warning">
   <div class="loader"></div>
-  </div>
+  <p style="margin-top: 20px; font-weight: bold; color: red;">
+    ⚠️ Please do not press back or refresh during payment.<br>
+    Your seat will be confirmed after successful payment.
+  </p>
+</div>
+
+
+      
 
     <div class="legend">
       <h3>Legend</h3>
@@ -291,6 +320,6 @@
     </div>
   </div>
 
-  <script src="booking.js?v=1.1.1"></script>
+  <script src="booking.js?v=1.2.2"></script>
 </body>
 </html>

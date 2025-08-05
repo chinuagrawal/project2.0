@@ -225,8 +225,7 @@ const { total: amount } = getTotalAmount(
   priceSettings.convenienceFee
 );
 
-
-  try {
+try {
   const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -239,40 +238,41 @@ const { total: amount } = getTotalAmount(
     return alert(data.message || 'Payment initiation failed.');
   }
 
+  // Store pending booking in session
   sessionStorage.setItem('pendingBooking', JSON.stringify({
     seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
   }));
 
   // ⚠️ Show warning UI
-  const warningEl = document.getElementById('payment-warning');
-  if (warningEl) {
-    warningEl.style.display = 'block';
-  }
+  const warningElement = document.getElementById("payment-warning");
 
-  // 🚫 Disable interaction and add beforeunload warning
-  document.body.style.pointerEvents = 'none';
-  window.onbeforeunload = () => "Please do not refresh or go back during the payment process.";
+  if (warningElement) {
+    warningElement.style.display = "flex";
 
-  // ✅ Redirect to PhonePe
-  if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
-    window.PhonePeCheckout.transact({
-      tokenUrl: data.redirectUrl,
-      callback: function (response) {
-        console.log("📦 PhonePe response:", response);
-      },
-      type: "REDIRECT"
-    });
+    // Wait 4 seconds, then redirect to PhonePe
+    setTimeout(() => {
+      if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
+        window.PhonePeCheckout.transact({
+          tokenUrl: data.redirectUrl,
+          callback: function (response) {
+            console.log("📦 PhonePe response:", response);
+          },
+          type: "REDIRECT"
+        });
+      } else {
+        alert("PhonePe SDK not loaded");
+      }
+    }, 4000);
+
   } else {
-    alert("PhonePe SDK not loaded");
+    console.warn("Element with ID 'payment-warning' not found.");
   }
 
 } catch (err) {
   console.error(err);
   alert('Payment or booking failed.');
 }
-
 });
-
 [startDateInput, durationInput, shiftInput].forEach(input => {
   input.addEventListener('change', () => {
     fetchBookings();
