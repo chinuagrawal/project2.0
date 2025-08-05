@@ -285,15 +285,16 @@
           <option value="am">Morning</option><option value="pm">Evening</option><option value="full">Full Day</option>
         </select>
       </div>
+      <div class="radio-group">
+        <label><input type="radio" name="paymentMode" value="online" checked> Pay Online</label>
+        <label><input type="radio" name="paymentMode" value="cash"> Pay Cash at Library</label>
+      </div>
 
       <div class="seat-map" id="seat-map"></div>
 
       <div class="amount-display">Total Amount: <span id="amount-display">₹ 0</span></div>
 
-      <div class="radio-group">
-        <label><input type="radio" name="paymentMode" value="online" checked> Pay Online</label>
-        <label><input type="radio" name="paymentMode" value="cash"> Pay Cash at Library</label>
-      </div>
+      
       
 
       <button id="book-btn">Book Seat</button>

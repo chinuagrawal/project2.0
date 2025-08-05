@@ -47,7 +47,7 @@ function getDiscount(duration) {
 
 function getTotalAmount(base, duration, discount, pgPercent, convenience) {
   const subtotal = base * duration - discount;
-  const pgFee = Math.round((subtotal * pgPercent) / 100);
+  const pgFee = Math.round(((subtotal + convenience)* pgPercent ) / 100);
   const total = subtotal + pgFee + convenience;
   return { subtotal, pgFee, convenience, total };
 }
@@ -79,8 +79,8 @@ async function updateAmount() {
       <div><span>Base Price</span> <span>₹${basePrice} × ${duration} months</span></div>
       <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
       <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
-      <div><span>PG Fee (${priceSettings.paymentGatewayFeePercent}%)</span> <span>+ ₹${pgFee}</span></div>
       <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
+      <div><span>PG Fee (${priceSettings.paymentGatewayFeePercent}%)</span> <span>+ ₹${pgFee}</span></div>
       <hr>
       <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
     </div>
