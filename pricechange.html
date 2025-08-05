@@ -1,0 +1,82 @@
+<h2>Update Price & Offers</h2>
+<form id="price-form">
+  <label>Morning Shift Price (AM):</label>
+  <input type="number" id="am" /><br />
+  
+  <label>Evening Shift Price (PM):</label>
+  <input type="number" id="pm" /><br />
+  
+  <label>Full Day Price:</label>
+  <input type="number" id="full" /><br /><br />
+
+  <h3>Offers (Duration based ₹ Discounts)</h3>
+  <div id="offer-container">
+    <div>
+      <input type="number" class="duration" placeholder="Months" />
+      <input type="number" class="discount" placeholder="Discount ₹" />
+    </div>
+  </div>
+  <button type="button" onclick="addOffer()">+ Add Offer</button><br /><br />
+
+  <h3>Extra Charges</h3>
+  <label>Payment Gateway Fee (%):</label>
+  <input type="number" id="pg-fee" /><br />
+
+  <label>Convenience Fee (₹):</label>
+  <input type="number" id="convenience-fee" /><br /><br />
+
+  <button type="submit">💾 Save</button>
+</form>
+
+<script>
+  function addOffer() {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <input type="number" class="duration" placeholder="Months" />
+      <input type="number" class="discount" placeholder="Discount ₹" />
+    `;
+    document.getElementById('offer-container').appendChild(div);
+  }
+
+  document.getElementById('price-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const am = +document.getElementById('am').value;
+    const pm = +document.getElementById('pm').value;
+    const full = +document.getElementById('full').value;
+    const pgFee = +document.getElementById('pg-fee').value;
+    const convenienceFee = +document.getElementById('convenience-fee').value;
+
+    const offers = Array.from(document.querySelectorAll('#offer-container div')).map(div => ({
+      duration: +div.querySelector('.duration').value,
+      discount: +div.querySelector('.discount').value
+    }));
+
+    await fetch('http://localhost:3000/api/prices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ am, pm, full, offers, paymentGatewayFeePercent: pgFee, convenienceFee })
+    });
+
+    alert('✅ Prices updated successfully!');
+  });
+
+  window.onload = async () => {
+    const res = await fetch('http://localhost:3000/api/prices');
+    const data = await res.json();
+    document.getElementById('am').value = data.am;
+    document.getElementById('pm').value = data.pm;
+    document.getElementById('full').value = data.full;
+    document.getElementById('pg-fee').value = data.paymentGatewayFeePercent || 0;
+    document.getElementById('convenience-fee').value = data.convenienceFee || 0;
+
+    document.getElementById('offer-container').innerHTML = '';
+    data.offers.forEach(offer => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input type="number" class="duration" value="${offer.duration}" />
+        <input type="number" class="discount" value="${offer.discount}" />
+      `;
+      document.getElementById('offer-container').appendChild(div);
+    });
+  };
+</script>

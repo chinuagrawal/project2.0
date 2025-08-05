@@ -39,6 +39,52 @@ app.use('/api/extend', extendRoutes);
 
 
 
+const PriceSetting = require('./models/PriceSetting');
+
+app.get('/api/prices', async (req, res) => {
+  const existing = await PriceSetting.findOne();
+  if (!existing) {
+    const defaultSetting = await PriceSetting.create({
+      am: 612,
+      pm: 612,
+      full: 816,
+      offers: [],
+      paymentGatewayFeePercent: 2,
+      convenienceFee: 0
+    });
+    return res.json(defaultSetting);
+  }
+  res.json(existing);
+});
+
+app.post('/api/prices', async (req, res) => {
+  const { am, pm, full, offers, paymentGatewayFeePercent, convenienceFee } = req.body;
+  console.log('Incoming price change:', req.body);
+
+  let setting = await PriceSetting.findOne();
+  if (!setting) setting = new PriceSetting();
+
+  setting.am = am;
+  setting.pm = pm;
+  setting.full = full;
+  setting.paymentGatewayFeePercent = paymentGatewayFeePercent;
+  setting.convenienceFee = convenienceFee;
+
+  setting.offers = offers;
+  setting.markModified('offers');
+
+  try {
+    const saved = await setting.save();
+    console.log('Saved PriceSetting:', saved);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('PriceSetting save failed:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 // Utility function: get PhonePe Access Token
 const getPhonePeAccessToken = async () => {

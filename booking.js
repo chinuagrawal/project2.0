@@ -26,20 +26,68 @@ if (isExtension) {
 }
 
 const amountDisplay = document.getElementById('amount-display');
+let priceSettings = null;
+async function fetchPrices() {
+  const res = await fetch('http://localhost:3000/api/prices');
+  priceSettings = await res.json();
+}
 
-function updateAmount() {
+function getDiscount(duration) {
+  if (!priceSettings || !Array.isArray(priceSettings.offers)) return 0;
+
+  // Find the best applicable discount for the given duration
+  let best = 0;
+  for (const offer of priceSettings.offers) {
+    if (duration >= offer.duration && offer.discount > best) {
+      best = offer.discount;
+    }
+  }
+  return best;
+}
+
+function getTotalAmount(base, duration, discount, pgPercent, convenience) {
+  const subtotal = base * duration - discount;
+  const pgFee = Math.round((subtotal * pgPercent) / 100);
+  const total = subtotal + pgFee + convenience;
+  return { subtotal, pgFee, convenience, total };
+}
+
+async function updateAmount() {
   const shift = shiftInput.value;
   const duration = parseInt(durationInput.value);
+  
+  if (!priceSettings) await fetchPrices();
 
   if (!shift || !duration || isNaN(duration)) {
     amountDisplay.innerText = '₹ 0';
     return;
   }
 
-  const baseAmount = shift === 'full' ? 816 : 612;
-  const totalAmount =Math.round(baseAmount * duration);
-  amountDisplay.innerText = `₹ ${totalAmount.toFixed(2)}`;
+  const basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
+  const discount = getDiscount(duration);
+
+  const { subtotal, pgFee, convenience, total } = getTotalAmount(
+    basePrice,
+    duration,
+    discount,
+    priceSettings.paymentGatewayFeePercent,
+    priceSettings.convenienceFee
+  );
+
+  amountDisplay.innerHTML = `
+    <div class="price-breakdown">
+      <div><span>Base Price</span> <span>₹${basePrice} × ${duration} months</span></div>
+      <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
+      <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
+      <div><span>PG Fee (${priceSettings.paymentGatewayFeePercent}%)</span> <span>+ ₹${pgFee}</span></div>
+      <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
+      <hr>
+      <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
+    </div>
+  `;
 }
+
+
 
 function calculateEndDate(start, months) {
   if (!start) return null;
@@ -165,8 +213,18 @@ const startDate = startDateInput.value;
   }
  
   // 🟣 Online booking via PhonePe
-  const baseAmount = shift === 'full' ? 816 : 612;
-  const amount =Math.round(baseAmount * months);
+  if (!priceSettings) await fetchPrices();
+const basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
+const discount = getDiscount(months);
+
+const { total: amount } = getTotalAmount(
+  basePrice,
+  months,
+  discount,
+  priceSettings.paymentGatewayFeePercent,
+  priceSettings.convenienceFee
+);
+
 
   try {
     const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
@@ -212,7 +270,7 @@ window.PhonePeCheckout.transact({
   });
 });
 
-window.onload = () => {
+window.onload = async () => {
   const today = new Date().toISOString().split('T')[0];
 
   if (isExtension && lockedSeatId && lockedShift && lockedToDate) {
@@ -227,19 +285,19 @@ window.onload = () => {
     shiftInput.disabled = true;
 
     // Disable seat map interaction
-    fetchBookings().then(() => {
-      renderSeats(); // highlight selected seat
-      const targetSeat = document.querySelector(`[data-seat-id="${lockedSeatId}"]`);
-      if (targetSeat) {
-        targetSeat.classList.add('selected');
-      }
-    });
+    await fetchBookings();
+    renderSeats(); // highlight selected seat
+    const targetSeat = document.querySelector(`[data-seat-id="${lockedSeatId}"]`);
+    if (targetSeat) {
+      targetSeat.classList.add('selected');
+    }
 
   } else {
     startDateInput.value = today;
-    fetchBookings();
+    await fetchBookings();
   }
 
-  updateAmount();
+  await updateAmount();
 };
+
 
