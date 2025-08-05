@@ -51,7 +51,7 @@
       discount: +div.querySelector('.discount').value
     }));
 
-    await fetch('http://localhost:3000/api/prices', {
+    await fetch('https://kanha-backend-yfx1.onrender.com/api/prices', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ am, pm, full, offers, paymentGatewayFeePercent: pgFee, convenienceFee })
@@ -61,7 +61,7 @@
   });
 
   window.onload = async () => {
-    const res = await fetch('http://localhost:3000/api/prices');
+    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/prices');
     const data = await res.json();
     document.getElementById('am').value = data.am;
     document.getElementById('pm').value = data.pm;

@@ -28,7 +28,7 @@ if (isExtension) {
 const amountDisplay = document.getElementById('amount-display');
 let priceSettings = null;
 async function fetchPrices() {
-  const res = await fetch('http://localhost:3000/api/prices');
+  const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/prices');
   priceSettings = await res.json();
 }
 
