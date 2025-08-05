@@ -227,40 +227,50 @@ const { total: amount } = getTotalAmount(
 
 
   try {
-    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, email ,seatId, shift, startDate, endDate })
-    });
+  const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, email, seatId, shift, startDate, endDate })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (!res.ok || !data.redirectUrl) {
-      return alert(data.message || 'Payment initiation failed.');
-    }
-
-    sessionStorage.setItem('pendingBooking', JSON.stringify({
-      seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
-    }));
-
- if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
-window.PhonePeCheckout.transact({
-  tokenUrl: data.redirectUrl,
-  callback: function (response) {
-    console.log("📦 PhonePe response:", response);
-    // No need to handle CONCLUDED here in REDIRECT mode
-  },
-  type: "REDIRECT"
-});
-
-
-} else {
-  alert("PhonePe SDK not loaded");
-}
-  } catch (err) {
-    console.error(err);
-    alert('Payment or booking failed.');
+  if (!res.ok || !data.redirectUrl) {
+    return alert(data.message || 'Payment initiation failed.');
   }
+
+  sessionStorage.setItem('pendingBooking', JSON.stringify({
+    seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
+  }));
+
+  // ⚠️ Show warning UI
+  const warningEl = document.getElementById('payment-warning');
+  if (warningEl) {
+    warningEl.style.display = 'block';
+  }
+
+  // 🚫 Disable interaction and add beforeunload warning
+  document.body.style.pointerEvents = 'none';
+  window.onbeforeunload = () => "Please do not refresh or go back during the payment process.";
+
+  // ✅ Redirect to PhonePe
+  if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
+    window.PhonePeCheckout.transact({
+      tokenUrl: data.redirectUrl,
+      callback: function (response) {
+        console.log("📦 PhonePe response:", response);
+      },
+      type: "REDIRECT"
+    });
+  } else {
+    alert("PhonePe SDK not loaded");
+  }
+
+} catch (err) {
+  console.error(err);
+  alert('Payment or booking failed.');
+}
+
 });
 
 [startDateInput, durationInput, shiftInput].forEach(input => {

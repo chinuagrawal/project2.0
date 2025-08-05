@@ -205,6 +205,20 @@
   border: none;
   border-top: 1px solid #ccc;
 }
+.loader {
+    margin: 10px auto;
+    border: 6px solid #eee;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
     @media(max-width: 768px){
       .mai
@@ -257,9 +271,16 @@
         <label><input type="radio" name="paymentMode" value="online" checked> Pay Online</label>
         <label><input type="radio" name="paymentMode" value="cash"> Pay Cash at Library</label>
       </div>
+      
 
       <button id="book-btn">Book Seat</button>
     </div>
+
+      <div id="payment-warning" style="display: none; text-align: center; margin-top: 20px;">
+  <h2>⚠️ Please do not press back or close this tab</h2>
+  <p>We are redirecting you to PhonePe for secure payment...</p>
+  <div class="loader"></div>
+  </div>
 
     <div class="legend">
       <h3>Legend</h3>
