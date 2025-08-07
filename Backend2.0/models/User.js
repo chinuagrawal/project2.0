@@ -8,6 +8,19 @@ const userSchema = new mongoose.Schema({
   email:     { type: String, required: true, unique: true },
   password:  { type: String, required: true },
   role:      { type: String, enum: ['user', 'admin'], default: 'user' }, // ✅ NEW
+  customPricing: {
+    am: Number,
+    pm: Number,
+    full: Number,
+    offers: [
+      {
+        duration: Number,
+        discount: Number
+      }
+    ],
+    paymentGatewayFeePercent: Number,
+    convenienceFee: Number
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
