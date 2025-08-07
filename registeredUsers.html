@@ -113,6 +113,8 @@
         <th>Email</th>
         <th>Role</th>
         <th>Registered On</th>
+        <th>Actions</th>
+
       </tr>
     </thead>
     <tbody>
@@ -121,55 +123,68 @@
   </table>
 
   <script>
+  async function deleteUser(userId, btn) {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+
+    try {
+      const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/users/${userId}`, {
+        method: 'DELETE'
+      });
+
+      if (res.ok) {
+        // Remove the row from the table
+        const row = btn.closest('tr');
+        row.remove();
+        alert('✅ User deleted');
+      } else {
+        alert('❌ Failed to delete user');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Error deleting user');
+    }
+  }
+
   fetch('https://kanha-backend-yfx1.onrender.com/api/users')
     .then(response => response.json())
     .then(users => {
-      // Sort users by createdAt descending (newest first)
-      users.sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0);
-        const dateB = new Date(b.createdAt || 0);
-        return dateB - dateA;
-      });
+      users.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
       const tbody = document.querySelector('#users-table tbody');
       users.forEach((user, i) => {
-        const createdAt = user.createdAt ? new Date(user.createdAt) : null;
-        
+        const createdAt = new Date(user.createdAt || 0);
+        const dateStr = !isNaN(createdAt) ? createdAt.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }) : 'N/A';
 
+        const phone = user.mobile || '';
+        const whatsappLink = `https://wa.me/91${phone}`;
+        const callLink = `tel:${phone}`;
+        const smsLink = `sms:${phone}`;
 
-          const dateStr = createdAt && !isNaN(createdAt.getTime())
-  ? createdAt.toLocaleString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    })
-  : 'N/A';
-
-     const tr = document.createElement('tr');
-const phone = user.mobile || '';
-
-// Phone actions
-const whatsappLink = `https://wa.me/91${phone}`;
-const callLink = `tel:${phone}`;
-const smsLink = `sms:${phone}`;
-
-tr.innerHTML = `
-  <td data-label="#">${i + 1}</td>
-  <td data-label="Name">${user.firstName} ${user.lastName}</td>
-  <td data-label="Gender">${user.gender}</td>
-  <td data-label="Mobile">
-    ${phone}<br/>
-    <a href="${whatsappLink}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:8px;"></i></a>
-    <a href="${callLink}" title="Call"><i class="fas fa-phone" style="color:#2c3e50; margin-right:8px;"></i></a>
-    <a href="${smsLink}" title="SMS"><i class="fas fa-comment-dots" style="color:#007bff;"></i></a>
-  </td>
-  <td data-label="Email">${user.email}</td>
-  <td data-label="Role">${user.role}</td>
-  <td data-label="Registered On">${dateStr}</td>
-`;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="#">${i + 1}</td>
+          <td data-label="Name">${user.firstName} ${user.lastName}</td>
+          <td data-label="Gender">${user.gender}</td>
+          <td data-label="Mobile">
+            ${phone}<br/>
+            <a href="${whatsappLink}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp" style="color:#25D366; margin-right:8px;"></i></a>
+            <a href="${callLink}" title="Call"><i class="fas fa-phone" style="color:#2c3e50; margin-right:8px;"></i></a>
+            <a href="${smsLink}" title="SMS"><i class="fas fa-comment-dots" style="color:#007bff;"></i></a>
+          </td>
+          <td data-label="Email">${user.email}</td>
+          <td data-label="Role">${user.role}</td>
+          <td data-label="Registered On">${dateStr}</td>
+          <td data-label="Actions">
+            <button onclick="deleteUser('${user._id}', this)">🗑️ Delete</button>
+          </td>
+        `;
         tbody.appendChild(tr);
       });
     })
