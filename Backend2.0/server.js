@@ -190,7 +190,7 @@ if (user?.customPricing) {
     await PendingBooking.create({
   txnId: merchantTransactionId,
   email,
-  amount,
+  amount: finalAmount * 100,
   status: 'pending',
   seatId,
   startDate,

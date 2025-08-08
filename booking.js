@@ -81,25 +81,31 @@ async function updateAmount() {
     return;
   }
 
- let basePrice;
-const userData = localStorage.getItem('user');
-const user = userData ? JSON.parse(userData) : null;
+  let basePrice;
+  const userData = localStorage.getItem('user');
+  const user = userData ? JSON.parse(userData) : null;
 
-if (user?.customPricing && user.customPricing[shift]) {
-  basePrice = user.customPricing[shift];
-} else {
-  basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
-}
-console.log("User custom pricing:", user?.customPricing);
+  if (user?.customPricing && user.customPricing[shift]) {
+    basePrice = user.customPricing[shift];
+  } else {
+    basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
+  }
 
   const discount = getDiscount(duration);
+
+  // ✅ Detect payment mode
+  const paymentMode = document.querySelector('input[name="paymentMode"]:checked')?.value || "online";
+
+  // ✅ If cash, PG fee is 0 and convenience is 0
+  const pgPercent = paymentMode === 'cash' ? 0 : priceSettings.paymentGatewayFeePercent;
+  const convenienceFee =  priceSettings.convenienceFee;
 
   const { subtotal, pgFee, convenience, total } = getTotalAmount(
     basePrice,
     duration,
     discount,
-    priceSettings.paymentGatewayFeePercent,
-    priceSettings.convenienceFee
+    pgPercent,
+    convenienceFee
   );
 
   amountDisplay.innerHTML = `
@@ -108,12 +114,13 @@ console.log("User custom pricing:", user?.customPricing);
       <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
       <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
       <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
-      <div><span>PG Fee (${priceSettings.paymentGatewayFeePercent}%)</span> <span>+ ₹${pgFee}</span></div>
+      <div><span>PG Fee (${pgPercent}%)</span> <span>+ ₹${pgFee}</span></div>
       <hr>
       <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
     </div>
   `;
 }
+
 
 
 
@@ -216,30 +223,46 @@ const startDate = startDateInput.value;
   if (!months || isNaN(months)) return alert('Invalid duration selected.');
 
   const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
+if (paymentMode === 'cash') {
+  try {
+    if (!priceSettings) await fetchPrices();
 
-  if (paymentMode === 'cash') {
-    try {
-      const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
-        method: 'POST',
-
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || 'Booking failed.');
-      } else {
-        alert('Cash booking request submitted. Please pay to Bindal E-mitra ,contact 9828130420.');
-        window.location.href = `index.html?success=1&cash=1`;
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Cash booking request failed.');
+    let basePrice;
+    if (user?.customPricing && user.customPricing[shift]) {
+      basePrice = user.customPricing[shift];
+    } else {
+      basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
     }
-    return;
+
+    const discount = getDiscount(duration);
+
+    // ✅ Cash booking: no PG fee, no convenience fee
+    let amount = basePrice * duration - discount ;
+
+    // OPTIONAL: If you want cash to be ₹100 more than online
+    
+
+    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration, amount })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || 'Booking failed.');
+    } else {
+      alert(`Cash booking request submitted for ₹${amount}. Please pay to Bindal E-mitra, contact 9828130420.`);
+      window.location.href = `index.html?success=1&cash=1`;
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Cash booking request failed.');
   }
- 
+  return;
+}
+
   // 🟣 Online booking via PhonePe
   if (!priceSettings) await fetchPrices();
 let basePrice;
@@ -341,6 +364,11 @@ window.onload = async () => {
     startDateInput.value = today;
     await fetchBookings();
   }
+
+
+  document.querySelectorAll('input[name="paymentMode"]').forEach(radio => {
+  radio.addEventListener('change', updateAmount);
+});
 
   await updateAmount();
 };
