@@ -98,7 +98,7 @@ async function updateAmount() {
 
   // ✅ If cash, PG fee is 0 and convenience is 0
   const pgPercent = paymentMode === 'cash' ? 0 : priceSettings.paymentGatewayFeePercent;
-  const convenienceFee =  priceSettings.convenienceFee;
+  const convenienceFee = 'cash' ? 100 : priceSettings.convenienceFee;
 
   const { subtotal, pgFee, convenience, total } = getTotalAmount(
     basePrice,
@@ -237,7 +237,7 @@ if (paymentMode === 'cash') {
     const discount = getDiscount(duration);
 
     // ✅ Cash booking: no PG fee, no convenience fee
-    let amount = basePrice * duration - discount ;
+    let amount = basePrice * duration - discount +100; // ₹100 convenience fee for cash bookings;
 
     // OPTIONAL: If you want cash to be ₹100 more than online
     
