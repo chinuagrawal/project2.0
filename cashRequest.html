@@ -104,6 +104,11 @@
 </head>
 <body>
   <h1>Library Admin Panel - Cash Bookings</h1>
+<div style="text-align: right; margin-bottom: 10px;">
+  <button id="clearPendingBtn" style="background:red;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;">
+    Clear All Pending Bookings
+  </button>
+</div>
 
   <table>
     <thead>
@@ -120,6 +125,26 @@
 
   </table>
   <script>
+
+    document.getElementById('clearPendingBtn').addEventListener('click', async () => {
+  if (confirm("Are you sure you want to delete ALL pending bookings? This action cannot be undone.")) {
+    try {
+      const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/bookings/clear-pending', {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ Deleted ${data.deletedCount} pending bookings`);
+        location.reload();
+      } else {
+        alert('❌ Failed to clear pending bookings');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('⚠️ Error connecting to server');
+    }
+  }
+});
 
      const user = JSON.parse(localStorage.getItem("user"));
     if (!user || user.role !== "admin") {
