@@ -270,7 +270,7 @@ if (user?.customPricing) {
   rate = global[shift];
 }
 
-const amount = rate * months +100; // ₹100 convenience fee for cash bookings
+const amount = rate * months;     // ₹100 convenience fee for cash bookings
 
 
   const dates = [];

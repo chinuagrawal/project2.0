@@ -96,9 +96,9 @@ async function updateAmount() {
   // ✅ Detect payment mode
   const paymentMode = document.querySelector('input[name="paymentMode"]:checked')?.value || "online";
 
-  // ✅ If cash, PG fee is 0 and convenience is 0
+  // ✅ For cash: PG fee = 0, Convenience fee = 100
   const pgPercent = paymentMode === 'cash' ? 0 : priceSettings.paymentGatewayFeePercent;
-  const convenienceFee = 'cash' ? 100 : priceSettings.convenienceFee;
+  const convenienceFee = paymentMode === 'cash' ? 100 : priceSettings.convenienceFee;
 
   const { subtotal, pgFee, convenience, total } = getTotalAmount(
     basePrice,
