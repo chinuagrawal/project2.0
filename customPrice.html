@@ -5,102 +5,132 @@
   <title>Custom Pricing - Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      padding: 30px 10px;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #f6f9fc, #e9f0f5);
+      margin: 0;
+      padding: 20px;
+      color: #2c3e50;
     }
 
     h2 {
       text-align: center;
-      color: #2c3e50;
-      margin-bottom: 20px;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      font-weight: 600;
+      color: #34495e;
+    }
+
+    .message {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 500;
+      font-size: 14px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-radius: 10px;
       overflow: hidden;
     }
 
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-    }
-
-    th {
-      background-color: #2c3e50;
+    thead {
+      background: #4a90e2;
       color: white;
     }
 
-    input {
-      width: 80px;
-      padding: 5px;
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
       font-size: 14px;
     }
 
+    tbody tr {
+      border-bottom: 1px solid #f1f1f1;
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: #f9fbfd;
+    }
+
+    input {
+      width: 70px;
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #4a90e2;
+      box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+      outline: none;
+    }
+
     button {
-      padding: 6px 10px;
+      padding: 8px 12px;
       font-size: 13px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
-      background-color: #28a745;
+      background-color: #4a90e2;
       color: white;
+      transition: background 0.2s ease;
     }
 
-    .message {
-      text-align: center;
-      margin-top: 10px;
-      font-weight: bold;
+    button:hover {
+      background-color: #3b78c4;
     }
 
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
+      table {
+    transform: scale(0.85); /* zoom out */
+    transform-origin: top left;
+    width: 100%; /* keep it filling horizontally */
+  }
+
+      thead {
+        display: none;
       }
 
       tr {
-        margin-bottom: 20px;
         background: white;
+        margin-bottom: 15px;
         border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        padding: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        padding: 12px;
       }
 
       td {
-        position: relative;
-        padding-left: 50%;
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border: none;
       }
 
       td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        top: 12px;
-        font-weight: bold;
+        font-weight: 600;
         color: #555;
-        font-size: 13px;
-      }
-
-      th {
-        display: none;
       }
 
       input {
-        width: 100%;
+        width: 100px;
       }
     }
   </style>
 </head>
 <body>
 
-<h2>Custom Pricing for Users</h2>
+<h2><i class="fas fa-tags"></i> Custom Pricing for Users</h2>
 <div class="message" id="msg"></div>
 
 <table id="users-table">
@@ -120,83 +150,90 @@
 </table>
 
 <script>
-const API_BASE = 'https://kanha-backend-yfx1.onrender.com';
-
-async function fetchUsers() {
-  try {
-    const res = await fetch(`${API_BASE}/api/users`);
-    const users = await res.json();
-    const tbody = document.querySelector('#users-table tbody');
-
-    users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    users.forEach((user, index) => {
-      const tr = document.createElement('tr');
-
-      const am = user.customPricing?.am ?? '';
-      const pm = user.customPricing?.pm ?? '';
-      const full = user.customPricing?.full ?? '';
-
-      tr.innerHTML = `
-        <td data-label="#">${index + 1}</td>
-        <td data-label="Name">${user.firstName} ${user.lastName}</td>
-        <td data-label="Email">${user.email}</td>
-        <td data-label="Mobile">${user.mobile}</td>
-        <td data-label="AM"><input type="number" value="${am}" class="am" /></td>
-        <td data-label="PM"><input type="number" value="${pm}" class="pm" /></td>
-        <td data-label="Full"><input type="number" value="${full}" class="full" /></td>
-        <td><button onclick="updatePricing('${user.email}', this)">Update</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-  } catch (err) {
-    console.error('Error fetching users:', err);
-    document.getElementById('msg').innerText = 'Failed to load users.';
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || user.role !== "admin") {
+    alert("Access denied! Admins only.");
+    window.location.href = "login.html";
   }
-}
 
-async function updatePricing(email, button) {
-  const row = button.closest('tr');
-  const am = parseInt(row.querySelector('.am').value) || 0;
-  const pm = parseInt(row.querySelector('.pm').value) || 0;
-  const full = parseInt(row.querySelector('.full').value) || 0;
+  const API_BASE = 'https://kanha-backend-yfx1.onrender.com';
 
-  const payload = {
-    email,
-    pricing: { am, pm, full }
-  };
+  async function fetchUsers() {
+    try {
+      const res = await fetch(`${API_BASE}/api/users`);
+      const users = await res.json();
+      const tbody = document.querySelector('#users-table tbody');
 
-  button.disabled = true;
-  button.innerText = 'Saving...';
+      users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  try {
-    const res = await fetch(`${API_BASE}/api/user-custom-price`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+      users.forEach((user, index) => {
+        const tr = document.createElement('tr');
 
-    const data = await res.json();
-    const msg = document.getElementById('msg');
-    if (data.success) {
-      msg.innerText = `Updated pricing for ${email}`;
-      msg.style.color = 'green';
-    } else {
-      msg.innerText = data.message || 'Failed to update';
-      msg.style.color = 'red';
+        const am = user.customPricing?.am ?? '';
+        const pm = user.customPricing?.pm ?? '';
+        const full = user.customPricing?.full ?? '';
+
+        tr.innerHTML = `
+          <td data-label="#">${index + 1}</td>
+          <td data-label="Name">${user.firstName} ${user.lastName}</td>
+          <td data-label="Email">${user.email}</td>
+          <td data-label="Mobile">${user.mobile}</td>
+          <td data-label="AM"><input type="number" value="${am}" class="am" /></td>
+          <td data-label="PM"><input type="number" value="${pm}" class="pm" /></td>
+          <td data-label="Full"><input type="number" value="${full}" class="full" /></td>
+          <td data-label="Update"><button onclick="updatePricing('${user.email}', this)">Update</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      document.getElementById('msg').innerText = 'Failed to load users.';
+      document.getElementById('msg').style.color = 'red';
     }
-  } catch (err) {
-    console.error(err);
-    document.getElementById('msg').innerText = 'Server error';
-    document.getElementById('msg').style.color = 'red';
   }
 
-  button.disabled = false;
-  button.innerText = 'Update';
-}
+  async function updatePricing(email, button) {
+    const row = button.closest('tr');
+    const am = parseInt(row.querySelector('.am').value) || 0;
+    const pm = parseInt(row.querySelector('.pm').value) || 0;
+    const full = parseInt(row.querySelector('.full').value) || 0;
 
-fetchUsers();
+    const payload = {
+      email,
+      pricing: { am, pm, full }
+    };
+
+    button.disabled = true;
+    button.innerText = 'Saving...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/user-custom-price`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      const msg = document.getElementById('msg');
+      if (data.success) {
+        msg.innerText = `✅ Updated pricing for ${email}`;
+        msg.style.color = 'green';
+      } else {
+        msg.innerText = data.message || 'Failed to update';
+        msg.style.color = 'red';
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('msg').innerText = 'Server error';
+      document.getElementById('msg').style.color = 'red';
+    }
+
+    button.disabled = false;
+    button.innerText = 'Update';
+  }
+
+  fetchUsers();
 </script>
 
 </body>

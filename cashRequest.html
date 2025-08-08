@@ -120,6 +120,13 @@
 
   </table>
   <script>
+
+     const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "admin") {
+      alert("Access denied! Admins only.");
+      window.location.href = "login.html";
+    }
+
     async function fetchPendingBookings() {
   try {
     const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/pending-bookings');

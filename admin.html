@@ -197,6 +197,8 @@ iframe {
     <a onclick="loadCashRequestPage()">Cash Requests</a>
     <a onclick="loadRecentBookings()">Recent Bookings</a>
     <a onclick="loadregisteredUsers()">Registered Users</a>
+    <a onclick="loadregpriceChange()">Price</a>
+    <a onclick="loadregisteredUsers()">Custom Price</a>
     <a onclick="logout()">Logout</a>
   </div>
 
@@ -244,6 +246,20 @@ iframe {
       mainContent.appendChild(iframe);
     }
 
+    function loadregisteredUsers() {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'registeredUsers.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
+    }
+    function loadpriceChange() {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'pricechange.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
+    }
     function loadregisteredUsers() {
       const iframe = document.createElement('iframe');
       iframe.src = 'registeredUsers.html';

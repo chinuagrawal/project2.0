@@ -1,5 +1,118 @@
-<h2>Update Price & Offers</h2>
-<form id="price-form">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Price Change</title>
+
+  <style>
+  
+  body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #f0f4f8, #e0ecf8);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+form {
+  background: #fff;
+  padding: 25px;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h3 {
+  color: #444;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+  color: #555;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="number"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 4px rgba(74,144,226,0.3);
+}
+
+button {
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: inline-block;
+}
+
+button:hover {
+  background: #3b78c4;
+}
+
+button[type="button"] {
+  background: #6c63ff;
+  margin-bottom: 12px;
+}
+
+#offer-container div {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#offer-container input {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  form {
+    padding: 20px;
+    margin: 10px;
+  }
+  #offer-container div {
+    flex-direction: column;
+    gap: 8px;
+  }
+  button {
+    width: 100%;
+  }
+}
+
+</style>
+
+</head>
+<body>
+  <form id="price-form">
+  <h2>Update Price & Offers</h2>
   <label>Morning Shift Price (AM):</label>
   <input type="number" id="am" /><br />
   
@@ -29,6 +142,13 @@
 </form>
 
 <script>
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "admin") {
+      alert("Access denied! Admins only.");
+      window.location.href = "login.html";
+    }
+
   function addOffer() {
     const div = document.createElement('div');
     div.innerHTML = `
@@ -80,3 +200,6 @@
     });
   };
 </script>
+
+</body>
+</html>
