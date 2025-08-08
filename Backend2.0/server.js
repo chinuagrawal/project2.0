@@ -190,7 +190,7 @@ if (user?.customPricing) {
     await PendingBooking.create({
   txnId: merchantTransactionId,
   email,
-  amount: finalAmount * 100,
+  amount,
   status: 'pending',
   seatId,
   startDate,
@@ -270,7 +270,7 @@ if (user?.customPricing) {
   rate = global[shift];
 }
 
-const amount = rate * months;     // ₹100 convenience fee for cash bookings
+const amount = rate * months;
 
 
   const dates = [];
