@@ -91,37 +91,45 @@
 
     /* Mobile Responsive */
     @media (max-width: 768px) {
-      table {
-    transform: scale(0.85); /* zoom out */
-    transform-origin: top left;
-    width: 100%; /* keep it filling horizontally */
-  }
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
 
-      thead {
-        display: none;
-      }
+    thead {
+      display: none;
+    }
 
-      tr {
-        background: white;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        padding: 12px;
-      }
+    tr {
+      margin-bottom: 15px;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+      padding: 10px;
+    }
 
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border: none;
-      }
+    td {
+      position: relative;
+      padding-left: 55%;
+      text-align: left;
+      border: none;
+      border-bottom: 1px solid #f0f0f0;
+    }
 
-      td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #555;
-      }
+    td:last-child {
+      border-bottom: none;
+    }
 
+    td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 15px;
+      top: 12px;
+      font-weight: bold;
+      color: #555;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+  
       input {
         width: 100px;
       }

@@ -132,59 +132,82 @@ iframe {
       z-index: 999;
     }
 
-    /* ✅ Responsive Styles for Mobile Devices */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-        
-      }
+   /* ✅ Responsive Styles for Mobile Devices */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
 
-      .hamburger {
-        display: block;
-      }
+  /* Hamburger Button */
+  .hamburger {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: #1e1e2f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-      .sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: column;
-        display: none;
-        padding: 10px 0;
-        border-radius: 0;
-        box-shadow: none;
-      }
+  /* Sidebar Hidden by Default (off screen to the left) */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -220px;
+    height: 100%;
+    width: 220px;
+    background: #1e1e2f;
+    padding-top: 20px;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    flex-direction: column;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+  }
 
-      .sidebar.show {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
+  /* Sidebar Visible */
+  .sidebar.show {
+    left: 0;
+  }
 
-      .sidebar h2 {
-        flex: 100%;
-        font-size: 20px;
-        margin-bottom: 10px;
-      }
+  /* Sidebar Title */
+  .sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    padding-left: 15px;
+    color: white;
+  }
 
-      .sidebar a {
-        margin: 5px;
-        padding: 10px 15px;
-        font-size: 14px;
-        border-radius: 6px;
-      }
+  /* Sidebar Links */
+  .sidebar a {
+    display: block;
+    margin: 5px 0;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+  }
 
-      
-.content {
+  /* Content */
+  .content {
     margin: 10px;
     border-radius: 12px;
-}
-      .welcome-container h1 {
-        font-size: 32px;
-      }
+  }
 
-      .welcome-container p {
-        font-size: 16px;
-      }
-    }
+  /* Welcome Section */
+  .welcome-container h1 {
+    font-size: 32px;
+  }
+
+  .welcome-container p {
+    font-size: 16px;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -192,13 +215,15 @@ iframe {
   <button class="hamburger" onclick="toggleSidebar()">☰ Menu</button>
 
   <div class="sidebar" id="sidebar">
+    <br>
+    <br>
     <h2>Admin</h2>
     <a onclick="loadSeatStatus()">Seat Status</a>
     <a onclick="loadCashRequestPage()">Cash Requests</a>
     <a onclick="loadRecentBookings()">Recent Bookings</a>
     <a onclick="loadregisteredUsers()">Registered Users</a>
-    <a onclick="loadregpriceChange()">Price</a>
-    <a onclick="loadregisteredUsers()">Custom Price</a>
+    <a onclick="loadpriceChange()">Price</a>
+    <a onclick="loadcustomPrice()">Custom Price</a>
     <a onclick="logout()">Logout</a>
   </div>
 
@@ -218,9 +243,18 @@ iframe {
     }
 
     function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("show");
+  document.getElementById("sidebar").classList.toggle("show");
+}
+
+// Close sidebar after clicking any menu item (mobile only)
+document.querySelectorAll(".sidebar a").forEach(link => {
+  link.addEventListener("click", () => {
+    if (window.innerWidth <= 768) {
+      document.getElementById("sidebar").classList.remove("show");
     }
+  });
+});
+
 
     function loadSeatStatus() {
       const iframe = document.createElement('iframe');
@@ -260,9 +294,9 @@ iframe {
       mainContent.innerHTML = '';
       mainContent.appendChild(iframe);
     }
-    function loadregisteredUsers() {
+    function loadcustomPrice() {
       const iframe = document.createElement('iframe');
-      iframe.src = 'registeredUsers.html';
+      iframe.src = 'customPrice.html';
       const mainContent = document.getElementById('mainContent');
       mainContent.innerHTML = '';
       mainContent.appendChild(iframe);
