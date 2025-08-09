@@ -1,23 +1,5 @@
 // UPDATED booking.js (with PhonePe integration)
 
-  async function refreshUserData() {
-    const oldUser = JSON.parse(localStorage.getItem("user"));
-    if (!oldUser?.email) return;
-
-    try {
-      const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/users/me/${oldUser.email}`);
-      const user = await res.json();
-      localStorage.setItem("user", JSON.stringify(user));
-      console.log("✅ Refreshed user data");
-    } catch (err) {
-      console.error("Failed to fetch user info:", err);
-    }
-  }
-
-  // ✅ Call it on page load BEFORE booking.js runs
-  refreshUserData();
-
-
 const seatMap = document.getElementById('seat-map');
 const bookBtn = document.getElementById('book-btn');
 const startDateInput = document.getElementById('start-date');
@@ -81,17 +63,7 @@ async function updateAmount() {
     return;
   }
 
- let basePrice;
-const userData = localStorage.getItem('user');
-const user = userData ? JSON.parse(userData) : null;
-
-if (user?.customPricing && user.customPricing[shift]) {
-  basePrice = user.customPricing[shift];
-} else {
-  basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
-}
-console.log("User custom pricing:", user?.customPricing);
-
+  const basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
   const discount = getDiscount(duration);
 
   const { subtotal, pgFee, convenience, total } = getTotalAmount(
@@ -242,14 +214,7 @@ const startDate = startDateInput.value;
  
   // 🟣 Online booking via PhonePe
   if (!priceSettings) await fetchPrices();
-let basePrice;
-
-if (user?.customPricing && user.customPricing[shift]) {
-  basePrice = user.customPricing[shift];
-} else {
-  basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
-}
-
+const basePrice = shift === 'full' ? priceSettings.full : priceSettings[shift];
 const discount = getDiscount(months);
 
 const { total: amount } = getTotalAmount(
