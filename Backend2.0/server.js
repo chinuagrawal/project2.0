@@ -28,9 +28,6 @@ const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
-const customPriceRoute = require('./routes/customprice');
-app.use('/api', customPriceRoute);
-
 
 const webhookRoutes = require('./routes/webhook');
 app.use('/api/payment', webhookRoutes);
@@ -87,17 +84,6 @@ app.post('/api/prices', async (req, res) => {
 });
 
 
-// ✅ Add this GET route to support frontend fetching user info
-app.get('/api/users/me/:email', async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.params.email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 
 // Utility function: get PhonePe Access Token
@@ -155,23 +141,7 @@ app.get('/api/bookings', async (req, res) => {
 
 // routes/initiate.js or in your main route file
 app.post('/api/payment/initiate', async (req, res) => {
-  let { amount, email, seatId, shift, startDate, endDate } = req.body;
-
-const user = await User.findOne({ email });
-const months = Math.ceil(
-  (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24 * 30)
-);
-
-let finalAmount;
-if (user?.customPricing) {
-  const rate = user.customPricing[shift];
-  finalAmount = rate * months;
-} else {
-  const priceSetting = await PriceSetting.findOne();
-  const rate = priceSetting[shift];
-  finalAmount = rate * months;
-}
-
+  const { amount, email, seatId, shift, startDate, endDate } = req.body;
   const merchantTransactionId = 'TXN_' + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
@@ -198,7 +168,7 @@ if (user?.customPricing) {
     const payload = {
       merchantId,
       merchantOrderId: merchantTransactionId,
-      amount: finalAmount * 100,
+      amount: amount * 100,
       expireAfter: 1200,
       metaInfo: {
         udf1: email,
@@ -252,18 +222,8 @@ app.post('/api/payment/callback', (req, res) => {
 app.post('/api/book-cash', async (req, res) => {
   const { seatId, startDate, endDate, shift, email, duration } = req.body;
   const months = parseInt(duration);
-const user = await User.findOne({ email });
-let rate;
-
-if (user?.customPricing) {
-  rate = user.customPricing[shift];
-} else {
-  const global = await PriceSetting.findOne();
-  rate = global[shift];
-}
-
-const amount = rate * months;
-
+  const baseAmount = shift === 'full' ? 800 : 600;
+  const amount = baseAmount * months;
 
   const dates = [];
   let current = new Date(startDate);
