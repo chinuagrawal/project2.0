@@ -27,6 +27,8 @@ const Booking = require('./models/Booking');
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
+const customPriceRoute = require('./routes/customprice');
+app.use('/api', customPriceRoute);
 
 
 const webhookRoutes = require('./routes/webhook');
@@ -83,6 +85,16 @@ app.post('/api/prices', async (req, res) => {
   }
 });
 
+app.get('/api/users/me/:email', async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 
