@@ -31,10 +31,15 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests for caching
+  if (event.request.method !== 'GET') {
+    // Let non-GET requests pass through normally
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((res) => {
-        // Clone and store the response in cache
         const resClone = res.clone();
         caches.open(cacheName).then((cache) => {
           cache.put(event.request, resClone);
@@ -44,3 +49,4 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
