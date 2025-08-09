@@ -1,11 +1,11 @@
-const cacheName = 'kanha-library-cache-v3'; // ✅ update version when deploying new changes
+const cacheName = 'kanha-library-cache-v4'; // updated version
+
 const assetsToCache = [
   '/',
-  
-  // Add more assets if needed (JS, images, etc.)
+  // Add more static assets here (CSS, JS, images, etc.)
 ];
 
-// Install: cache the essential files
+// Install: cache essential files
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
@@ -31,15 +31,28 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests for caching
-  if (event.request.method !== 'GET') {
-    // Let non-GET requests pass through normally
-    return;
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
+  // Skip caching Google Maps & tracking scripts
+  const url = event.request.url;
+  if (
+    url.includes('google.com/maps') ||
+    url.includes('googletagmanager.com') ||
+    url.includes('googlesyndication.com') ||
+    url.includes('cloudflareinsights.com')
+  ) {
+    return; // Let them load normally without caching
   }
 
   event.respondWith(
     fetch(event.request)
       .then((res) => {
+        // Only cache valid 200 OK responses of type 'basic'
+        if (!res || res.status !== 200 || res.type !== 'basic') {
+          return res;
+        }
+
         const resClone = res.clone();
         caches.open(cacheName).then((cache) => {
           cache.put(event.request, resClone);
@@ -49,5 +62,3 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request))
   );
 });
-
-if (event.request.url.includes("google.com/maps")) return; // skip caching maps
