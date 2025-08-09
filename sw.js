@@ -50,3 +50,4 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+if (event.request.url.includes("google.com/maps")) return; // skip caching maps
