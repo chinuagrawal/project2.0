@@ -34,6 +34,12 @@ app.use('/api', customPriceRoute);
 const webhookRoutes = require('./routes/webhook');
 app.use('/api/payment', webhookRoutes);
 
+const deleteUserRoute = require('./routes/deleteuser');
+app.use('/api', deleteUserRoute);
+
+
+const pendingDeleteRoutes = require('./routes/deletepending');
+app.use('/api', pendingDeleteRoutes);
 
 const extendRoutes = require('./routes/extend');
 const PendingBooking = require('./models/PendingBooking');
