@@ -1,63 +1,27 @@
-const express = require('express');
-const crypto = require('crypto');
+// webhook.js
+const express = require("express");
 const router = express.Router();
 
-// Replace with actual credentials set on PhonePe dashboard
-const PHONEPE_USERNAME = 'chinu';
-const PHONEPE_PASSWORD = 'chinu123';
+router.use(express.json());
 
-// SHA256(username:password)
-const expectedAuth = crypto
-  .createHash('sha256')
-  .update(`${PHONEPE_USERNAME}:${PHONEPE_PASSWORD}`)
-  .digest('hex');
+router.post("/phonepe/webhook", (req, res) => {
+  console.log("📩 Webhook Received:", JSON.stringify(req.body, null, 2));
 
-// Route to handle PhonePe webhooks
-router.post('/webhook', express.json({ limit: '1mb' }), async (req, res) => {
-  try {
-    const receivedAuth = req.headers['authorization'];
-
-    if (!receivedAuth) {
-      console.warn('[Webhook] Missing Authorization header');
-      return res.status(401).send('Unauthorized');
-    }
-
-    if (receivedAuth !== expectedAuth) {
-      console.warn('[Webhook] Invalid Authorization header');
-      return res.status(401).send('Unauthorized');
-    }
-
-    const { event, payload } = req.body;
-
-    console.log('[Webhook] Event received:', event);
-    console.log('[Webhook] Payload:', payload);
-
-    // Only process confirmed payments
-    if (event === 'checkout.order.completed' && payload?.state === 'COMPLETED') {
-      const { merchantOrderId, amount, paymentDetails } = payload;
-      const txnId = paymentDetails?.[0]?.transactionId;
-
-      // TODO: Update booking in DB or confirm pending transaction here
-      console.log(`[Webhook] Payment SUCCESS: Order ${merchantOrderId}, Txn ID: ${txnId}, Amount: ${amount}`);
-      // Example: mark as paid
-      // await Booking.updateOne({ txnId: merchantOrderId }, { $set: { status: 'paid' } });
-
-      return res.status(200).send('Webhook received and processed');
-    }
-
-    // You may handle failed cases too
-    if (event === 'checkout.order.failed' || payload?.state === 'FAILED') {
-      console.warn(`[Webhook] Payment FAILED: ${payload?.merchantOrderId}`);
-      // Optional: Log failed transaction, update status
-      return res.status(200).send('Payment failed');
-    }
-
-    console.log('[Webhook] Unhandled event or incomplete state');
-    res.status(200).send('Ignored');
-  } catch (error) {
-    console.error('[Webhook] Error processing webhook:', error.message);
-    res.status(500).send('Internal Server Error');
+  if (!req.body.payload || !req.body.payload.state) {
+    return res.status(400).json({ error: "Invalid payload" });
   }
+
+  const paymentState = req.body.payload.state;
+  const txnId = req.body.payload.transactionId;
+
+  if (paymentState === "COMPLETED") {
+    console.log(`✅ Payment successful: ${txnId}`);
+    // TODO: Call your booking confirmation logic here
+  } else if (paymentState === "FAILED") {
+    console.log(`❌ Payment failed: ${txnId}`);
+  }
+
+  res.status(200).send("OK");
 });
 
 module.exports = router;
