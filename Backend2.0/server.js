@@ -190,6 +190,7 @@ app.post('/api/payment/initiate', async (req, res) => {
       metaInfo: {
         udf1: email,
       },
+      callbackUrl,
       paymentFlow: {
         type: 'PG_CHECKOUT',
         redirectMode: 'AUTO',
