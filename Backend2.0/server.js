@@ -103,6 +103,14 @@ app.get('/api/users/me/:email', async (req, res) => {
   }
 });
 
+["MONGO_URI", "WEBHOOK_USER", "WEBHOOK_PASS", "PHONEPE_CLIENT_ID", "PHONEPE_CLIENT_SECRET", "PHONEPE_MERCHANT_ID", "PHONEPE_BASE_URL", "PHONEPE_REDIRECT_URL", "BASE_URL"]
+.forEach(key => {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
 app.post("/phonepe/webhook", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
