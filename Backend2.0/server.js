@@ -163,25 +163,25 @@ app.post('/api/payment/initiate', async (req, res) => {
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
   const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
+  const callbackUrl = "https://kanha-backend-yfx1.onrender.com/phonepe/webhook"; // ✅ Your webhook URL
 
   try {
-    // ✅ Save pending booking
+    // Save pending booking
     await PendingBooking.create({
-  txnId: merchantTransactionId,
-  email,
-  amount,
-  status: 'pending',
-  seatId,
-  startDate,
-  endDate,
-  shift
-});
+      txnId: merchantTransactionId,
+      email,
+      amount,
+      status: 'pending',
+      seatId,
+      startDate,
+      endDate,
+      shift
+    });
 
-
-    // ✅ Get PhonePe token
+    // Get PhonePe token
     const accessToken = await getPhonePeAccessToken();
 
-    // ✅ Create payload
+    // Create payload
     const payload = {
       merchantId,
       merchantOrderId: merchantTransactionId,
@@ -195,6 +195,7 @@ app.post('/api/payment/initiate', async (req, res) => {
         redirectMode: 'AUTO',
         merchantUrls: {
           redirectUrl,
+          callbackUrl // ✅ Now PhonePe will send webhooks here
         },
       },
     };
@@ -223,8 +224,6 @@ app.post('/api/payment/initiate', async (req, res) => {
     res.status(500).json({ message: 'PhonePe API error', details: err.response?.data || err.message });
   }
 });
-
-
 
 module.exports = router;
 
