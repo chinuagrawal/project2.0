@@ -30,7 +30,7 @@ app.use('/api', authRoutes);
 const customPriceRoute = require('./routes/customprice');
 app.use('/api', customPriceRoute);
 
-const webhookRoutes = require("./webhook");
+const webhookRoutes = require("./routes/webhook");
 app.use("/", webhookRoutes);
 
 const deleteUserRoute = require('./routes/deleteuser');
