@@ -12,7 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kanha Library Seat Booking - best library in kota</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="./index.css?v=1.2.3">
+  <link rel="stylesheet" href="./index.css?v=1.2.5">
   
 
   <!-- Google tag (gtag.js) -->
@@ -49,7 +49,10 @@
 
   <span class="credit-text">Website made by Chinmay Agrawal | contact no. 7976769514</span>
   <h3 id="welcome-message" class="welcome-text"></h3>
-
+<section id="my-bookings" style="display:none; padding: 20px;">
+      <h2>📚 My Booked Seats</h2>
+      <div id="booking-list" class="booking-list"></div>
+    </section>
   <section class="home" id="home">
     <div class="carousel">
       <div class="carousel-images">
@@ -74,10 +77,7 @@
     <button id="close-modal">OK</button>
   </div>
 </div>
-    <section id="my-bookings" style="display:none; padding: 20px;">
-      <h2>📚 My Booked Seats</h2>
-      <div id="booking-list" class="booking-list"></div>
-    </section>
+    
   
 
 
@@ -112,16 +112,83 @@
 </div>
 
     <button class="book-now-btn" type="button">Book Now</button>
-
-   
-    
-   </section>
-
-<section>
- <button id="installBtn" style="display: none;" class="install-app-btn">
+<br><br>
+    <button id="installBtn" style="display: none;" class="install-app-btn">
   <img src="icon-192.png" alt="App Icon" class="install-icon">
   Download KanhaLibrary App
 </button>
+<div class="review-widget_net" data-uuid="9f99bcf2-833b-446c-89d2-1dab467bc7d8" data-template="10" data-lang="en" data-theme="light"></div><script src="https://grwapi.net/widget.min.js"></script>
+    
+   </section>
+
+
+<section>
+<iframe src='https://widgets.sociablekit.com/google-reviews/iframe/25586921' frameborder='0' width='100%' height='400'></iframe>
+</section>
+<div id="map" style="display:none;"></div>
+
+<div id="google-reviews-container">
+  <div id="google-reviews">Loading reviews...</div>
+  <a id="write-review-btn" class="review-button" target="_blank">Write a Review</a>
+</div>
+
+<script>
+let currentSlide = 0;
+let totalSlides = 0;
+
+function initMap() {
+  const placeId = "ChIJNb-kHXubbzkR_7up04GFTDo";
+  const service = new google.maps.places.PlacesService(document.getElementById("map"));
+  
+  service.getDetails(
+    {
+      placeId: placeId,
+      fields: ["name", "rating", "reviews", "url"]
+    },
+    (place, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        document.getElementById("write-review-btn").href = "https://g.page/r/Cf-7qdOBhUw6EAI/review";
+        
+        let html = `<h3>${place.name} <span>⭐ ${place.rating}</span></h3>`;
+        
+        html += `<div class="reviews-row" id="reviews-slider">`;
+        
+        const sortedReviews = place.reviews.sort((a, b) => b.time - a.time);
+        
+        sortedReviews.forEach(r => {
+          html += `
+            <div class="review">
+              <strong>${r.author_name}</strong>
+              <div class="review-stars">⭐ ${r.rating}</div>
+              <div class="review-text">${r.text}</div>
+            </div>
+          `;
+        });
+        
+        html += `</div>`;
+        
+        document.getElementById("google-reviews").innerHTML = html;
+
+        totalSlides = Math.ceil(sortedReviews.length / 3);
+        setInterval(slideReviews, 2000);
+      } else {
+        document.getElementById("google-reviews").innerHTML = "Unable to load reviews.";
+      }
+    }
+  );
+}
+
+function slideReviews() {
+  const slider = document.getElementById("reviews-slider");
+  currentSlide = (currentSlide + 1) % totalSlides;
+  slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+}
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD_Fjj7bQLrU0JU74Yab74oOBvKvztLqw&libraries=places&callback=initMap"></script>
+
+
+<section>
 
 
  <div class="owner-card">

@@ -779,6 +779,138 @@ footer {
 }
 
 
+/* 11. Reviews
+/* ========================================================================== */
+:root {
+  --primary-color: #6a11cb;
+  --secondary-color: #2575fc;
+  --accent-color: #2f7aea;
+  --accent-hover-color: #feb47b;
+  --background-dark: linear-gradient(-80deg, #12C2E9, #F64F59);
+  --background-light: #1e1e1e;
+  --text-primary: #f5f5f5;
+  --text-secondary: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --success-color: #4CAF50;
+  --danger-color: #f44336;
+  --warning-color: #ffa726;
+  --info-color: #8e44ad;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(0, 0, 0, 0.25);
+  --welcome-text-gradient: linear-gradient(100deg, #6a11cb, #2575fc);
+}
+
+#google-reviews-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  background: var(--background-dark);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-light);
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+#google-reviews-container h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+#google-reviews-container h3 span {
+  color: var(--warning-color);
+  font-size: 1.2rem;
+  margin-left: 8px;
+}
+
+/* Slider wrapper */
+.reviews-row {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
+}
+
+/* Review card */
+.review {
+  flex: 0 0 calc((100% - 40px) / 3);
+  background: #ffffff; /* White card for contrast */
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 12px var(--shadow-light);
+  transition: transform 0.3s ease;
+  color: #333; /* Dark text inside cards */
+}
+.review:hover {
+  transform: scale(1.05);
+}
+.review strong {
+  color: #333;
+  font-size: 1rem;
+}
+.review-stars {
+  color: var(--warning-color);
+  font-size: 0.9rem;
+}
+.review-text {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* Button */
+.review-button {
+  display: block; /* Make it block-level so margin auto works */
+  margin: 15px auto 0; /* Top margin 15px, auto center horizontally */
+  padding: 12px 17px; /* Smaller size */
+  background-color: var(--accent-color);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+.review-button:hover {
+  background-color: var(--accent-hover-color);
+}
+
+
+review {
+  flex: 0 0 calc((100% - 40px) / 3);
+}
+
+/* Tablet: 2 reviews per row */
+@media (max-width: 768px) {
+  .review {
+    flex: 0 0 calc((100% - 20px) / 2);
+  }
+  #google-reviews-container {
+    padding: 15px;
+  }
+}
+
+/* Mobile: 1 review per row */
+@media (max-width: 480px) {
+  .reviews-row {
+    gap: 15px;
+  }
+  .review {
+    flex: 0 0 100%;
+  }
+  #google-reviews-container {
+    padding: 12px;
+  }
+  .review-button {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 10px;
+  }
+}
+
 
 /* 10. RESPONSIVE DESIGN
 /* ========================================================================== */
