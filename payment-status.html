@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checking Payment Status...</title>
+  <title>Payment Status</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -33,45 +30,30 @@
   </style>
 </head>
 <body>
-  <h2>✅ Checking Payment Status, please wait...</h2>
+  <h2>✅ Checking Payment Status...</h2>
   <div class="spinner"></div>
 
   <script>
-
-    
-
     const urlParams = new URLSearchParams(window.location.search);
     const txnId = urlParams.get('txnId');
-    const booking = JSON.parse(sessionStorage.getItem('pendingBooking'));
 
-    if (!txnId || !booking) {
+    if (!txnId) {
       document.body.innerHTML = "<h2>❌ Missing payment details.</h2>";
     } else {
       fetch(`https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`)
         .then(res => res.json())
-        .then(async data => {
+        .then(data => {
           if (data.code === "PAYMENT_SUCCESS") {
-            // Send to backend to confirm booking
-            const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...booking,
-                payment: { phonepe_txn_id: txnId }
-              })
-            });
-
-            const result = await res.json();
-            if (res.ok) {
-              // Clear pending booking and redirect
-              sessionStorage.removeItem('pendingBooking');
-              const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}`;
-              window.location.href = `index.html${query}`;
-            } else {
-              document.body.innerHTML = `<h2>❌ Booking failed: ${result.message || 'Unknown error'}</h2>`;
-            }
+            document.body.innerHTML = `
+              <h2>✅ Payment successful!</h2>
+              <p>Your booking will appear in My Bookings shortly.</p>
+            `;
+            sessionStorage.removeItem('pendingBooking');
+            setTimeout(() => {
+  window.location.href = "index.html";
+}, 3000); // 3 seconds delay
           } else {
-            document.body.innerHTML = `<h2>❌ Payment failed or was cancelled.</h2>`;
+            document.body.innerHTML = `<h2>❌ Payment failed or cancelled.</h2>`;
           }
         })
         .catch(err => {

@@ -1,4 +1,5 @@
 // ✅ Fully Updated server.js with PhonePe V2 Integration
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,10 +11,11 @@ const app = express();
 app.get("/", (req, res) => res.send("Server is running"));
 const PORT = process.env.PORT || 3000;
 
+
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.json());
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
+
 
 
 
@@ -24,14 +26,14 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Models & Routes
 const Booking = require('./models/Booking');
+const PendingBooking = require("./models/PendingBooking");
+const client = require("./phonepeClient");
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 const customPriceRoute = require('./routes/customprice');
 app.use('/api', customPriceRoute);
 
-const webhookRoutes = require("./routes/webhook");
-app.use("/", webhookRoutes);
 
 const deleteUserRoute = require('./routes/deleteuser');
 app.use('/api', deleteUserRoute);
@@ -41,7 +43,7 @@ const pendingDeleteRoutes = require('./routes/deletepending');
 app.use('/api', pendingDeleteRoutes);
 
 const extendRoutes = require('./routes/extend');
-const PendingBooking = require('./models/PendingBooking');
+
 app.use('/api/extend', extendRoutes);
 
 
@@ -98,6 +100,61 @@ app.get('/api/users/me/:email', async (req, res) => {
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post("/phonepe/webhook", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const rawBody = req.rawBody.toString();
+
+    const callbackResponse = client.validateCallback(
+      process.env.WEBHOOK_USER,
+      process.env.WEBHOOK_PASS,
+      authHeader,
+      rawBody
+    );
+
+    if (!callbackResponse?.payload) {
+      console.warn("⚠️ Invalid webhook payload");
+      return res.status(400).send("Invalid payload");
+    }
+
+    console.log("📥 Webhook validated:", callbackResponse.type);
+    const { state, originalMerchantOrderId: txnId, paymentDetails } = callbackResponse.payload;
+
+    if (callbackResponse.type === "CHECKOUT_ORDER_COMPLETED" && state === "COMPLETED") {
+      const pending = await PendingBooking.findOne({ txnId });
+      const existingBooking = await Booking.findOne({ paymentTxnId: txnId });
+
+      if (!pending) {
+        console.log(`⚠️ No pending booking for txnId: ${txnId}`);
+      } else if (existingBooking) {
+        console.log(`ℹ️ Booking already exists for txnId: ${txnId}`);
+      } else {
+        await Booking.create({
+          seatId: pending.seatId,
+          date: pending.startDate,
+          shift: pending.shift,
+          email: pending.email,
+          paymentMode: "online",
+          status: "paid",
+          amount: pending.amount,
+          paymentTxnId: txnId,
+          transactionId: paymentDetails?.[0]?.transactionId || null,
+          paymentConfirmedVia: "webhook"
+        });
+        await PendingBooking.deleteOne({ _id: pending._id });
+        console.log(`✅ Booking confirmed for txnId: ${txnId}`);
+      }
+    } else {
+      console.log(`ℹ️ Payment not completed for txnId ${txnId}, state: ${state}`);
+    }
+
+    res.status(200).send("OK");
+  } catch (err) {
+    console.error("❌ Webhook error:", err);
+    res.status(400).send("Invalid callback");
   }
 });
 
@@ -163,7 +220,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
   const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
-  const callbackUrl = "https://kanha-backend-yfx1.onrender.com/phonepe/webhook"; // ✅ Your webhook URL
+  
 
   try {
     // Save pending booking
@@ -190,13 +247,12 @@ app.post('/api/payment/initiate', async (req, res) => {
       metaInfo: {
         udf1: email,
       },
-      callbackUrl,
+      
       paymentFlow: {
         type: 'PG_CHECKOUT',
         redirectMode: 'AUTO',
         merchantUrls: {
-          redirectUrl,
-          callbackUrl // ✅ Now PhonePe will send webhooks here
+          callbackUrl: `${process.env.BASE_URL}/api/payment/callback`
         },
       },
     };
@@ -226,7 +282,7 @@ app.post('/api/payment/initiate', async (req, res) => {
   }
 });
 
-module.exports = router;
+
 
 
 // Endpoint: Payment callback
