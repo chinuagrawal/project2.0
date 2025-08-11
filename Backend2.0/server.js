@@ -260,6 +260,7 @@ app.post('/api/payment/initiate', async (req, res) => {
         type: 'PG_CHECKOUT',
         redirectMode: 'AUTO',
         merchantUrls: {
+          redirect: `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`,
           callbackUrl: `${process.env.BASE_URL}/api/payment/callback`
         },
       },
