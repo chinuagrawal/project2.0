@@ -36,6 +36,8 @@ app.use('/api', customPriceRoute);
 const deleteUserRoute = require('./routes/deleteuser');
 app.use('/api', deleteUserRoute);
 
+const blockUserRoute = require('./routes/blockuser');
+app.use('/api', blockUserRoute);
 
 const pendingDeleteRoutes = require('./routes/deletepending');
 app.use('/api', pendingDeleteRoutes);
@@ -43,6 +45,8 @@ app.use('/api', pendingDeleteRoutes);
 const extendRoutes = require('./routes/extend');
 const PendingBooking = require('./models/PendingBooking');
 app.use('/api/extend', extendRoutes);
+
+
 
 
 

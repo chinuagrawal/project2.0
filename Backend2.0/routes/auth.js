@@ -66,6 +66,11 @@ router.post('/login', async (req, res) => {
 
     if (!user) return res.status(400).json({ message: 'User not found' });
 
+    // ✅ Check if the user is blocked
+    if (user.blocked) {
+      return res.status(403).json({ message: 'You are blocked by admin. Please contact support (8870969514).' });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ message: 'Invalid password' });
 
@@ -82,6 +87,5 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 module.exports = router;

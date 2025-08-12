@@ -85,39 +85,45 @@
     showHiddenPass('password', 'login-eye');
 
     // Handle Login Form Submission
-    document.getElementById("login-form").addEventListener("submit", async function (e) {
-      e.preventDefault();
+document.getElementById("login-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-      const loginId = document.getElementById("loginId").value.trim();
-      const password = document.getElementById("password").value;
+  const loginId = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("password").value;
 
-      try {
-        const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ loginId, password })  // ✅ send loginId
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          alert("Login successful!");
-          localStorage.setItem("user", JSON.stringify(data.user));
-          if (data.user.role === "admin") {
-            window.location.href = "admin.html";
-          } else {
-            window.location.href = "index.html";
-          }
-        } else {
-          alert(data.message || "Login failed");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Server error");
-      }
+  try {
+    const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ loginId, password }) // ✅ send loginId
     });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Login successful!");
+      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.user.role === "admin") {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    } else {
+      // ✅ Handle blocked user separately
+      if (res.status === 403 && data.message.includes("blocked")) {
+        alert("❌ " + data.message);
+      } else {
+        alert(data.message || "Login failed");
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Server error");
+  }
+});
+
   </script>
 </body>
 </html>
