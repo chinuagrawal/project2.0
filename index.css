@@ -937,28 +937,29 @@ review {
     padding: 0.4rem 0.6rem;
     font-size: 0.9rem;
   }
-
-  /* SECTION */
   section {
-    padding: 25px 4%;
+    padding: 30px 5%;
   }
 
-  section h1 { font-size: 2rem; }
-  section h2 { font-size: 1.6rem; }
-  .welcome-text { font-size: 1.3rem; }
+  section h1 { font-size: 2.2rem; }
+  section h2 { font-size: 1.8rem; }
+  .welcome-text { font-size: 1.5rem; }
 
-  /* CAROUSEL */
   .carousel {
-    height: 32vh;
-    border-radius: 10px;
+    height: 35vh;
+    border-radius: 12px;
   }
 
-  /* SEAT LAYOUT */
+ 
+
+
+
+
   .seat-layout-container {
-    transform: scale(0.55);
-    transform-origin: top center; /* keep centered scaling */
-    width: 180%;
-    max-width: unset;
+    transform: scale(0.45);
+    transform-origin: left;
+    width: 230%;
+    
     overflow: hidden;
     padding: 0;
     margin: 0 auto;
@@ -968,42 +969,43 @@ review {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   .row {
     display: flex;
     justify-content: center;
-    gap: 2px;
-    margin-bottom: 8px;
+    gap: 1px;
+    margin-bottom: 12px;
   }
 
   .seat-box {
-    width: 45px;
-    height: 50px;
-    font-size: 0.85rem;
+    width: 50px;
+    height: 55px;
+    font-size: 0.90rem;
   }
 
   .fan-icon, .ac-icon {
-    font-size: 12px;
-    min-width: 35px;
+    font-size: 13px;
+    min-width: 40px;
   }
 
   .fans-top, .fan-bottom {
-    gap: 50px;
+    gap: 60px;
   }
 
-  /* BUTTON */
+
+
+  
+
   .book-now-btn {
-    padding: 12px 28px;
-    font-size: 0.95rem;
+    padding: 14px 35px;
+    font-size: 1rem;
   }
 
-  /* MODAL */
   .modal-content {
-    width: 92%;
-    padding: 1.2rem;
-  }
+    width: 90%;
+    padding: 1.5rem;}
 
   #user-section button {
     padding: 0.2rem 0.4rem;
