@@ -123,14 +123,17 @@ async function updateAmount() {
 
 
 
-
 function calculateEndDate(start, months) {
   if (!start) return null;
   const date = new Date(start);
   if (isNaN(date.getTime())) return null;
+
   date.setMonth(date.getMonth() + parseInt(months));
+  date.setDate(date.getDate() - 1);  // 👈 subtract 1 day
+
   return date.toISOString().split('T')[0];
 }
+
 
 async function fetchBookings() {
   const startDate = startDateInput.value;
