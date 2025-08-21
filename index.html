@@ -72,7 +72,7 @@
  
 <div id="confirmation-modal" class="modal hidden">
   <div class="modal-content">
-    <h2>✅ Booking Confirmed!</h2>
+    
     <p id="confirmation-details"></p>
     <button id="close-modal">OK</button>
   </div>
@@ -501,6 +501,53 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
       updateUserUI();
       loadBookings();
 
+
+      // show confirmation or cash-submitted modal on page load if redirected with ?success=1
+(function checkAndShowConfirmationOnLoad(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    console.log('[index] checkAndShowConfirmationOnLoad params:', window.location.search);
+
+    if (params.get('success') === '1') {
+      const seatId = params.get('seatId') || '';
+      const shift = params.get('shift') || '';
+      const startDate = params.get('startDate') || '';
+      const endDate = params.get('endDate') || '';
+      const isCash = params.get('cash') === '1';
+
+      console.log('[index] Redirect params:', { seatId, shift, startDate, endDate, isCash });
+
+      if (isCash) {
+        // Show cash-submitted modal (no confirmed booking)
+        if (typeof showCashSubmittedModal === 'function') {
+          showCashSubmittedModal(seatId, shift, startDate, endDate);
+        } else {
+          // fallback: reuse confirmation modal but change text
+          showConfirmationModal(seatId, shift, startDate, endDate, { cashMode: true });
+        }
+      } else {
+        // Show confirmed booking modal
+        if (typeof showConfirmationModal === 'function') {
+          showConfirmationModal(seatId, shift, startDate, endDate);
+        } else {
+          console.warn('showConfirmationModal not found on page');
+        }
+      }
+
+      // remove query params without reloading (preserve pathname & hash)
+      const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+      try {
+        history.replaceState({}, document.title, cleanUrl);
+      } catch (e) {
+        console.warn('history.replaceState failed', e);
+      }
+    }
+  } catch (err) {
+    console.error('checkAndShowConfirmationOnLoad error', err);
+  }
+})();
+
+
       const bookNowBtn = document.querySelector(".book-now-btn");
       bookNowBtn.addEventListener("click", () => {
         const user = localStorage.getItem("user");
@@ -552,6 +599,7 @@ if (params.get('success') === '1') {
   const closeBtn = document.getElementById('close-modal');
 
   details.innerHTML = `
+  <h2>✅ Booking Confirmed!</h2>
     Seat <strong>${seatId}</strong> booked for <strong>${shift}</strong> shift<br>
     From <strong>${startDate}</strong> to <strong>${endDate}</strong>.
   `;
@@ -561,6 +609,29 @@ if (params.get('success') === '1') {
   closeBtn.onclick = () => {
     modal.classList.add('hidden');
     window.location.href = 'index.html'; // 🔁 Redirect and reload to show updated seat
+  };
+}
+function showCashSubmittedModal(seatId = '', shift = '', startDate = '', endDate = '') {
+  const modal = document.getElementById('confirmation-modal');
+  const details = document.getElementById('confirmation-details');
+  const closeBtn = document.getElementById('close-modal');
+
+  details.innerHTML = `
+    <h3>✅ Request Submitted</h3>
+    <p>Your cash booking request has been submitted and is pending confirmation from the library.</p>
+    <p><strong>Seat:</strong> ${seatId || 'N/A'}<br>
+       <strong>Shift:</strong> ${shift || 'N/A'}<br>
+       <strong>From:</strong> ${startDate || 'N/A'}<br>
+       <strong>To:</strong> ${endDate || 'N/A'}</p>
+    
+  `;
+
+  modal.classList.remove('hidden');
+
+  // just hide modal on close; no redirect (URL was already cleaned)
+  closeBtn.onclick = () => {
+    modal.classList.add('hidden');
+    // optional: reload to reflect state: location.reload();
   };
 }
   

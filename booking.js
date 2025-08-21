@@ -226,6 +226,8 @@ const startDate = startDateInput.value;
   if (!months || isNaN(months)) return alert('Invalid duration selected.');
 
   const paymentMode = document.querySelector('input[name="paymentMode"]:checked').value;
+
+
 if (paymentMode === 'cash') {
   try {
     if (!priceSettings) await fetchPrices();
@@ -239,11 +241,8 @@ if (paymentMode === 'cash') {
 
     const discount = getDiscount(duration);
 
-    // ✅ Cash booking: no PG fee, no convenience fee
-    let amount = basePrice * duration - discount +100; // ₹100 convenience fee for cash bookings;
-
-    // OPTIONAL: If you want cash to be ₹100 more than online
-    
+    // Cash booking: add ₹100 convenience for cash (you already do)
+    let amount = basePrice * duration - discount + 100;
 
     const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
       method: 'POST',
@@ -256,8 +255,20 @@ if (paymentMode === 'cash') {
     if (!res.ok) {
       alert(data.message || 'Booking failed.');
     } else {
-      alert(`Cash booking request submitted for ₹${amount}. Please pay to Bindal E-mitra, contact 9828130420.`);
-      window.location.href = `index.html?success=1&cash=1`;
+      // prepare query string with useful info and cashRequestId (if returned)
+      const qs = new URLSearchParams({
+        success: '1',
+        cash: '1',
+        seatId,
+        shift,
+        startDate,
+        endDate
+      });
+
+      if (data.cashRequestId) qs.set('cashId', data.cashRequestId);
+
+      // Redirect to index where the modal logic will handle cash=1 differently
+      window.location.href = `index.html?${qs.toString()}`;
     }
   } catch (err) {
     console.error(err);
