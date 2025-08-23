@@ -5,7 +5,7 @@
     if (!oldUser?.email) return;
 
     try {
-      const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/users/me/${oldUser.email}`);
+      const res = await fetch(`http://localhost:3000/api/users/me/${oldUser.email}`);
       const user = await res.json();
       localStorage.setItem("user", JSON.stringify(user));
       console.log("✅ Refreshed user data");
@@ -46,7 +46,7 @@ if (isExtension) {
 const amountDisplay = document.getElementById('amount-display');
 let priceSettings = null;
 async function fetchPrices() {
-  const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/prices');
+  const res = await fetch('http://localhost:3000/api/prices');
   priceSettings = await res.json();
 }
 
@@ -145,7 +145,7 @@ async function fetchBookings() {
   if (!endDate) return;
 
   try {
-    const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`);
+    const res = await fetch(`http://localhost:3000/api/bookings?startDate=${startDate}&endDate=${endDate}`);
     bookings = await res.json();
     renderSeats();
   } catch (err) {
@@ -244,7 +244,7 @@ if (paymentMode === 'cash') {
     // Cash booking: add ₹100 convenience for cash (you already do)
     let amount = basePrice * duration - discount + 100;
 
-    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book-cash', {
+    const res = await fetch('http://localhost:3000/api/book-cash', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ seatId, shift, startDate, endDate, email, duration, amount })
@@ -298,7 +298,7 @@ const { total: amount } = getTotalAmount(
 );
 
 try {
-  const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/payment/initiate', {
+  const res = await fetch('http://localhost:3000/api/payment/initiate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount, email, seatId, shift, startDate, endDate })

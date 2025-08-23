@@ -275,7 +275,7 @@ function slideReviews() {
     .catch(err => console.error('Service Worker Failed:', err));
 }
 
-    const API_BASE = 'https://kanha-backend-yfx1.onrender.com/api';
+    const API_BASE = 'http://localhost:3000/api';
 
     function formatDate(dateStr) {
       const date = new Date(dateStr);
@@ -442,7 +442,7 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
 
    async function loadAvailability(date) {
   if (!date) return;
-  const API_BASE = 'https://kanha-backend-yfx1.onrender.com/api';
+  const API_BASE = 'http://localhost:3000/api';
 
   try {
     const response = await fetch(`${API_BASE}/bookings?date=${date}`);

@@ -204,7 +204,7 @@ app.post('/api/payment/initiate', async (req, res) => {
     };
 
     const response = await axios.post(
-      `${baseUrl}/apis/pg/checkout/v2/pay`,
+      `${baseUrl}/apis/pg-sandbox/checkout/v2/pay`,
       payload,
       {
         headers: {
@@ -440,7 +440,7 @@ app.get('/api/payment/status', async (req, res) => {
 
     // ✅ Step 2: Check Order Status (txnId is merchantOrderId)
     const statusRes = await axios.get(
-      `${baseUrl}/apis/pg/checkout/v2/order/${txnId}/status?details=false`,
+      `${baseUrl}/apis/pg-sandbox/checkout/v2/order/${txnId}/status?details=false`,
       {
         headers: {
           'Content-Type': 'application/json',

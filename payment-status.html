@@ -47,12 +47,12 @@
     if (!txnId || !booking) {
       document.body.innerHTML = "<h2>❌ Missing payment details.</h2>";
     } else {
-      fetch(`https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`)
+      fetch(`http://localhost:3000/api/payment/status?txnId=${txnId}`)
         .then(res => res.json())
         .then(async data => {
           if (data.code === "PAYMENT_SUCCESS") {
             // Send to backend to confirm booking
-            const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book', {
+            const res = await fetch('http://localhost:3000/api/book', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
