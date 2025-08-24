@@ -28,7 +28,66 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
-  
+  <!-- SIMPLE OFFERS POPUP (paste right after <header>) -->
+<style>
+  /* minimal responsive modal */
+  #offers-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 9999; }
+  #offers-modal .overlay { position:absolute; inset:0; background: rgba(0,0,0,0.45); }
+  #offers-modal .card {
+    position: relative;
+    z-index: 2;
+    width: 92%;
+    max-width: 720px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 14px 35px rgba(0,0,0,0.22);
+    font-family: "Poppins", system-ui, Arial;
+    color: #222;
+  }
+  #offers-modal h3 { margin: 0 0 8px 0; font-size: 1.2rem; }
+  .offers-text { margin-top: 10px; line-height: 1.45; color:#444; }
+  .offers-item { margin: 10px 0; padding: 8px 10px; border-radius:6px; background: #f7f7f7; }
+  .close-offers { position:absolute; right:12px; top:12px; background:#ef5350; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+  @media (max-width:460px){
+    #offers-modal .card { padding:14px; border-radius:8px; }
+    #offers-modal h3 { font-size:1.05rem; }
+  }
+</style>
+
+<div id="offers-modal" role="dialog" aria-modal="true" aria-label="Current offers">
+  <div class="overlay" onclick="document.getElementById('offers-modal').style.display='none'"></div>
+  <div class="card">
+    <button class="close-offers" id="closeOffersBtn" aria-label="Close offers">✕</button>
+
+    <h3>🔥Offers — Kanha Library</h3>
+    <div class="offers-text">
+      <div class="offers-item"><strong>Book 2 months → Get 50₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase 2 months of any shift and Get discount of 50rs.</div></div>
+      <div class="offers-item"><strong>Book 3 months → Get 150₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase 3 months of any shift and Get discount of 150rs.</div></div>
+      <div class="offers-item"><strong>Book 6 months → Get 450₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase 6 months of any shift and Get discount of 450rs.</div></div>
+      <div class="offers-item"><strong>Referral — ₹100 OFF for both</strong><div style="font-size:0.95rem; color:#555;">Invite your freind to our library. When they book, both of you get ₹100 off.</div></div>
+
+ 
+      <div style="margin-top:10px; font-size:0.95rem; color:#666;">
+        <em>Note:</em> For details or to use an offer, visit the booking page or contact us at +91 8870969514 on Whatsapp.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // show modal once per session (remove sessionStorage check if you want it every load)
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!sessionStorage.getItem('offersSeen')) {
+      document.getElementById('offers-modal').style.display = 'flex';
+      sessionStorage.setItem('offersSeen','1');
+    }
+    document.getElementById('closeOffersBtn').addEventListener('click', () => {
+      document.getElementById('offers-modal').style.display = 'none';
+    });
+  });
+</script>
+
   <header>
     <h2>Kanha Library</h2>
     
