@@ -86,6 +86,51 @@
   <h2>📅 Check Seat Availability</h2>
   <h3>Select Date  👇</h3>
   <input type="date" id="calendar-date" style="padding: 8px; font-size: 16px; margin-bottom: 15px;" />
+
+
+  <div id="liveCounter" style="text-align:center; margin:20px; font-size:1.3rem; font-weight:bold; color:#f9e616;">
+  🔥 Hurry! Only <span id="seatsLeft">--</span> seats left today. Don’t miss out!
+</div>
+
+<script>
+async function updateLiveCounter() {
+  try {
+    const today = new Date().toISOString().split("T")[0]; 
+    const res = await fetch(`${API_BASE}/bookings?date=${today}`);
+    const bookings = await res.json();
+
+    const booked = Array.isArray(bookings) ? bookings.length : 0;
+    const total = 34; // total seats
+    const left = total - booked;
+
+    // update DOM
+    document.getElementById("seatsLeft").textContent = left;
+
+    // urgency color coding
+    const counter = document.getElementById("liveCounter");
+    if (left <= 5) {
+      counter.style.color = "red";
+      counter.style.fontSize = "1.5rem";
+    } else if (left <= 10) {
+      counter.style.color = "orange";
+    } else {
+      counter.style.color = "#4caf50";
+    }
+  } catch (err) {
+    console.error("⚠️ Failed to update live counter:", err);
+  }
+}
+
+// run on page load
+document.addEventListener("DOMContentLoaded", () => {
+  updateLiveCounter();
+  // refresh every 30 sec
+  setInterval(updateLiveCounter, 30000);
+});
+</script>
+
+
+
    <div class="seat-layout-container">
         <div class="fans-top">
           <div class="fan-icon">🌀 Fan</div>
@@ -676,6 +721,136 @@ function showCashSubmittedModal(seatId = '', shift = '', startDate = '', endDate
 </script>
 <noscript>You need to <a href="https://www.openwidget.com/enable-javascript" rel="noopener nofollow">enable JavaScript</a> to use the communication tool powered by <a href="https://www.openwidget.com/" rel="noopener nofollow" target="_blank">OpenWidget</a></noscript>
 <!-- End of OpenWidget code -->
+
+
+<script>
+/*
+  Live counter for index.html
+  - Uses your API endpoint: /api/bookings?date=YYYY-MM-DD
+  - Counts a seat as "booked" if shift === 'full' OR both 'am' and 'pm' exist for same seat
+  - Works with shift values like 'am','AM','pm','PM','full','FULL'
+*/
+
+(function () {
+  // Use existing API_BASE if present, otherwise fallback
+  const API = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://kanha-backend-yfx1.onrender.com/api';
+  const TOTAL_SEATS = 34;
+  const POLL_MS = 30000; // refresh every 30s
+
+  function normalizeShift(s) {
+    if (!s) return '';
+    return String(s).trim().toLowerCase();
+  }
+
+  async function fetchBookingsForDate(dateStr) {
+    try {
+      const res = await fetch(`${API}/bookings?date=${dateStr}`);
+      if (!res.ok) {
+        console.warn('LiveCounter: bookings fetch failed', res.status);
+        return [];
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error('LiveCounter fetch error:', err);
+      return [];
+    }
+  }
+
+  function calcBookedSeats(bookings) {
+    // build map: seatId -> Set of shifts
+    const map = {};
+    bookings.forEach(b => {
+      const sid = String(b.seatId || b.seat || '').trim();
+      if (!sid) return;
+      const shift = normalizeShift(b.shift);
+
+      let normalized;
+      if (shift.includes('full')) normalized = 'full';
+      else if (shift.startsWith('a')) normalized = 'am';
+      else if (shift.startsWith('p')) normalized = 'pm';
+      else normalized = shift; // fallback
+
+      if (!map[sid]) map[sid] = new Set();
+      map[sid].add(normalized);
+    });
+
+    // count seats that are fully blocked
+    let bookedCount = 0;
+    for (let i = 1; i <= TOTAL_SEATS; i++) {
+      const sid = String(i);
+      const s = map[sid];
+      if (!s) continue;
+      if (s.has('full') || (s.has('am') && s.has('pm'))) bookedCount++;
+    }
+    return bookedCount;
+  }
+
+  async function updateLiveCounter(dateStr) {
+    try {
+      const dateToUse = dateStr || (document.getElementById('calendar-date')?.value)
+                        || new Date().toISOString().split('T')[0];
+      if (!dateToUse) return;
+
+      const bookings = await fetchBookingsForDate(dateToUse);
+      const booked = calcBookedSeats(bookings);
+      const left = Math.max(0, TOTAL_SEATS - booked);
+
+      const counter = document.getElementById('liveCounter');
+      if (!counter) return;
+
+      const seatsLeftSpan = counter.querySelector('#seatsLeft');
+      if (seatsLeftSpan) seatsLeftSpan.textContent = left;
+      else counter.innerHTML = `🔥 Hurry! Only <span id="seatsLeft">${left}</span> seats left today. Don’t miss out!`;
+
+      // colours / emphasis
+      if (left <= 3) {
+        counter.style.color = 'yellow';
+        counter.style.fontWeight = '600';
+      } else if (left <= 8) {
+        counter.style.color = 'yellow';
+        counter.style.fontWeight = '600';
+      } else {
+        counter.style.color = 'Yellow'; // greenish
+        counter.style.fontWeight = '600';
+      }
+
+      // optional: update console (useful while testing)
+      // console.log(`[LiveCounter] ${dateToUse} — booked ${booked}, left ${left}`);
+    } catch (err) {
+      console.error('updateLiveCounter error:', err);
+    }
+  }
+
+  // Hook into date change and initial load
+  document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('calendar-date');
+    const today = new Date().toISOString().split('T')[0];
+
+    // If date input exists, ensure it has a value
+    if (dateInput && !dateInput.value) dateInput.value = today;
+
+    // initial load
+    updateLiveCounter(dateInput ? dateInput.value : today);
+
+    // when calendar date changes, update counter
+    if (dateInput) {
+      dateInput.addEventListener('change', (e) => {
+        updateLiveCounter(e.target.value);
+      });
+    }
+
+    // poll in background every POLL_MS to keep counter fresh
+    setInterval(() => {
+      const dateNow = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+      updateLiveCounter(dateNow);
+    }, POLL_MS);
+  });
+
+  // expose for debugging if needed
+  window.updateLiveCounter = updateLiveCounter;
+})();
+</script>
 
 
 </body>
