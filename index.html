@@ -457,7 +457,8 @@ function slideReviews() {
          
           list.innerHTML = grouped.map(b => {
   const today = new Date().toISOString().split('T')[0];
-  const isExtendable = new Date(b.end) >= new Date(today);
+  const isExtendable = true;
+
   return `
     <div class="booking-card">
       <p><strong>Seat:</strong> ${b.seatId}</p>
