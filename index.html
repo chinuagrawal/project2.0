@@ -78,14 +78,14 @@
 <script>
   // show modal once per session (remove sessionStorage check if you want it every load)
   document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('offers-modal');
-  modal.style.display = 'flex';
-
-  document.getElementById('closeOffersBtn').addEventListener('click', () => {
-    modal.style.display = 'none';
+    if (!sessionStorage.getItem('offersSeen')) {
+      document.getElementById('offers-modal').style.display = 'flex';
+      sessionStorage.setItem('offersSeen','1');
+    }
+    document.getElementById('closeOffersBtn').addEventListener('click', () => {
+      document.getElementById('offers-modal').style.display = 'none';
+    });
   });
-});
-
 </script>
 
 
