@@ -231,28 +231,114 @@ section h3 {
 
 }
 
+/* Carousel container */
 .carousel {
+  position: relative;
   width: 100%;
+  max-width: 1200px;
+  margin: 1rem auto;
   overflow: hidden;
-  position: center;
-  height: 450px;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  margin-bottom: 5px;
+  /* stable responsive height: min 220px, preferred 40vh, max 450px */
+  height: clamp(220px, 40vh, 450px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  background: #000; /* fallback while images load */
 }
 
-.carousel-images {
+/* Track and slides */
+.carousel-track {
   display: flex;
-  transition: transform 0.8s ease-in-out;
+  transition: transform 0.6s cubic-bezier(.22,.9,.26,1);
+  will-change: transform;
   height: 100%;
-  width: 500vw;
 }
 
-.carousel-images img {
-  width: 100vw;
+.carousel-slide {
+  flex: 0 0 100%; /* each slide is full width of carousel */
+  height: 100%;
+  display: block;
+}
+
+/* Images: fill slide and cover */
+.carousel-slide img {
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  flex-shrink: 0;}
+  display: block; /* removes small baseline gaps */
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Controls */
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+.carousel-button:focus { outline: 2px solid var(--primary-color); }
+
+.carousel-button.prev { left: 12px; }
+.carousel-button.next { right: 12px; }
+
+/* Indicators */
+.carousel-indicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display:flex;
+  gap: 8px;
+  z-index: 30;
+}
+
+.carousel-indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.45);
+  cursor: pointer;
+}
+.carousel-indicators button[aria-current="true"] {
+  background: linear-gradient(45deg,var(--primary-color),var(--secondary-color));
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+
+/* Pause animation visually on hover (JS will handle pause) */
+.carousel:hover .carousel-button { background: rgba(0,0,0,0.65); }
+
+/* Prevent lateral scroll issues on smaller breakpoints */
+@media (max-width: 768px) {
+  .carousel { height: clamp(180px, 35vh, 300px); border-radius: 12px; }
+  .carousel-button { width:36px; height:36px; }
+}
+/* Slightly taller on laptop / desktop */
+@media (min-width: 1024px) {
+  .carousel {
+    height: clamp(480px, 55vh, 1000px);
+  }
+}
+
+
+
+
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track { transition: none; }
+}
+
 /* 5. SEAT AVAILABILITY & LAYOUT
 /* ========================================================================== */
 
@@ -945,10 +1031,8 @@ review {
   section h2 { font-size: 1.8rem; }
   .welcome-text { font-size: 1.5rem; }
 
-  .carousel {
-    height: 35vh;
-    border-radius: 12px;
-  }
+
+
 
  
 
