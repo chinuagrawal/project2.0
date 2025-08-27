@@ -18,7 +18,45 @@
     button.delete { background:#e74c3c; color:#fff; }
     button.block { background:#f1c40f; color:#111; }
     button.unblock { background:#2ecc71; color:#fff; }
-    @media (max-width:768px){ /* keep mobile styles as you have */ }
+    @media (max-width:768px){ /* keep mobile styles as you have */table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: 12px;
+      }
+
+      td {
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+        border: none;
+        border-bottom: 1px solid #eee;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        font-weight: bold;
+        color: #666;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      td:last-child {
+        border-bottom: none;
+      }
+    } 
   </style>
 </head>
 <body>
