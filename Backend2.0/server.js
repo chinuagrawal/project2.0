@@ -26,10 +26,10 @@ mongoose.connect(process.env.MONGO_URI)
 const Booking = require('./models/Booking');
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
-app.use('/api', authRoutes);
-const customPriceRoute = require('./routes/customprice');
-app.use('/api', webhookRoutes);
 const webhookRoutes = require('./routes/webhook');
+const customPriceRoute = require('./routes/customprice');
+app.use('/api', authRoutes);
+app.use('/api', webhookRoutes);
 app.use('/api', customPriceRoute);
 
 
