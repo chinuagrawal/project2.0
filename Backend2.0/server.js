@@ -169,7 +169,8 @@ app.post('/api/payment/initiate', async (req, res) => {
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
   const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
-
+  
+  console.log(`✅ PhonePe Payment initiated for ${email}, TXN: ${merchantTransactionId}`);
   try {
     // ✅ Save pending booking
     await PendingBooking.create({
@@ -218,7 +219,6 @@ app.post('/api/payment/initiate', async (req, res) => {
 
     const redirectUrlFromResponse = response.data.redirectUrl || redirectUrl;
 
-    console.log(`✅ PhonePe Payment initiated for ${email}, TXN: ${merchantTransactionId}`);
     res.json({
       redirectUrl: redirectUrlFromResponse,
       merchantTransactionId
