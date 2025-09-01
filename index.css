@@ -80,6 +80,19 @@ header {
     opacity: 1;
   }
 }
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between logo and text */
+}
+
+.logo {
+  height: 50px;    /* adjust as needed */
+  width: 50px;     /* make it square so circle looks perfect */
+  border-radius: 50%;
+  object-fit: cover; /* ensures image fills the circle nicely */
+  border: 2px solid white; /* optional: adds border */
+}
 
 header h2 {
     font-weight: 700;
