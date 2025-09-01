@@ -28,6 +28,8 @@ const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 const customPriceRoute = require('./routes/customprice');
+app.use('/api', webhookRoutes);
+const webhookRoutes = require('./routes/webhook');
 app.use('/api', customPriceRoute);
 
 
