@@ -56,9 +56,13 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                ...booking,
-                payment: { phonepe_txn_id: txnId }
-              })
+  ...booking,
+  amount: booking.amount,
+  paymentTxnId: txnId,         // Your TXN_xxx (merchantOrderId)
+  transactionId: null,         // Will be filled by webhook later
+  paymentMode: "online",
+  paymentConfirmedVia: "status-page"
+})
             });
 
             const result = await res.json();
