@@ -378,24 +378,7 @@ app.post('/api/book', async (req, res) => {
       current.setDate(current.getDate() + 1);
     }
 
-    // ✅ Check for booking conflicts
-    const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
-    const conflicts = [];
-
-    for (const date of dates) {
-      const dayBookings = existing.filter(b => b.date === date);
-      const hasFull = dayBookings.some(b => b.shift === 'full');
-      const hasAM = dayBookings.some(b => b.shift === 'am');
-      const hasPM = dayBookings.some(b => b.shift === 'pm');
-
-      if (shift === 'full' && (hasFull || hasAM || hasPM)) conflicts.push(date);
-      else if (shift === 'am' && (hasFull || hasAM)) conflicts.push(date);
-      else if (shift === 'pm' && (hasFull || hasPM)) conflicts.push(date);
-    }
-
-    if (conflicts.length > 0) {
-      return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
-    }
+   
 
     // ✅ Save bookings with full schema
     const bookings = dates.map(date => ({
