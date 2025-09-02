@@ -1,4 +1,8 @@
-app.post('/api/phonepe/webhook', async (req, res) => {
+const express = require('express');
+const router = express.Router();
+const Booking = require('../models/Booking'); // adjust path if needed
+const Booking = require('../models/PendingBooking'); // adjust path if needed
+router.post('/api/phonepe/webhook', async (req, res) => {
   try {
     console.log('📥 PhonePe Callback Received:', req.body);
 
@@ -53,3 +57,4 @@ app.post('/api/phonepe/webhook', async (req, res) => {
     res.status(200).send("OK");
   }
 });
+module.exports = router;
