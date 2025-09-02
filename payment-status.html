@@ -30,16 +30,13 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-  </style>
+</style>
 </head>
 <body>
-  <h2>✅ Checking Payment Status, please wait...</h2>
+  <h2 id="status">✅ Checking Payment Status, please wait...</h2>
   <div class="spinner"></div>
 
   <script>
-
-    
-
     const urlParams = new URLSearchParams(window.location.search);
     const txnId = urlParams.get('txnId');
     const booking = JSON.parse(sessionStorage.getItem('pendingBooking'));
@@ -47,33 +44,37 @@
     if (!txnId || !booking) {
       document.body.innerHTML = "<h2>❌ Missing payment details.</h2>";
     } else {
+      // 1️⃣ First check PhonePe status
       fetch(`https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`)
         .then(res => res.json())
         .then(async data => {
           if (data.code === "PAYMENT_SUCCESS") {
-            // Send to backend to confirm booking
-            const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/book', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-  ...booking,
-  amount: booking.amount,
-  paymentTxnId: txnId,         // Your TXN_xxx (merchantOrderId)
-  transactionId: null,         // Will be filled by webhook later
-  paymentMode: "online",
-  paymentConfirmedVia: "status-page"
-})
-            });
+            document.getElementById("status").innerText = "⏳ Payment confirmed, waiting for booking...";
 
-            const result = await res.json();
-            if (res.ok) {
-              // Clear pending booking and redirect
-              sessionStorage.removeItem('pendingBooking');
-              const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}`;
-              window.location.href = `index.html${query}`;
-            } else {
-              document.body.innerHTML = `<h2>❌ Booking failed: ${result.message || 'Unknown error'}</h2>`;
+            // 2️⃣ Poll backend until webhook inserts booking
+            let attempts = 0;
+            let confirmed = false;
+
+            while (attempts < 10 && !confirmed) { // retry max 10 times
+              const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/bookings/status/${txnId}`);
+              const result = await res.json();
+
+              if (result.success) {
+                confirmed = true;
+                sessionStorage.removeItem('pendingBooking');
+                const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}`;
+                window.location.href = `index.html${query}`;
+              } else {
+                await new Promise(r => setTimeout(r, 3000)); // wait 3s
+                attempts++;
+              }
             }
+
+            if (!confirmed) {
+              document.getElementById("status").innerText =
+                "⚠️ Payment done, but booking not confirmed yet. Please contact support.";
+            }
+
           } else {
             document.body.innerHTML = `<h2>❌ Payment failed or was cancelled.</h2>`;
           }
