@@ -361,54 +361,65 @@ app.post('/api/delete-bookings', async (req, res) => {
   }
 });
 app.post('/api/book', async (req, res) => {
-  const { seatId, startDate, endDate, shift, email } = req.body;
+  try {
+    const { seatId, startDate, endDate, shift, email, amount, paymentTxnId, transactionId, paymentMode, paymentConfirmedVia } = req.body;
 
-  // ✅ Basic validation
-  if (!seatId || !startDate || !endDate || !shift || !email) {
-    return res.status(400).json({ message: 'Missing required fields.' });
+    // ✅ Basic validation
+    if (!seatId || !startDate || !endDate || !shift || !email) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // ✅ Generate booking dates between start and end
+    const dates = [];
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+    while (current <= end) {
+      dates.push(current.toISOString().split('T')[0]);
+      current.setDate(current.getDate() + 1);
+    }
+
+    // ✅ Check for booking conflicts
+    const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
+    const conflicts = [];
+
+    for (const date of dates) {
+      const dayBookings = existing.filter(b => b.date === date);
+      const hasFull = dayBookings.some(b => b.shift === 'full');
+      const hasAM = dayBookings.some(b => b.shift === 'am');
+      const hasPM = dayBookings.some(b => b.shift === 'pm');
+
+      if (shift === 'full' && (hasFull || hasAM || hasPM)) conflicts.push(date);
+      else if (shift === 'am' && (hasFull || hasAM)) conflicts.push(date);
+      else if (shift === 'pm' && (hasFull || hasPM)) conflicts.push(date);
+    }
+
+    if (conflicts.length > 0) {
+      return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
+    }
+
+    // ✅ Save bookings with full schema
+    const bookings = dates.map(date => ({
+      seatId,
+      date,
+      shift,
+      email,
+      status: 'paid',
+      amount: amount || 0,
+      paymentMode: paymentMode || 'online',
+      paymentTxnId: paymentTxnId || null,
+      transactionId: transactionId || null,
+      paymentConfirmedVia: paymentConfirmedVia || 'manual'
+    }));
+
+    await Booking.insertMany(bookings);
+
+    res.json({ success: true, bookings });
+  } catch (err) {
+    console.error("❌ Error in /api/book:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  // ✅ Generate booking dates between start and end
-  const dates = [];
-  let current = new Date(startDate);
-  const end = new Date(endDate);
-  while (current <= end) {
-    dates.push(current.toISOString().split('T')[0]);
-    current.setDate(current.getDate() + 1);
-  }
-
-  // ✅ Check for booking conflicts
-  const existing = await Booking.find({ seatId, date: { $in: dates }, status: 'paid' });
-  const conflicts = [];
-
-  for (const date of dates) {
-    const dayBookings = existing.filter(b => b.date === date);
-    const hasFull = dayBookings.some(b => b.shift === 'full');
-    const hasAM = dayBookings.some(b => b.shift === 'am');
-    const hasPM = dayBookings.some(b => b.shift === 'pm');
-
-    if (shift === 'full' && (hasFull || hasAM || hasPM)) conflicts.push(date);
-    else if (shift === 'am' && (hasFull || hasAM)) conflicts.push(date);
-    else if (shift === 'pm' && (hasFull || hasPM)) conflicts.push(date);
-  }
-
-  if (conflicts.length > 0) {
-    return res.status(400).json({ message: 'Seat already booked during this period.', conflicts });
-  }
-
-  // ✅ Save bookings
-  const bookings = dates.map(date => ({
-    seatId,
-    date,
-    shift,
-    email,
-    status: 'paid',
-    paymentMode: 'online'
-  }));
-
-  await Booking.insertMany(bookings);
-  res.json({ success: true });
 });
+
 // 📦 Status Check Route
 // ✅ PhonePe Payment Status using latest Order Status API
 app.get('/api/payment/status', async (req, res) => {

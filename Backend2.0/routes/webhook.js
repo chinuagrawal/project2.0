@@ -1,27 +1,55 @@
-// webhook.js
-const express = require("express");
-const router = express.Router();
+app.post('/api/phonepe/webhook', async (req, res) => {
+  try {
+    console.log('📥 PhonePe Callback Received:', req.body);
 
-router.use(express.json());
+    const payload = req.body.payload;
+    if (!payload) {
+      console.error("❌ Invalid webhook format");
+      return res.status(200).send("OK");
+    }
 
-router.post("/phonepe/webhook", (req, res) => {
-  console.log("📩 Webhook Received:", JSON.stringify(req.body, null, 2));
+    const { merchantOrderId, state, paymentDetails, metaInfo } = payload;
 
-  if (!req.body.payload || !req.body.payload.state) {
-    return res.status(400).json({ error: "Invalid payload" });
+    if (state === "COMPLETED") {
+      const phonepeTxn = paymentDetails?.[0]?.transactionId || null;
+      const paymentMode = paymentDetails?.[0]?.paymentMode || "UNKNOWN";
+      const email = metaInfo?.udf1;
+
+      // 1️⃣ Check if booking already exists
+      const existing = await Booking.findOne({ paymentTxnId: merchantOrderId });
+      if (!existing) {
+        // 2️⃣ Find Pending Booking
+        const pending = await PendingBooking.findOne({ txnId: merchantOrderId });
+        if (pending) {
+          await Booking.create({
+            seatId: pending.seatId,
+            date: pending.startDate,   // store start date
+            shift: pending.shift,
+            email: pending.email,
+            amount: pending.amount,
+            paymentMode,
+            status: "paid",
+            paymentTxnId: merchantOrderId,  // your TXN_xxx
+            transactionId: phonepeTxn,      // PhonePe txn id
+            paymentConfirmedVia: "webhook"
+          });
+          await PendingBooking.deleteOne({ txnId: merchantOrderId });
+          console.log(`✅ Seat booked for ${email}, TXN: ${merchantOrderId}`);
+        } else {
+          console.warn("⚠️ Pending booking not found for:", merchantOrderId);
+        }
+      } else {
+        console.log("ℹ️ Booking already exists, skipping duplicate:", merchantOrderId);
+      }
+    } else {
+      // ❌ Failed or expired payment → cleanup
+      await PendingBooking.deleteOne({ txnId: payload.merchantOrderId });
+      console.log(`❌ Payment failed/expired: ${payload.merchantOrderId}`);
+    }
+
+    res.status(200).send("OK"); // Always ACK
+  } catch (err) {
+    console.error("Webhook error:", err);
+    res.status(200).send("OK");
   }
-
-  const paymentState = req.body.payload.state;
-  const txnId = req.body.payload.transactionId;
-
-  if (paymentState === "COMPLETED") {
-    console.log(`✅ Payment successful: ${txnId}`);
-    // TODO: Call your booking confirmation logic here
-  } else if (paymentState === "FAILED") {
-    console.log(`❌ Payment failed: ${txnId}`);
-  }
-
-  res.status(200).send("OK");
 });
-
-module.exports = router;
