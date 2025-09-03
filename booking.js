@@ -334,7 +334,7 @@ try {
       } else {
         alert("PhonePe SDK not loaded");
       }
-    }, 4000);
+    }, 2000);
 
   } else {
     console.warn("Element with ID 'payment-warning' not found.");
