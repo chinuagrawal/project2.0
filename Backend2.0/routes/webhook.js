@@ -8,8 +8,8 @@ router.post('/phonepe/webhook', async (req, res) => {
   try {
     console.log('📥 PhonePe Callback Received:', req.body);
 
-    const payload = req.body.payload || req.body;
-    
+    const payload = req.body.payload;
+
 
     if (!payload) {
       console.error("❌ Invalid webhook format");
