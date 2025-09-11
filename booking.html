@@ -238,15 +238,137 @@
 
 
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+  
 
     @media(max-width: 768px){
-      .mai
-      n-wrapper { flex-direction: column; align-items: center; }
-    }
+  .main-wrapper { flex-direction: column; align-items: center; }
+}
+
+
+
+  /* ===== Mobile bottom action bar ===== */
+.mobile-action-bar {
+  display: none; /* default hidden on desktop */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 72px;
+  padding: 10px;
+  background: linear-gradient(90deg, #ffffff, #fafafa);
+  box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  z-index: 9999;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+/* amount box */
+.mobile-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;   /* prevent newline between ₹ and number */
+  font-weight: 700;
+  color: #222;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.mobile-amount .currency {
+  font-size: 0.92rem;
+  opacity: 0.95;
+}
+.mobile-amount .amount-num {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* mobile book button */
+/* updated mobile book button — narrower, responsive, accessible */
+.mobile-book-btn {
+  flex: 0 0 auto;                     /* don't stretch */
+  min-width: 96px;                    /* smaller minimum width */
+  max-width: 220px;                   /* avoid growing too large on wide screens */
+  padding: 10px 14px;                 /* slightly reduced padding */
+  border-radius: 10px;
+  background: linear-gradient(90deg, #7b1fa2, #ba68c8);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.96rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(123,31,162,0.12);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* hover / lift effect */
+.mobile-book-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(123,31,162,0.18);
+}
+
+/* active / pressed */
+.mobile-book-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(123,31,162,0.10);
+}
+
+/* keyboard focus styling for accessibility */
+.mobile-book-btn:focus {
+  outline: 3px solid rgba(123,31,162,0.14);
+  outline-offset: 2px;
+}
+
+/* very small screens: allow button to grow and share space with amount */
+@media (max-width: 360px) {
+  .mobile-book-btn {
+    flex: 1 1 auto;   /* allow button to take remaining space */
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 0.94rem;
+  }
+  .mobile-amount {
+    margin-right: 8px; /* small breathing room */
+  }
+}
+
+/* slightly smaller adjustments for narrow phones */
+@media (max-width: 420px) {
+  .mobile-book-btn { min-width: 90px; padding: 10px 12px; font-size: 0.94rem; }
+}
+
+/* make CTA full-width when smaller screens */
+@media (max-width: 420px) {
+  .mobile-action-bar { height: 78px; gap: 10px; padding-left: 12px; padding-right: 12px; }
+  .mobile-amount { font-size: 0.95rem; }
+  .mobile-book-btn { min-width: 120px; padding: 12px; font-size: 0.95rem; }
+}
+
+/* show the bar and add bottom spacing only on small screens */
+@media (max-width: 768px) {
+  .mobile-action-bar { display: flex; }
+  /* ensure page content isn't hidden behind the bar */
+  body, .main-wrapper { padding-bottom: 100px; }
+}
+
+/* optional: hide desktop CTA if you had another big Book button visible */
+@media (min-width: 769px) {
+  .mobile-action-bar { display: none; }
+}
+  @media (max-width: 768px) {
+  #book-btn { display: none; }
+}
+
   </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9442859388560602"
      crossorigin="anonymous"></script>
@@ -321,6 +443,145 @@
     </div>
   </div>
 
-  <script src="booking.js?v=1.3.5"></script>
+  <script src="booking.js?v=1.3.6"></script>
+  <!-- Mobile action bar (visible only on small screens) -->
+<div class="mobile-action-bar">
+  <div class="mobile-amount">Total: <span id="mobile-amount"><span class="currency">₹</span><span class="amount-num">0</span></span></div>
+  <button id="mobile-book-btn" class="mobile-book-btn">Book Now</button>
+</div>
+
+
+<script>
+(function(){
+  const API_PRICES = 'https://kanha-backend-yfx1.onrender.com/api/prices';
+  const mobileAmountEl = document.getElementById('mobile-amount');
+  const shiftEl = document.getElementById('shift');
+  const durationEl = document.getElementById('duration');
+  const bookBtn = document.getElementById('book-btn');
+
+  if (!mobileAmountEl) {
+    console.warn('mobile-amount element not found. Script will not run.');
+    return;
+  }
+
+  // Try to reuse already-fetched priceSettings if present (common in booking.js)
+  let _prices = window.priceSettings || window._priceSettings || null;
+
+  async function fetchPricesIfNeeded() {
+    if (_prices) return _prices;
+    try {
+      const res = await fetch(API_PRICES);
+      if (!res.ok) throw new Error('fetch failed');
+      _prices = await res.json();
+      // also expose globally for reuse
+      window._priceSettings = _prices;
+      return _prices;
+    } catch (e) {
+      console.warn('Could not fetch prices, using fallback defaults.', e);
+      _prices = { am: 500, pm: 400, full: 900, paymentGatewayFeePercent: 2.5, convenienceFee: 25, offers: [] };
+      window._priceSettings = _prices;
+      return _prices;
+    }
+  }
+
+  function getDiscountForDuration(offers, months) {
+    if (!Array.isArray(offers)) return 0;
+    let best = 0;
+    for (const o of offers) {
+      const dur = Number(o.duration || 0);
+      const disc = Number(o.discount || 0);
+      if (months >= dur && disc > best) best = disc;
+    }
+    return best;
+  }
+
+  function computeTotal(basePrice, months, discount, pgPercent, convenience) {
+    const baseTimesMonths = Number(basePrice) * Number(months);
+    const subtotal = baseTimesMonths - Number(discount || 0);
+    const pgFee = Math.round(((subtotal + Number(convenience || 0)) * Number(pgPercent || 0)) / 100);
+    const total = subtotal + pgFee + Number(convenience || 0);
+    return { subtotal, pgFee, convenience, total };
+  }
+
+  function formatINRWithSpace(n) {
+    if (isNaN(n)) return '₹ 0';
+    // simple thousands separator
+    return '₹ ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  async function updateMobileAmount() {
+    const prices = await fetchPricesIfNeeded();
+    const shift = (shiftEl && shiftEl.value) || 'am';
+    const months = parseInt((durationEl && durationEl.value) || '1', 10) || 1;
+
+    // try to use user customPricing if available
+    let basePrice;
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (user && user.customPricing && user.customPricing[shift]) {
+        basePrice = Number(user.customPricing[shift]);
+      }
+    } catch (e) { /* ignore */ }
+
+    if (!basePrice) {
+      basePrice = (shift === 'full') ? (prices.full || 0) : (prices[shift] || 0);
+    }
+
+    const discount = getDiscountForDuration(prices.offers || [], months);
+
+    const paymentMode = (document.querySelector('input[name="paymentMode"]:checked') || {}).value || 'online';
+    const pgPercent = (paymentMode === 'cash') ? 0 : (prices.paymentGatewayFeePercent || 0);
+    const convenience = (paymentMode === 'cash') ? 100 : (prices.convenienceFee || 0);
+
+    const { total } = computeTotal(basePrice, months, discount, pgPercent, convenience);
+
+    // update the mobile amount span
+   // update the mobile amount using the centralized helper (keeps currency + numeric spans)
+updateMobileBarAmount(total);
+
+
+    // also update book button dataset so booking.js (if it reads it) can use it
+    if (bookBtn) bookBtn.dataset.amount = total;
+
+    return total;
+  }
+
+  // attach listeners
+  if (durationEl) durationEl.addEventListener('change', updateMobileAmount);
+  if (shiftEl) shiftEl.addEventListener('change', updateMobileAmount);
+  document.querySelectorAll('input[name="paymentMode"]').forEach(r => r.addEventListener('change', updateMobileAmount));
+
+  // run on load (small delay to let other scripts finish)
+  window.addEventListener('load', () => { setTimeout(updateMobileAmount, 150); });
+
+  // expose for manual calls
+  window.__Kanha_updateMobileAmount = updateMobileAmount;
+})();
+function updateMobileBarAmount(numericAmount) {
+  const mobileAmountEl = document.getElementById('mobile-amount');
+  if (!mobileAmountEl) return;
+  // if using structured HTML (currency + amount)
+  const amountNum = mobileAmountEl.querySelector('.amount-num');
+  if (amountNum) {
+    amountNum.textContent = new Intl.NumberFormat('en-IN', { maximumFractionDigits:0 }).format(numericAmount ? numericAmount : 0);
+    // ensure currency symbol exists
+    if (!mobileAmountEl.querySelector('.currency')) {
+      mobileAmountEl.insertAdjacentHTML('afterbegin', '<span class="currency">₹</span>');
+    }
+  } else {
+    // fallback: plain text
+    mobileAmountEl.textContent = '₹ ' + (numericAmount ? numericAmount : 0);
+  }
+}
+
+</script>
+<script>
+  document.getElementById("mobile-book-btn")
+    .addEventListener("click", () => {
+      document.getElementById("book-btn").click();
+    });
+</script>
+
+
 </body>
 </html>

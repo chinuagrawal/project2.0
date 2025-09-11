@@ -388,3 +388,132 @@ window.onload = async () => {
 };
 
 
+
+
+(function(){
+  const API_PRICES = 'https://kanha-backend-yfx1.onrender.com/api/prices';
+  const mobileAmountEl = document.getElementById('mobile-amount');
+  const shiftEl = document.getElementById('shift');
+  const durationEl = document.getElementById('duration');
+  const bookBtn = document.getElementById('book-btn');
+
+  if (!mobileAmountEl) {
+    console.warn('mobile-amount element not found. Script will not run.');
+    return;
+  }
+
+  // Try to reuse already-fetched priceSettings if present (common in booking.js)
+  let _prices = window.priceSettings || window._priceSettings || null;
+
+  async function fetchPricesIfNeeded() {
+    if (_prices) return _prices;
+    try {
+      const res = await fetch(API_PRICES);
+      if (!res.ok) throw new Error('fetch failed');
+      _prices = await res.json();
+      // also expose globally for reuse
+      window._priceSettings = _prices;
+      return _prices;
+    } catch (e) {
+      console.warn('Could not fetch prices, using fallback defaults.', e);
+      _prices = { am: 500, pm: 400, full: 900, paymentGatewayFeePercent: 2.5, convenienceFee: 25, offers: [] };
+      window._priceSettings = _prices;
+      return _prices;
+    }
+  }
+
+  function getDiscountForDuration(offers, months) {
+    if (!Array.isArray(offers)) return 0;
+    let best = 0;
+    for (const o of offers) {
+      const dur = Number(o.duration || 0);
+      const disc = Number(o.discount || 0);
+      if (months >= dur && disc > best) best = disc;
+    }
+    return best;
+  }
+
+  function computeTotal(basePrice, months, discount, pgPercent, convenience) {
+    const baseTimesMonths = Number(basePrice) * Number(months);
+    const subtotal = baseTimesMonths - Number(discount || 0);
+    const pgFee = Math.round(((subtotal + Number(convenience || 0)) * Number(pgPercent || 0)) / 100);
+    const total = subtotal + pgFee + Number(convenience || 0);
+    return { subtotal, pgFee, convenience, total };
+  }
+
+  function formatINRWithSpace(n) {
+    if (isNaN(n)) return '₹ 0';
+    // simple thousands separator
+    return '₹ ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  async function updateMobileAmount() {
+    const prices = await fetchPricesIfNeeded();
+    const shift = (shiftEl && shiftEl.value) || 'am';
+    const months = parseInt((durationEl && durationEl.value) || '1', 10) || 1;
+
+    // try to use user customPricing if available
+    let basePrice;
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (user && user.customPricing && user.customPricing[shift]) {
+        basePrice = Number(user.customPricing[shift]);
+      }
+    } catch (e) { /* ignore */ }
+
+    if (!basePrice) {
+      basePrice = (shift === 'full') ? (prices.full || 0) : (prices[shift] || 0);
+    }
+
+    const discount = getDiscountForDuration(prices.offers || [], months);
+
+    const paymentMode = (document.querySelector('input[name="paymentMode"]:checked') || {}).value || 'online';
+    const pgPercent = (paymentMode === 'cash') ? 0 : (prices.paymentGatewayFeePercent || 0);
+    const convenience = (paymentMode === 'cash') ? 100 : (prices.convenienceFee || 0);
+
+    const { total } = computeTotal(basePrice, months, discount, pgPercent, convenience);
+
+    // update the mobile amount span
+   // update the mobile amount using the centralized helper (keeps currency + numeric spans)
+updateMobileBarAmount(total);
+
+
+    // also update book button dataset so booking.js (if it reads it) can use it
+    if (bookBtn) bookBtn.dataset.amount = total;
+
+    return total;
+  }
+
+  // attach listeners
+  if (durationEl) durationEl.addEventListener('change', updateMobileAmount);
+  if (shiftEl) shiftEl.addEventListener('change', updateMobileAmount);
+  document.querySelectorAll('input[name="paymentMode"]').forEach(r => r.addEventListener('change', updateMobileAmount));
+
+  // run on load (small delay to let other scripts finish)
+  window.addEventListener('load', () => { setTimeout(updateMobileAmount, 150); });
+
+  // expose for manual calls
+  window.__Kanha_updateMobileAmount = updateMobileAmount;
+})();
+function updateMobileBarAmount(numericAmount) {
+  const mobileAmountEl = document.getElementById('mobile-amount');
+  if (!mobileAmountEl) return;
+  // if using structured HTML (currency + amount)
+  const amountNum = mobileAmountEl.querySelector('.amount-num');
+  if (amountNum) {
+    amountNum.textContent = new Intl.NumberFormat('en-IN', { maximumFractionDigits:0 }).format(numericAmount ? numericAmount : 0);
+    // ensure currency symbol exists
+    if (!mobileAmountEl.querySelector('.currency')) {
+      mobileAmountEl.insertAdjacentHTML('afterbegin', '<span class="currency">₹</span>');
+    }
+  } else {
+    // fallback: plain text
+    mobileAmountEl.textContent = '₹ ' + (numericAmount ? numericAmount : 0);
+  }
+}
+
+
+  document.getElementById("mobile-book-btn")
+    .addEventListener("click", () => {
+      document.getElementById("book-btn").click();
+    });
