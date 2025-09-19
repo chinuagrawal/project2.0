@@ -1024,7 +1024,47 @@ function showCashSubmittedModal(seatId = '', shift = '', startDate = '', endDate
   window.updateLiveCounter = updateLiveCounter;
 })();
 </script>
+<script>
+(function redirectToGoogleReviewAfterConfirmation() {
+  try {
+    // your Google Review link (exact as in your page)
+    const GOOGLE_REVIEW_URL = 'https://g.page/r/Cf-7qdOBhUw6EAI/review';
 
+    const modal = document.getElementById('confirmation-modal');
+    if (!modal) return;
+
+    const triggerRedirect = () => {
+      // wait 2 seconds while user sees the modal, then redirect
+      setTimeout(() => {
+        // navigate current tab to Google review page
+        window.location.href = GOOGLE_REVIEW_URL;
+
+        // If you'd prefer to open in a new tab instead, comment the line above
+        // and uncomment the line below:
+        // window.open(GOOGLE_REVIEW_URL, '_blank');
+      }, 2000);
+    };
+
+    // If modal already visible on load -> start timer immediately
+    if (!modal.classList.contains('hidden')) {
+      triggerRedirect();
+      return;
+    }
+
+    // Otherwise observe the modal's class attribute and trigger when it becomes visible
+    const obs = new MutationObserver((mutations, observer) => {
+      if (!modal.classList.contains('hidden')) {
+        triggerRedirect();
+        observer.disconnect();
+      }
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+  } catch (err) {
+    console.error('redirectToGoogleReviewAfterConfirmation error:', err);
+  }
+})();
+</script>
 
 
 
