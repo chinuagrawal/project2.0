@@ -1,0 +1,123 @@
+ /* ====================
+       CSS STYLES
+       ==================== */
+
+    /* ----- Google Font Import ----- */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+    /* ----- Base Styles ----- */
+    :root{
+      --primary-color: #1345ea;
+      --card-bg: #49a2f0;
+      --container-bg: #1e55a8;
+      --shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    
+
+    .testimonial-container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:0 15px;
+    }
+
+    
+    /* ----- Slider Wrapper ----- */
+    .slider-wrapper{
+      position:relative;
+      width:100%;
+      overflow:hidden; /* key for sliding */
+      padding: 0; /* keep no horizontal padding on mobile */
+    }
+
+    .testimonial-slider{
+      display:flex;
+      transition: transform 0.5s ease-in-out;
+      will-change: transform;
+      /* prevent small gaps from causing horizontal scroll */
+      gap: 0;
+    }
+
+    /* ----- Testimonial Card (Mobile First) ----- */
+    .testimonial-card{
+      flex: 0 0 100%; /* each card takes 100% width on mobile */
+      box-sizing: border-box;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin: 0; /* IMPORTANT: no horizontal margins on mobile */
+      text-align: center;
+      min-height: 200px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .testimonial-image{
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      object-fit:cover;
+      margin:0 auto 15px;
+      border:3px solid var(--primary-color);
+      display:block;
+      max-width:100%;
+    }
+
+    .testimonial-quote{
+      font-size:1rem;
+      font-style:italic;
+      margin-bottom:15px;
+      color:#252525;
+    }
+
+    .testimonial-name{
+      font-size:1.1rem;
+      font-weight:600;
+      margin:0;
+    }
+.testimonial-rating { /* Renamed from .testimonial-role */
+  font-size: 1rem;     /* Adjust size as needed */
+  color: #FFD700;      /* A gold color for the stars */
+  margin-top: 4px;
+  letter-spacing: 2px; /* Adds a little space between stars */
+}
+
+    /* ----- Laptop/Desktop Styles ----- */
+    @media (min-width: 768px){
+      
+
+      /* give cards margins and use narrower flex-basis on desktop */
+      .testimonial-card{
+        flex: 0 0 calc(25% - 20px); /* 4 cards per row roughly */
+        margin: 0 10px; /* horizontal spacing only on desktop */
+        text-align:left;
+        align-items: flex-start;
+      }
+
+      .testimonial-card .testimonial-image{
+        margin: 0 0 12px 0;
+      }
+
+      /* For the infinite scroll animation on desktop */
+      @keyframes infinite-scroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); } /* end at cloned set start */
+      }
+
+      .testimonial-slider{
+        animation: infinite-scroll 40s linear infinite;
+        transition: none; /* disable JS transition on desktop animation */
+      }
+
+      .slider-wrapper:hover .testimonial-slider{
+        animation-play-state: paused; /* pause on hover */
+      }
+    }
+
+    /* optional small tweak for very large screens */
+    @media (min-width: 1400px) {
+      .testimonial-container { max-width: 1400px; }
+    }
