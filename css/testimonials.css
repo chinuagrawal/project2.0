@@ -91,7 +91,7 @@
 
       /* give cards margins and use narrower flex-basis on desktop */
       .testimonial-card{
-        flex: 0 0 calc(25% - 20px); /* 4 cards per row roughly */
+        flex: 0 0 calc(25% - 5px); /* 4 cards per row roughly */
         margin: 0 10px; /* horizontal spacing only on desktop */
         text-align:left;
         align-items: flex-start;
