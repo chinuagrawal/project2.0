@@ -315,35 +315,24 @@ try {
     seatId, shift, startDate, endDate, email, txnId: data.merchantTransactionId
   }));
 
-  // ⚠️ Show warning UI
-  const warningElement = document.getElementById("payment-warning");
+  if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
+window.PhonePeCheckout.transact({
+  tokenUrl: data.redirectUrl,
+  callback: function (response) {
+    console.log("📦 PhonePe response:", response);
+    // No need to handle CONCLUDED here in REDIRECT mode
+  },
+  type: "REDIRECT"
+});
 
-  if (warningElement) {
-    warningElement.style.display = "flex";
 
-    // Wait 4 seconds, then redirect to PhonePe
-    setTimeout(() => {
-      if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
-        window.PhonePeCheckout.transact({
-          tokenUrl: data.redirectUrl,
-          callback: function (response) {
-            console.log("📦 PhonePe response:", response);
-          },
-          type: "REDIRECT"
-        });
-      } else {
-        alert("PhonePe SDK not loaded");
-      }
-    }, 2000);
-
-  } else {
-    console.warn("Element with ID 'payment-warning' not found.");
-  }
-
-} catch (err) {
-  console.error(err);
-  alert('Payment or booking failed.');
+} else {
+  alert("PhonePe SDK not loaded");
 }
+  } catch (err) {
+    console.error(err);
+    alert('Payment or booking failed.');
+  }
 });
 [startDateInput, durationInput, shiftInput].forEach(input => {
   input.addEventListener('change', () => {
