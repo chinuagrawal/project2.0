@@ -34,6 +34,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* ... existing CSS ... */
+
+/* New CSS for Back Button */
+#back-button {
+    position: absolute; /* Position it relative to the body */
+    top: var(--space-6); /* 1.5rem from the top */
+    left: var(--space-6); /* 1.5rem from the left */
+    z-index: 1000; /* Ensure it's above other elements */
+    
+    /* Styling */
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    text-decoration: none; /* Remove underline */
+    color: var(--gray-700);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+#back-button:hover {
+    background: var(--primary-50);
+    color: var(--primary-700);
+    border-color: var(--primary-500);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 480px) {
+    #back-button {
+        top: var(--space-4);
+        left: var(--space-4);
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.875rem;
+    }
+}
    /* Modern Booking System CSS */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -159,6 +202,7 @@ h1 {
   color: var(--gray-900);
   margin-bottom: var(--space-2);
   letter-spacing: -0.025em;
+  margin-top: var(--space-6);
 }
 
 label {
@@ -624,7 +668,9 @@ body {
 
 
 <body>
-  
+  <a href="#" id="back-button" aria-label="Go Back">
+        &#x2190; Back
+    </a>
   <div class="main-wrapper">
     <div class="container">
       <h1>Library Seat Booking</h1>
@@ -820,6 +866,12 @@ function updateMobileBarAmount(numericAmount) {
     });
 </script>
 
+<script>
+    document.getElementById('back-button').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default anchor link behavior
+        window.history.back(); // Navigate back in history
+    });
+</script>
 
 </body>
 </html>
