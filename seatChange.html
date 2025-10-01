@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Change Seat (Library)</title>
+  <style>
+    :root{
+      --glass-bg: rgba(255,255,255,0.08);
+      --glass-border: rgba(255,255,255,0.12);
+      --accent: #7dd3fc;
+      --muted: rgba(255,255,255,0.7);
+      --card-padding: 18px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    /* Background with mountain-like silhouette (CSS only) */
+    body{
+      min-height:100vh;
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg,#0f172a 0%, #071126 60%, #041225 100%);
+      color: white;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    /* simple mountain SVG positioned at bottom */
+    body::before{
+      content:"";
+      position:fixed;left:0;right:0;bottom:0;height:36vh;
+      background: radial-gradient(40% 60% at 20% 80%, rgba(125,211,252,0.06), transparent 10%), radial-gradient(40% 60% at 80% 90%, rgba(125,211,252,0.04), transparent 10%), linear-gradient(180deg, transparent, rgba(3,7,18,0.6) 20%);
+      mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300"><path fill="white" d="M0 220 L160 120 L300 200 L460 80 L640 180 L820 100 L1000 200 L1200 120 L1200 300 L0 300 Z"/></svg>');
+      mask-size:cover; mask-position:center; mask-repeat:no-repeat;
+      opacity:0.7; pointer-events:none;
+    }
+
+    .container{
+      width:100%;
+      max-width:1100px;
+      padding:32px;
+      box-sizing:border-box;
+    }
+
+    .card{
+      backdrop-filter: blur(8px) saturate(120%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid var(--glass-border);
+      border-radius:14px;
+      padding:var(--card-padding);
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:20px;
+    }
+
+    h1{margin:0 0 8px 0;font-size:20px}
+    p.lead{margin:0 0 20px 0;color:var(--muted);font-size:13px}
+
+    .form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    label{font-size:12px;color:var(--muted)}
+    input[type="text"], input[type="date"], select{
+      padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:white;font-size:14px;outline:none;
+    }
+
+    .shifts{display:flex;gap:8px}
+    .shifts button{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer}
+    .shifts button.active{background:linear-gradient(90deg,var(--accent), #60a5fa); color:#00223a; font-weight:600}
+
+    .seat-map{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:10px}
+    .seat{padding:10px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.04); text-align:center; font-weight:600; cursor:pointer; font-size:13px}
+    .seat.available{background: rgba(255,255,255,0.02); color:var(--muted)}
+    .seat.selected{background:linear-gradient(90deg,var(--accent), #60a5fa); color:#00223a; box-shadow: 0 6px 18px rgba(96,165,250,0.12)}
+    .seat.conflict{background: rgba(255,99,71,0.10); color:#ffddd0; border-color: rgba(255,99,71,0.18) }
+
+    .actions{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .btn.primary{background:linear-gradient(90deg,var(--accent), #60a5fa);color:#00223a}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    .right-col{display:flex;flex-direction:column;gap:12px}
+    .result{padding:12px;border-radius:8px;background:rgba(0,0,0,0.2);min-height:120px;overflow:auto;font-size:13px}
+
+    .info-row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .small{font-size:12px;color:var(--muted)}
+
+    footer.small{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+
+    @media (max-width:980px){
+      .card{grid-template-columns:1fr;}
+      .seat-map{grid-template-columns:repeat(4,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div>
+        <h1>Admin — Change Seat for User</h1>
+        <p class="lead">Pick a user, date range and the new seat. This UI uses your API <code>/api/admin/change-seat</code>.</p>
+
+        <div class="form-row">
+          <label>User Email</label>
+          <input id="email" type="text" placeholder="student@domain.com" />
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1" class="form-row">
+            <label>From</label>
+            <input id="fromDate" type="date" />
+          </div>
+          <div style="flex:1" class="form-row">
+            <label>To</label>
+            <input id="toDate" type="date" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Shifts</label>
+          <div class="shifts" id="shifts">
+            <button data-shift="am">AM</button>
+            <button data-shift="pm">PM</button>
+            <button data-shift="full">FULL</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Seat Map (click to select new seat)</label>
+          <div class="seat-map" id="seatMap">
+            <!-- seats generated by JS -->
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <div class="small">Selected seat:</div>
+            <div id="selectedSeat" class="small" style="font-weight:700">—</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Force override conflicts?</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="force" type="checkbox" />
+            <div class="small">When checked, admin will remove existing paid bookings that conflict on the chosen seat.</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn primary">Change Seat</button>
+          <button id="clearBtn" class="btn ghost">Clear</button>
+        </div>
+
+      </div>
+
+      <div class="right-col">
+        <div class="info-row">
+          <div>
+            <div class="small">Preview & Server Response</div>
+            <div class="small">API: <code>/api/admin/change-seat</code></div>
+          </div>
+          <div>
+            <div class="small">Seats: <strong id="totalSeats">34</strong></div>
+          </div>
+        </div>
+
+        <div class="result" id="result">Result will appear here.</div>
+
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <button id="refreshAvailability" class="btn ghost">Refresh Availability</button>
+          <div class="small">Tip: Click a seat to pick it. Use force only with care.</div>
+        </div>
+
+        <footer class="small">Admin actions are audited in your server. This page does not send notifications — implement email notify in server for best UX.</footer>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Config
+    const TOTAL_SEATS = 34; // adjust if needed
+
+    // Elements
+    const seatMap = document.getElementById('seatMap');
+    const selectedSeatEl = document.getElementById('selectedSeat');
+    const totalSeatsEl = document.getElementById('totalSeats');
+    const shiftsEl = document.getElementById('shifts');
+    const resultEl = document.getElementById('result');
+    const submitBtn = document.getElementById('submitBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const refreshBtn = document.getElementById('refreshAvailability');
+
+    totalSeatsEl.textContent = TOTAL_SEATS;
+
+    // state
+    let selectedSeat = null;
+    let selectedShifts = [];
+
+    // build seat map
+    function buildSeatMap(){
+      seatMap.innerHTML = '';
+      for(let i=1;i<=TOTAL_SEATS;i++){
+        const id = i;
+        const el = document.createElement('div');
+        el.className = 'seat available';
+        el.textContent = id;
+        el.dataset.seat = id;
+        el.addEventListener('click', () => selectSeat(el));
+        seatMap.appendChild(el);
+      }
+    }
+
+    function selectSeat(el){
+      // deselect previous
+      [...seatMap.children].forEach(c=>c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedSeat = el.dataset.seat;
+      selectedSeatEl.textContent = selectedSeat;
+    }
+
+    // shifts toggling
+    shiftsEl.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('button[data-shift]');
+      if(!btn) return;
+      const shift = btn.dataset.shift.toLowerCase();
+      if(btn.classList.contains('active')){
+        btn.classList.remove('active');
+        selectedShifts = selectedShifts.filter(s=>s!==shift);
+      } else {
+        btn.classList.add('active');
+        selectedShifts.push(shift);
+      }
+    });
+
+    // clear form
+    clearBtn.addEventListener('click', () => {
+      document.getElementById('email').value = '';
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      selectedShifts = [];
+      [...shiftsEl.querySelectorAll('button')].forEach(b=>b.classList.remove('active'));
+      selectedSeat = null; selectedSeatEl.textContent = '—';
+      resultEl.textContent = 'Result will appear here.';
+      buildSeatMap();
+    });
+
+    // submit handler
+    submitBtn.addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      const force = document.getElementById('force').checked;
+
+      if(!email || !fromDate || !toDate || selectedShifts.length===0 || !selectedSeat){
+        alert('Please provide email, date range, shifts and select a seat.');
+        return;
+      }
+
+      // prepare payload
+      const payload = { email, fromDate, toDate, shifts: selectedShifts, newSeatId: selectedSeat, force };
+
+      resultEl.textContent = 'Sending request...';
+
+      try {
+        const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/admin/change-seat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(res.status === 409){
+          // conflicts — show nicely and offer to force
+          resultEl.innerHTML = `<div><strong>Conflicts detected:</strong> ${data.conflictCount || data.conflicts?.length || 0}</div><pre>${JSON.stringify(data.conflicts || data, null, 2)}</pre>`;
+          const doForce = confirm('Conflicts found. Do you want to force override (this will remove conflicting bookings)?');
+          if(doForce){
+            // call again with force=true
+            payload.force = true;
+            resultEl.textContent = 'Forcing override...';
+            const r2 = await fetch('https://kanha-backend-yfx1.onrender.com/api/admin/change-seat', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+            const d2 = await r2.json();
+            if(!r2.ok) throw d2;
+            resultEl.innerHTML = `<div><strong>Force succeeded.</strong></div><pre>${JSON.stringify(d2, null, 2)}</pre>`;
+          }
+        } else if(!res.ok){
+          resultEl.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          alert('Request failed — check console for details');
+        } else {
+          resultEl.innerHTML = `<div><strong>Success</strong></div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+      } catch (err) {
+        console.error('Admin change-seat error:', err);
+        resultEl.textContent = 'Error: ' + (err.message || JSON.stringify(err));
+      }
+    });
+
+    // refresh availability — naive: calls your /api/bookings to find paid bookings and mark them as conflict
+    refreshBtn.addEventListener('click', async () => {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      const shifts = selectedShifts;
+      if(!fromDate || !toDate || shifts.length===0){ alert('Set date range and shifts first to refresh availability'); return; }
+
+      resultEl.textContent = 'Checking availability...';
+      // fetch bookings between dates
+      try {
+        const qs = new URLSearchParams({ startDate: fromDate, endDate: toDate });
+        const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/bookings?' + qs.toString());
+        const booked = await res.json();
+        // build set of seat+date+shift combos that are paid
+        const occupied = new Set(booked.filter(b=>b.status==='paid').map(b=>`${b.seatId}||${b.date}||${b.shift}`));
+
+        // mark seats that have any conflict for the selected shifts/dates
+        [...seatMap.children].forEach(s => {
+          s.classList.remove('conflict');
+          s.classList.add('available');
+        });
+
+        // for each seat, if any of the dates/shifts conflict, mark as conflict
+        const dates = getDateArray(fromDate, toDate);
+        for(const seatEl of seatMap.children){
+          const id = seatEl.dataset.seat;
+          let has = false;
+          for(const d of dates){
+            for(const sh of shifts){
+              if(occupied.has(`${id}||${d}||${sh}`)) { has = true; break; }
+            }
+            if(has) break;
+          }
+          if(has){ seatEl.classList.add('conflict'); seatEl.classList.remove('available'); }
+        }
+
+        resultEl.textContent = 'Availability updated. Conflicting seats are highlighted in red-ish color.';
+      } catch (err){
+        console.error(err); resultEl.textContent = 'Failed to check availability.';
+      }
+    });
+// format a Date to YYYY-MM-DD using local date components (no timezone shift)
+function formatDateLocal(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+    function getDateArray(start, end){
+  const arr = [];
+  const s = new Date(start);
+  const e = new Date(end);
+  // normalize to local midnight
+  s.setHours(0,0,0,0);
+  e.setHours(0,0,0,0);
+  const cur = new Date(s);
+  while (cur <= e) {
+    arr.push(formatDateLocal(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return arr;
+}
+
+    // init
+    buildSeatMap();
+
+  </script>
+</body>
+</html>

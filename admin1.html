@@ -233,8 +233,9 @@ iframe {
     <br>
     <br>
     <h2>Admin</h2>
-    <a onclick="loadSeatStatus()">Seat Status</a>
     <a onclick="loadCashRequestPage()">Cash Requests</a>
+    <a onclick="loadSeatStatus()">Seat Status</a>
+    <a onclick="loadseatChange()">Change seat</a>
     <a onclick="loadRecentBookings()">Recent Bookings</a>
     <a onclick="loadregisteredUsers()">Registered Users</a>
     <a onclick="loadpriceChange()">Price</a>
@@ -312,6 +313,13 @@ document.querySelectorAll(".sidebar a").forEach(link => {
     function loadcustomPrice() {
       const iframe = document.createElement('iframe');
       iframe.src = 'customPrice.html';
+      const mainContent = document.getElementById('mainContent');
+      mainContent.innerHTML = '';
+      mainContent.appendChild(iframe);
+    }
+    function loadseatChange() {
+      const iframe = document.createElement('iframe');
+      iframe.src = 'seatChange.html';
       const mainContent = document.getElementById('mainContent');
       mainContent.innerHTML = '';
       mainContent.appendChild(iframe);

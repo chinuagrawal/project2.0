@@ -465,6 +465,8 @@ app.get('/api/payment/status', async (req, res) => {
   }
 });
 
+const seatchangeRoutes = require('./routes/seatchange');
+app.use('/api/admin', seatchangeRoutes);
 
 
 // Start Server
