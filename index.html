@@ -595,6 +595,7 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
     const container = document.getElementById(row.id);
     if (!container) return;
 
+    // If row2 should have AC icons at ends
     if (row.id === 'row2') {
       const leftAC = document.createElement('div');
       leftAC.className = 'ac-icon';
@@ -606,6 +607,9 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
       const div = document.createElement('div');
       div.className = 'seat-box';
       div.textContent = `${seatCounter}`;
+      // IMPORTANT: add a stable data attribute and id
+      div.dataset.seatid = String(seatCounter);
+      div.id = `seat-${seatCounter}`;
       container.appendChild(div);
       seatCounter++;
     }
@@ -619,8 +623,8 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
   });
 }
 
-
-   async function loadAvailability(date) {
+// --- Replace your loadAvailability with this ---
+async function loadAvailability(date) {
   if (!date) return;
   const API_BASE = 'https://kanha-backend-yfx1.onrender.com/api';
 
@@ -628,24 +632,45 @@ document.querySelectorAll(".extend-btn").forEach(btn => {
     const response = await fetch(`${API_BASE}/bookings?date=${date}`);
     const bookings = await response.json();
 
+    // Debug: log bookings for seat 28 specifically
+    console.log('Bookings response (total):', Array.isArray(bookings) ? bookings.length : bookings);
+    try {
+      const seat28 = (Array.isArray(bookings) && bookings.find(b => String(b.seatId).trim() === '28'));
+      console.log('Seat 28 booking records (raw):', seat28 || 'none');
+    } catch (e) { /* ignore */ }
+
+    // Build normalized map: seatIdString -> array of uppercase shifts
     const seatStatus = {};
-    bookings.forEach(b => {
-      if (!seatStatus[b.seatId]) seatStatus[b.seatId] = [];
-      seatStatus[b.seatId].push(b.shift.toUpperCase());
+    (Array.isArray(bookings) ? bookings : []).forEach(b => {
+      const sid = String(b.seatId ?? b.seat ?? '').trim();
+      if (!sid) return;
+      const shift = String(b.shift ?? '').trim().toUpperCase();
+      if (!seatStatus[sid]) seatStatus[sid] = new Set();
+      seatStatus[sid].add(shift);
+    });
+
+    // convert sets to arrays for easier checks (optional)
+    Object.keys(seatStatus).forEach(k => {
+      seatStatus[k] = Array.from(seatStatus[k]);
     });
 
     const seats = document.querySelectorAll('.seat-box');
     seats.forEach(seat => {
-      const seatId = seat.textContent.trim();
+      // Use the data attribute — far more robust than textContent
+      const seatId = String(seat.dataset.seatid || seat.textContent).trim();
       const shifts = seatStatus[seatId] || [];
 
       let bg = "white";
+      // treat "FULL" or both AM & PM as fully booked
       if (shifts.includes("FULL") || (shifts.includes("AM") && shifts.includes("PM"))) {
         bg = "red";
       } else if (shifts.includes("PM") && !shifts.includes("AM")) {
         bg = "purple";
-      } else if (shifts.length === 1) {
+      } else if (shifts.includes("AM") && !shifts.includes("PM")) {
+        // explicit AM-only -> orange
         bg = "orange";
+      } else {
+        bg = "white";
       }
 
       seat.style.backgroundColor = bg;
