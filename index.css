@@ -45,7 +45,20 @@ html {
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: var(--background-dark);
+ background: linear-gradient(90deg, #0f2027, #2c5364, #32a89b);
+/*background: linear-gradient(135deg, #0f1022 0%, #1c1f4a 40%, #2b104f 100%);
+background: linear-gradient(120deg, #012a4a 0%, #013a63 45%, #02577a 100%);
+background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+background: linear-gradient(120deg, #2b0030 0%, #6a11cb 40%, #2575fc 100%);*/
+
+
+
+
+
+
+
+
+
   color: var(--text-primary);
   line-height: 1.7;
   overflow-x: hidden; /* Prevent horizontal scroll */
