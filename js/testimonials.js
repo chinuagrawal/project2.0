@@ -1,40 +1,60 @@
-document.addEventListener("DOMContentLoaded", function() {
-      const slider = document.querySelector(".testimonial-slider");
-      const testimonials = Array.from(document.querySelectorAll(".testimonial-card"));
-      const screenWidth = window.innerWidth;
+(function () {
+  const slider = document.querySelector(".testimonial-slider");
+  if (!slider) return;
 
-      // --- Logic for DESKTOP (Infinite Scroll) ---
-      if (screenWidth >= 768) {
-        // Clone all testimonials and append them to the slider
-        // so the CSS animation can scroll through a repeating set.
-        testimonials.forEach(card => {
-          const clone = card.cloneNode(true);
-          slider.appendChild(clone);
-        });
-      }
-      // --- Logic for MOBILE (Auto-Swap) ---
-      else {
-        let currentIndex = 0;
-        const totalTestimonials = testimonials.length;
+  const ORIGINAL_CARDS = Array.from(document.querySelectorAll(".testimonial-card"));
+  const BREAKPOINT = 768;
+  let mode = window.innerWidth >= BREAKPOINT ? "desktop" : "mobile";
+  let intervalId = null;
+  let currentIndex = 0;
 
-        // Ensure the slider uses transitions on mobile (CSS animation disabled there)
-        slider.style.transition = 'transform 0.5s ease-in-out';
+  function clearIntervalIfAny() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
 
-        function showNextTestimonial() {
-          currentIndex = (currentIndex + 1) % totalTestimonials;
-          const offset = -currentIndex * 100; // move by 100% increments (cards are 100% width)
-          slider.style.transform = `translateX(${offset}%)`;
-        }
+  function renderOriginals() {
+    slider.innerHTML = "";
+    ORIGINAL_CARDS.forEach(card => slider.appendChild(card.cloneNode(true)));
+  }
 
-        // Automatically swap testimonials every 5 seconds (5000ms)
-        setInterval(showNextTestimonial, 3000);
-      }
-    });
+  function setupDesktop() {
+    clearIntervalIfAny();
+    renderOriginals();
+    Array.from(slider.children).forEach(c => slider.appendChild(c.cloneNode(true)));
+    slider.style.transition = "";
+    slider.style.transform = "";
+  }
 
-    // Optional: if the user resizes window make a simple reload to re-evaluate layout.
-    // (Helps when rotating phone; remove if you don't want reloads)
-    window.addEventListener('resize', () => {
-      // small debounce
-      clearTimeout(window._resizeTO);
-      window._resizeTO = setTimeout(() => location.reload(), 300);
-    });
+  function setupMobile() {
+    clearIntervalIfAny();
+    renderOriginals();
+    slider.style.transition = "transform 0.5s ease-in-out";
+    currentIndex = 0;
+    slider.style.transform = "translateX(0%)";
+
+    intervalId = setInterval(() => {
+      const total = ORIGINAL_CARDS.length;
+      currentIndex = (currentIndex + 1) % total;
+      slider.style.transform = `translateX(${-currentIndex * 100}%)`;
+    }, 3000);
+  }
+
+  if (mode === "desktop") setupDesktop();
+  else setupMobile();
+
+  let lastWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    const newWidth = window.innerWidth;
+    if (Math.abs(newWidth - lastWidth) < 50) { lastWidth = newWidth; return; }
+    const newMode = newWidth >= BREAKPOINT ? "desktop" : "mobile";
+    if (newMode !== mode) {
+      mode = newMode;
+      if (mode === "desktop") setupDesktop();
+      else setupMobile();
+    }
+    lastWidth = newWidth;
+  });
+})();
