@@ -103,7 +103,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
     const data = await res.json();
 
     if (res.ok) {
-      alert("Login successful!");
+      
       localStorage.setItem("user", JSON.stringify(data.user));
       if (data.user.role === "admin") {
         window.location.href = "admin.html";

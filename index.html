@@ -756,7 +756,7 @@ if (trackEl && slidesCount > 1) {
       bookNowBtn.addEventListener("click", () => {
         const user = localStorage.getItem("user");
         if (!user) {
-          alert("Please log in first.");
+          
           window.location.href = "login.html";
         } else {
           window.location.href = "booking.html";
