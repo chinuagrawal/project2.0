@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password</title>
+  <link rel="stylesheet" href="./login.css">
+</head>
+<body>
+  <div class="login">
+    <form id="reset-form" class="login__form">
+      <h1 class="login__title">Reset Password</h1>
+
+      <div class="login__box">
+        <i class="ri-lock-2-line login__icon"></i>
+        <div class="login__box-input">
+          <input type="password" id="newPassword" required class="login__input" placeholder=" " />
+          <label class="login__label">New Password</label>
+        </div>
+      </div>
+
+      <button type="submit" class="login__button">Reset Password</button>
+    </form>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    document.getElementById("reset-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const newPassword = document.getElementById("newPassword").value;
+
+      const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, newPassword })
+      });
+
+      const data = await res.json();
+      alert(data.message);
+      if (res.ok) window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+
 
 
 // Signup route
@@ -92,7 +94,7 @@ router.post('/login', async (req, res) => {
 
 
 // POST /api/forgot-password
-app.post("/api/forgot-password", async (req, res) => {
+router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -110,8 +112,8 @@ app.post("/api/forgot-password", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "yourlibraryemail@gmail.com",
-        pass: "your-app-password" // use app password if Gmail
+        user: "thechinmayagrawal@gmail.com",
+        pass: "bhyq xafx opjq cnol" // use app password if Gmail
       },
     });
 
@@ -132,7 +134,7 @@ app.post("/api/forgot-password", async (req, res) => {
 });
 
 // POST /api/reset-password
-app.post("/api/reset-password", async (req, res) => {
+router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
   try {
