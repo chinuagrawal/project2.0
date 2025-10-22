@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema({
   password:  { type: String, required: true },
   role:      { type: String, enum: ['user', 'admin'], default: 'user' },
   blocked: { type: Boolean, default: false }, // ✅ NEW
+
+  // In userSchema
+resetPasswordToken: String,
+resetPasswordExpires: Date,
+
   customPricing: {
     am: Number,
     pm: Number,
@@ -23,5 +28,6 @@ const userSchema = new mongoose.Schema({
     convenienceFee: Number
   }
 }, { timestamps: true });
+
 
 module.exports = mongoose.model('User', userSchema);
