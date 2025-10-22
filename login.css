@@ -217,3 +217,28 @@ img {
     font-size: 2rem;
   }
 }
+
+body {
+  background-color: #f5f6fa;
+  color: #333;
+}
+
+.login__form {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.login__input {
+  color: #000;
+}
+
+.login__label {
+  color: #555;
+}
+
+.login__button {
+  background-color: #243b55;
+  color: #fff;
+}
