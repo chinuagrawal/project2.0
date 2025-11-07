@@ -28,6 +28,7 @@
   <title>Kanha Library Seat Booking - best library in kota</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="./index.css?v=1.3.5">
+  <link rel="stylesheet" href="./css/offer.css?v=1.0.0">
   <link rel="stylesheet" href="./css/testimonials.css?v=1.0.2">
   
   
@@ -45,66 +46,34 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
-  <!-- SIMPLE OFFERS POPUP (paste right after <header>) -->
-<style>
-  /* minimal responsive modal */
-  #offers-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 9999; }
-  #offers-modal .overlay { position:absolute; inset:0; background: rgba(0,0,0,0.45); }
-  #offers-modal .card {
-    position: relative;
-    z-index: 2;
-    width: 92%;
-    max-width: 720px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 18px;
-    box-shadow: 0 14px 35px rgba(0,0,0,0.22);
-    font-family: "Poppins", system-ui, Arial;
-    color: #222;
-  }
-  #offers-modal h3 { margin: 0 0 8px 0; font-size: 1.2rem; }
-  .offers-text { margin-top: 10px; line-height: 1.45; color:#444; }
-  .offers-item { margin: 10px 0; padding: 8px 10px; border-radius:6px; background: #f7f7f7; }
-  .close-offers { position:absolute; right:12px; top:12px; background:#ef5350; color:#fff; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
-  @media (max-width:460px){
-    #offers-modal .card { padding:14px; border-radius:8px; }
-    #offers-modal h3 { font-size:1.05rem; }
-  }
-</style>
+<!-- ENHANCED ANIMATED OFFER POPUP (place right after <header>) -->
 
-<div id="offers-modal" role="dialog" aria-modal="true" aria-label="Current offers">
-  <div class="overlay" onclick="document.getElementById('offers-modal').style.display='none'"></div>
-  <div class="card">
+<div id="offers-modal" role="dialog" aria-modal="true" aria-label="Current offers" aria-hidden="true">
+  <div class="card floating" role="document" aria-labelledby="offers-title">
     <button class="close-offers" id="closeOffersBtn" aria-label="Close offers">✕</button>
 
-    <h3>🔥Offers — Kanha Library</h3>
-    <div class="offers-text">
-      <div class="offers-item"><strong>Book 2 months → Get 70₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase minimum 2 months of any shift and Get discount of 70rs.</div></div>
-      <div class="offers-item"><strong>Book 3 months → Get 150₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase minimum 3 months of any shift and Get discount of 150rs.</div></div>
-      <div class="offers-item"><strong>Book 6 months → Get 450₹ discount</strong><div style="font-size:0.95rem; color:#555;">Purchase minimum 6 months of any shift and Get discount of 450rs.</div></div>
-      <div class="offers-item"><strong>Referral — ₹100 OFF for both</strong><div style="font-size:0.95rem; color:#555;">Invite your freind to our library. When they book, both of you get ₹100 off.</div></div>
-
- 
-      <div style="margin-top:10px; font-size:0.95rem; color:#666;">
-        <em>Note:</em> For details or to use an offer, visit the booking page or contact us at +91 8870969514 on Whatsapp.
-      </div>
+    <div class="offer-header">
+      <h3 id="offers-title"><span class="offer-emoji">🔥</span> Kanha Library — Exclusive Offers</h3>
     </div>
+
+    <div class="offers-grid" aria-live="polite">
+     
+      <div class="offer">💸 Book 4 months → ₹400 OFF</div>
+      <div class="offer">🌟 Book 6 months → ₹800 OFF</div>
+      <div class="offer">🏆 Book 12 months → ₹2400 OFF</div>
+       <div class="offer">🎁 Referral — ₹100 OFF for
+        <br> both(Invite a friend)</div>
+    </div>
+
+    <div class="divider" role="separator" aria-hidden="true"></div>
+
+    <button class="book-seat-btn pulse" id="bookSeatBtn" onclick="location.href='booking.html'">Book Seat</button>
   </div>
 </div>
 
-<script>
-  // show modal once per session (remove sessionStorage check if you want it every load)
-  document.addEventListener('DOMContentLoaded', () => {
-    if (!sessionStorage.getItem('offersSeen')) {
-      document.getElementById('offers-modal').style.display = 'flex';
-      sessionStorage.setItem('offersSeen','1');
-    }
-    document.getElementById('closeOffersBtn').addEventListener('click', () => {
-      document.getElementById('offers-modal').style.display = 'none';
-    });
-  });
-</script>
 
+
+ 
 
   <header>
     <div class="logo-title">
@@ -254,12 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </section>
 
-<!--
-  <section>
-    <iframe src='https://widgets.sociablekit.com/google-reviews/iframe/25586921' frameborder='0' width='100%' height='400'></iframe>
-  </section>
-  -->
-  
+
   <!-- TESTIMONIAL -->
   
   <section class="testimonial-container" id="testimonials">
@@ -305,70 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <script type="text/javascript" src="https://grwapi.net/widget.min.js" async></script>
 <div class="review-widget_net" data-uuid="c43e6766-44f0-44b2-988f-cef27d47875b" data-template="10" data-lang="en" data-theme="dark">Unable to load widget</div>
   </section>
-  <!--
-    <div id="map" style="display:none;"></div>
-    
-    <div id="google-reviews-container">
-      <div id="google-reviews">Loading reviews...</div>
-  <a id="write-review-btn" class="review-button" target="_blank">Write a Review</a>
-</div>
-
-<script>
-let currentSlide = 0;
-let totalSlides = 0;
-
-function initMap() {
-  const placeId = "ChIJNb-kHXubbzkR_7up04GFTDo";
-  const service = new google.maps.places.PlacesService(document.getElementById("map"));
   
-  service.getDetails(
-    {
-      placeId: placeId,
-      fields: ["name", "rating", "reviews", "url"]
-    },
-    (place, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        document.getElementById("write-review-btn").href = "https://g.page/r/Cf-7qdOBhUw6EAI/review";
-        
-        let html = `<h3>${place.name} <span>⭐ ${place.rating}</span></h3>`;
-        
-        html += `<div class="reviews-row" id="reviews-slider">`;
-        
-        const sortedReviews = place.reviews.sort((a, b) => b.time - a.time);
-        
-        sortedReviews.forEach(r => {
-          html += `
-            <div class="review">
-              <strong>${r.author_name}</strong>
-              <div class="review-stars">⭐ ${r.rating}</div>
-              <div class="review-text">${r.text}</div>
-            </div>
-          `;
-        });
-        
-        html += `</div>`;
-        
-        document.getElementById("google-reviews").innerHTML = html;
-
-        totalSlides = Math.ceil(sortedReviews.length / 3);
-        setInterval(slideReviews, 2000);
-      } else {
-        document.getElementById("google-reviews").innerHTML = "Unable to load reviews.";
-      }
-    }
-  );
-}
-
-function slideReviews() {
-  const slider = document.getElementById("reviews-slider");
-  currentSlide = (currentSlide + 1) % totalSlides;
-  slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-}
-</script>
-
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD_Fjj7bQLrU0JU74Yab74oOBvKvztLqw&libraries=places&callback=initMap"></script>
-
--->
 <section>
 
 
@@ -872,16 +773,6 @@ function showCashSubmittedModal(seatId = '', shift = '', startDate = '', endDate
 </div>
 
 
-<!-- Start of OpenWidget (www.openwidget.com) code -->
-<script>
-  window.__ow = window.__ow || {};
-  window.__ow.organizationId = "19b7c8ac-511a-4b96-9aea-88d266dc2893";
-  window.__ow.integration_name = "manual_settings";
-  window.__ow.product_name = "openwidget";   
-  ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[OpenWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.openwidget.com/openwidget.js",t.head.appendChild(n)}};!n.__ow.asyncInit&&e.init(),n.OpenWidget=n.OpenWidget||e}(window,document,[].slice))
-</script>
-<noscript>You need to <a href="https://www.openwidget.com/enable-javascript" rel="noopener nofollow">enable JavaScript</a> to use the communication tool powered by <a href="https://www.openwidget.com/" rel="noopener nofollow" target="_blank">OpenWidget</a></noscript>
-<!-- End of OpenWidget code -->
 
 
 <script>
@@ -1141,6 +1032,7 @@ function showCashSubmittedModal(seatId = '', shift = '', startDate = '', endDate
 })();
 </script>
 <script src="./js/testimonials.js?v=1.0.2"></script>
+<script src="./js/offer.js?v=1.0.0"></script>
 
 
 </body>
