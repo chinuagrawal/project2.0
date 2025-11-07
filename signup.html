@@ -280,6 +280,30 @@
       .visual { order:2; }
       .card { order:1; }
     }
+@media (max-width: 520px) {
+  body {
+    align-items: flex-start;
+    padding-top: 20px; /* move form down slightly */
+  }
+
+  .wrap {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .card {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .visual {
+    text-align: center;
+    padding: 10px;
+  }
+}
 
     @media (max-width:520px){
       .visual h1 { font-size:1.6rem; }
