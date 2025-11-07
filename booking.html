@@ -839,7 +839,7 @@ section {
 
     const paymentMode = (document.querySelector('input[name="paymentMode"]:checked') || {}).value || 'online';
     const pgPercent = (paymentMode === 'cash') ? 0 : (prices.paymentGatewayFeePercent || 0);
-    const convenience = (paymentMode === 'cash') ? 100 : (prices.convenienceFee || 0);
+    const convenience = (paymentMode === 'cash') ? 20 : (prices.convenienceFee || 0);
 
     const { total } = computeTotal(basePrice, months, discount, pgPercent, convenience);
 
