@@ -290,7 +290,7 @@ async function updateAmount() {
 
   // ✅ For cash: PG fee = 0, Convenience fee = 100
   const pgPercent = paymentMode === 'cash' ? 0 : priceSettings.paymentGatewayFeePercent;
-  const convenienceFee = paymentMode === 'cash' ? 100 : priceSettings.convenienceFee;
+  const convenienceFee = paymentMode === 'cash' ? 20 : priceSettings.convenienceFee;
 
   const { subtotal, pgFee, convenience, total } = getTotalAmount(
     basePrice,
