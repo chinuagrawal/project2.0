@@ -240,6 +240,37 @@ async function fetchPrices() {
   priceSettings = await res.json();
   window.priceSettings = priceSettings; // Expose globally for mobile bar logic
 }
+// === After your fetchPrices() definition ===
+
+async function fetchPricesForLabels() {
+  const API_URL = 'https://kanha-backend-yfx1.onrender.com/api/prices';
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('Failed to fetch prices');
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.warn('Using fallback prices due to error:', err);
+    return { am: 600, pm: 600, full: 800 };
+  }
+}
+
+async function updateShiftLabelsWithPrices() {
+  const prices = await fetchPricesForLabels();
+  const shiftSelect = document.getElementById("shift");
+  if (!shiftSelect) return;
+
+  const amPrice = prices.am || prices.AM || 0;
+  const pmPrice = prices.pm || prices.PM || 0;
+  const fullPrice = prices.full || prices.Full || 0;
+
+  shiftSelect.querySelector('option[value="am"]').textContent = `🌅Morning |7 AM - 2 PM| (₹${amPrice})`;
+  shiftSelect.querySelector('option[value="pm"]').textContent = `🌃Evening |2 PM - 10 PM| (₹${pmPrice})`;
+  shiftSelect.querySelector('option[value="full"]').textContent = `☀️Full Day |7 AM - 10 PM| (₹${fullPrice})`;
+}
+
+// ✅ Run this as soon as the DOM is ready (before your window.onload)
+document.addEventListener("DOMContentLoaded", updateShiftLabelsWithPrices);
 
 function getDiscount(duration) {
   // ... (Existing logic remains) ...
