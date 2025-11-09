@@ -290,7 +290,7 @@ document.querySelectorAll(".sidebar a").forEach(link => {
 
     function loadRecentBookings() {
       const iframe = document.createElement('iframe');
-      iframe.src = 'recent-booking.html';
+      iframe.src = 'recent-booking.html?v=1.0.2';
       const mainContent = document.getElementById('mainContent');
       mainContent.innerHTML = '';
       mainContent.appendChild(iframe);
