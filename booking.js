@@ -19,40 +19,68 @@ function formatDate(dateStr) {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
 }
-
 function groupBookings(bookings) {
-    // Existing grouping logic from the HTML (copied for completeness)
-    const groups = [];
-    bookings.sort((a, b) => {
-        if (a.seatId !== b.seatId) return a.seatId.localeCompare(b.seatId);
-        if (a.shift !== b.shift) return a.shift.localeCompare(b.shift);
-        return new Date(a.date) - new Date(b.date);
-    });
+    if (!Array.isArray(bookings) || bookings.length === 0) return [];
 
-    for (let i = 0; i < bookings.length; i++) {
-        const current = bookings[i];
-        const lastGroup = groups[groups.length - 1];
-        const currentDate = new Date(current.date);
-        const lastDate = lastGroup ? new Date(lastGroup.end) : null;
+    // STEP 1 — Normalize and sort correctly
+    const normalized = bookings.map(b => ({
+        ...b,
+        dateObj: new Date(b.date)
+    }));
 
-        if (
-            lastGroup &&
-            lastGroup.seatId === current.seatId &&
-            lastGroup.shift === current.shift &&
-            currentDate.getTime() === lastDate.getTime() + 86400000
-        ) {
-            lastGroup.end = current.date;
-        } else {
-            groups.push({
-                seatId: current.seatId,
-                shift: current.shift,
-                start: current.date,
-                end: current.date,
-            });
-        }
-    }
-    return groups;
+    normalized.sort((a, b) => a.dateObj - b.dateObj);
+
+    const groups = [];
+    let group = null;
+
+    for (let i = 0; i < normalized.length; i++) {
+        const curr = normalized[i];
+        const currTime = curr.dateObj.getTime();
+
+        if (!group) {
+            // Start first group
+            group = {
+                seatId: curr.seatId,
+                shift: curr.shift,
+                start: curr.date,
+                end: curr.date
+            };
+            continue;
+        }
+
+        const lastEnd = new Date(group.end).getTime();
+        const nextExpected = lastEnd + 86400000;
+
+        // CASE 1 — SAME DAY duplicate → ignore it
+        if (currTime === lastEnd) {
+            continue;
+        }
+
+        // CASE 2 — Consecutive day → merge
+        if (
+            curr.seatId === group.seatId &&
+            curr.shift === group.shift &&
+            currTime === nextExpected
+        ) {
+            group.end = curr.date;
+        }
+
+        // CASE 3 — Not consecutive → push previous group and start new
+        else {
+            groups.push(group);
+            group = {
+                seatId: curr.seatId,
+                shift: curr.shift,
+                start: curr.date,
+                end: curr.date
+            };
+        }
+    }
+
+    if (group) groups.push(group);
+    return groups;
 }
+
 
 /**
  * Sets the page to the 'Extend Booking' flow using the most recent booking.
@@ -148,6 +176,7 @@ async function checkAndLoadBookings() {
         const res = await fetch(`${API_BASE}/bookings?email=${user.email}`);
         const userBookings = await res.json();
         const grouped = groupBookings(userBookings);
+        userBookingsData = grouped;
 
         const urlParams = new URLSearchParams(window.location.search);
         const isForceNewBooking = urlParams.get('new') === '1';
@@ -162,6 +191,8 @@ async function checkAndLoadBookings() {
         
         // Update the My Bookings section UI
         updateMyBookingsUI(grouped);
+console.log("GROUPED INPUT:", userBookingsData);
+
 
     } catch (err) {
         console.error("Error loading user bookings for default logic:", err);
@@ -221,6 +252,8 @@ const durationInput = document.getElementById('duration');
 const shiftInput = document.getElementById('shift');
 const totalSeats = 34;
 let bookings = [];
+let userBookingsData = [];   // <-- REAL USER BOOKINGS SAFE STORAGE
+
 
 // REMOVE these since the new logic handles extension via globals and functions
 // const urlParams = new URLSearchParams(window.location.search);
@@ -623,7 +656,7 @@ window.onload = async () => {
   }
 
   // 3. Fetch bookings and update UI based on the determined mode
-  await fetchBookings();
+  
   
   // Ensure the correct seat is selected after seat map renders in EXTEND mode
   if(window.isExtensionMode) {
@@ -645,6 +678,9 @@ window.onload = async () => {
 });
 
   await updateAmount();
+setTimeout(() => {
+    fetchBookings();
+}, 300);
 };
 
 
