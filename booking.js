@@ -176,21 +176,38 @@ async function checkAndLoadBookings() {
         const res = await fetch(`${API_BASE}/bookings?email=${user.email}`);
         const userBookings = await res.json();
         const grouped = groupBookings(userBookings);
-        userBookingsData = grouped;
+if (grouped.length > 0) {
+    grouped.sort((a, b) => new Date(b.end) - new Date(a.end));
+
+    const latestSeat = grouped[0]; // This already has max end-date
+const latestSeatId = latestSeat.seatId;
+const latestShift = latestSeat.shift;
+
+// STEP 2: Keep only this seat+shift bookings
+userBookingsData = grouped.filter(b => 
+    b.seatId === latestSeatId && b.shift === latestShift
+);
+} else {
+    userBookingsData = [];
+}
+
+        
 
         const urlParams = new URLSearchParams(window.location.search);
         const isForceNewBooking = urlParams.get('new') === '1';
+// 🔥 Show only latest seat bookings
 
-        if (grouped.length > 0 && !isForceNewBooking) {
-            // User has bookings -> Default to EXTEND mode
-            setExtendMode(grouped);
-        } else {
-            // First time user or forced new booking -> New Booking mode
-            setNewBookingMode();
-        }
+
+        if (userBookingsData.length > 0 && !isForceNewBooking) {
+    setExtendMode(userBookingsData);   // ✅ Only latest seat data
+} else {
+    setNewBookingMode();
+}
+
         
         // Update the My Bookings section UI
-        updateMyBookingsUI(grouped);
+        updateMyBookingsUI(userBookingsData);
+
 console.log("GROUPED INPUT:", userBookingsData);
 
 
