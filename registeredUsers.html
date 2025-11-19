@@ -70,6 +70,7 @@
         <th>Mobile</th>
         <th>Email</th>
         <th>Role</th>
+        <th>Seat No.</th>
         <th>Registered On</th>
         <th>Actions</th>
       </tr>
@@ -93,6 +94,17 @@
     // Fetch and render users
     async function fetchUsers() {
       try {
+        const bookingRes = await fetch(`${API_BASE}/api/bookings`);
+        const bookings = await bookingRes.json();
+        // Map latest booking per user
+const latestByEmail = {};
+
+bookings.forEach(b => {
+  if (!latestByEmail[b.email] || new Date(b.createdAt) > new Date(latestByEmail[b.email].createdAt)) {
+    latestByEmail[b.email] = b;
+  }
+});
+
         const res = await fetch(`${API_BASE}/api/users`);
         if (!res.ok) throw new Error('Failed to fetch users');
         const users = await res.json();
@@ -125,6 +137,16 @@
             </td>
             <td data-label="Email">${escapeHtml(u.email || '')}</td>
             <td data-label="Role">${escapeHtml(u.role || '')}</td>
+
+<td data-label="Seat No.">
+  ${
+    latestByEmail[u.email]
+      ?  + latestByEmail[u.email].seatId
+      : "<span style='color:red;'>Not Booked</span>"
+  }
+</td>
+
+
             <td data-label="Registered On">${dateStr}</td>
             <td data-label="Actions">
               <button class="action-btn delete" onclick="deleteUser('${u._id}', this)">🗑️ Delete</button>
