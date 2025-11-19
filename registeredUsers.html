@@ -64,7 +64,6 @@
   <table id="users-table">
     <thead>
       <tr>
-        <th>#</th>
         <th>Name</th>
         <th>Gender</th>
         <th>Mobile</th>
@@ -126,7 +125,6 @@ bookings.forEach(b => {
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td data-label="#">${i+1}</td>
             <td data-label="Name">${escapeHtml(u.firstName || '')} ${escapeHtml(u.lastName || '')}</td>
             <td data-label="Gender">${escapeHtml(u.gender || '')}</td>
             <td data-label="Mobile">
