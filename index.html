@@ -736,9 +736,11 @@ if (params.get('success') === '1') {
   const closeBtn = document.getElementById('close-modal');
 
   details.innerHTML = `
-  <h2>✅ Booking Confirmed!</h2>
+  <h2>✅ Seat Booked!</h2>
     Seat <strong>${seatId}</strong> booked for <strong>${shift}</strong> shift<br>
-    From <strong>${startDate}</strong> to <strong>${endDate}</strong>.
+    From <strong>${startDate}</strong> to <strong>${endDate}</strong><br>
+    <strong>No need to send Screenshot of Payment</strong><br>
+    Thank you for booking with us! Your seat is confirmed.
   `;
 
   modal.classList.remove('hidden');
