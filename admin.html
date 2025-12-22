@@ -253,10 +253,20 @@ iframe {
   <script>
     // ✅ Protect admin page
     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || user.role !== "admin") {
-      
-      window.location.href = "login.html";
-    }
+
+if (!user) {
+  // Not logged in
+  window.location.href = "login.html";
+} else if (user.role === "admin") {
+  // Admin allowed – do nothing
+} else if (user.role === "incharge") {
+  // Incharge dashboard
+  window.location.href = "libincharge.html";
+} else {
+  // Any other role
+  window.location.href = "login.html";
+}
+
 
     function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("show");
