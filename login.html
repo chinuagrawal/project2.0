@@ -65,27 +65,9 @@
     </form>
   </div>
 
-  <script>
-    // Toggle password visibility
-    const showHiddenPass = (passId, eyeId) => {
-      const input = document.getElementById(passId),
-            iconEye = document.getElementById(eyeId);
+  
 
-      iconEye.addEventListener('click', () => {
-        if (input.type === 'password') {
-          input.type = 'text';
-          iconEye.classList.add('ri-eye-line');
-          iconEye.classList.remove('ri-eye-off-line');
-        } else {
-          input.type = 'password';
-          iconEye.classList.remove('ri-eye-line');
-          iconEye.classList.add('ri-eye-off-line');
-        }
-      });
-    };
-    showHiddenPass('password', 'login-eye');
-
-    // Handle Login Form Submission
+   <script>
 document.getElementById("login-form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -98,35 +80,38 @@ document.getElementById("login-form").addEventListener("submit", async function 
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ loginId, password }) // ✅ send loginId
+      body: JSON.stringify({ loginId, password })
     });
 
     const data = await res.json();
 
-    if (res.ok) {
-      
-      localStorage.setItem("user", JSON.stringify(data.user));
-      if (data.user.role === "admin") {
-        window.location.href = "admin.html";
-      } else if (data.user.role === "incharge") {
-        window.location.href = "libincharge.html";
-      }
-      } else if (data.user.role === "user") {
-        window.location.href = "booking.html";
-    }else {
-      // ✅ Handle blocked user separately
-      if (res.status === 403 && data.message.includes("blocked")) {
+    if (!res.ok) {
+      if (res.status === 403 && data.message?.includes("blocked")) {
         alert("❌ " + data.message);
       } else {
         alert(data.message || "Login failed");
       }
+      return;
     }
+
+    // ✅ SUCCESS LOGIN
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    if (data.user.role === "admin") {
+      window.location.href = "admin.html";
+    } else if (data.user.role === "incharge") {
+      window.location.href = "libincharge.html";
+    } else if (data.user.role === "user") {
+      window.location.href = "booking.html";
+    } else {
+      alert("Unknown role");
+    }
+
   } catch (error) {
     console.error(error);
     alert("Server error");
   }
 });
-
-  </script>
+</script>
 </body>
 </html>
