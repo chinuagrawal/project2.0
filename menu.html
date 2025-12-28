@@ -31,6 +31,16 @@
 <div id="menu"></div>
 
 <script>
+  const userData = localStorage.getItem("user");
+
+if (!userData) {
+  alert("Please login to request tea");
+  window.location.href = "login.html";
+}
+
+const user = JSON.parse(userData);
+const mobile = user.mobile;
+
 const params = new URLSearchParams(window.location.search);
 const outletId = params.get("outletId");
 
@@ -90,14 +100,18 @@ async function loadMenu() {
 /* ---------------- REQUEST ITEM ---------------- */
 
 async function requestItem(itemId) {
-  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/requests", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      outletId,
-      itemId
-    })
-  });
+  const res = await fetch(
+    "https://kanha-backend-yfx1.onrender.com/api/requests",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        outletId,
+        itemId,
+        mobile   // ✅ IMPORTANT
+      })
+    }
+  );
 
   const data = await res.json();
 
@@ -108,6 +122,7 @@ async function requestItem(itemId) {
 
   alert(data.message);
 }
+
 
 /* INIT */
 loadOutletName();
