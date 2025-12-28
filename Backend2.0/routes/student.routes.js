@@ -71,7 +71,13 @@ router.get("/outlets/:outletId/items", async (req, res) => {
  */
 router.post("/requests", async (req, res) => {
   try {
-    const { outletId, itemId, mobile } = req.body;
+    const { outletId, itemId, mobile, studentId } = req.body;
+
+if (!studentId) {
+  return res.status(400).json({
+    message: "studentId is required"
+  });
+}
 
     if (!outletId || !itemId || !mobile) {
       return res.status(400).json({
@@ -123,14 +129,16 @@ router.post("/requests", async (req, res) => {
     }
 
     // create request
-    await ItemRequest.create({
-      mobile,
-      outletId,
-      itemId,
-      requestDate: today,
-      month,
-      status: "pending"
-    });
+   await ItemRequest.create({
+  studentId,   // ✅ REQUIRED FIELD FIXED
+  mobile,
+  outletId: outletObjectId,
+  itemId: itemObjectId,
+  requestDate: today,
+  month,
+  status: "pending"
+});
+
 
     res.json({ message: "Request sent successfully" });
 
