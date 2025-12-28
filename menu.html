@@ -100,6 +100,11 @@ async function loadMenu() {
 /* ---------------- REQUEST ITEM ---------------- */
 
 async function requestItem(itemId) {
+  console.log("REQUEST PAYLOAD", {
+  outletId,
+  itemId,
+  mobile
+});
   const res = await fetch(
     "https://kanha-backend-yfx1.onrender.com/api/requests",
     {
