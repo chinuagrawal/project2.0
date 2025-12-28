@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Outlet Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    button {
+      padding: 6px 10px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏪 Outlet Dashboard</h1>
+
+<!-- ================= PENDING REQUESTS ================= -->
+
+<h2>⏳ Pending Requests</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Student Mobile</th>
+      <th>Item</th>
+      <th>Requested At</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="pendingTable"></tbody>
+</table>
+
+<!-- ================= MONTHLY SUMMARY ================= -->
+
+<h2>📊 Monthly Served Summary</h2>
+
+<div class="card">
+  <input id="summaryMonth" placeholder="YYYY-MM (e.g. 2025-01)">
+  <button onclick="loadSummary()">Load Summary</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Served Count</th>
+    </tr>
+  </thead>
+  <tbody id="summaryTable"></tbody>
+</table>
+
+<script>
+    const outletId = localStorage.getItem("outletId");
+
+if (!outletId) {
+  alert("No restaurant selected");
+  window.location.href = "outlet-select.html";
+}
+
+/* ---------------- LOAD PENDING REQUESTS ---------------- */
+
+async function loadPending() {
+  const res = await fetch(`http://localhost:3000/api/outlet/requests/pending?outletId=${outletId}`)
+
+  const data = await res.json();
+
+  const tbody = document.getElementById("pendingTable");
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    tbody.innerHTML =
+      `<tr><td colspan="4">No pending requests</td></tr>`;
+    return;
+  }
+
+  data.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.studentMobile}</td>
+      <td>${r.itemName}</td>
+      <td>${new Date(r.requestedAt).toLocaleString()}</td>
+      <td>
+        <button onclick="serve('${r.requestId}')">Serve</button>
+        <button onclick="reject('${r.requestId}')">Reject</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------------- SERVE REQUEST ---------------- */
+
+async function serve(requestId) {
+  const res = await fetch(
+    `http://localhost:3000/api/outlet/requests/${requestId}/serve`,
+    { method: "POST" }
+  );
+
+  const data = await res.json();
+  alert(data.message);
+  loadPending();
+}
+
+/* ---------------- REJECT REQUEST ---------------- */
+
+async function reject(requestId) {
+  const res = await fetch(
+    `http://localhost:3000/api/outlet/requests/${requestId}/reject`,
+    { method: "POST" }
+  );
+
+  const data = await res.json();
+  alert(data.message);
+  loadPending();
+}
+
+/* ---------------- LOAD SUMMARY ---------------- */
+
+async function loadSummary() {
+  const month = document.getElementById("summaryMonth").value;
+  if (!month) return alert("Enter month");
+
+  const res = await fetch(`http://localhost:3000/api/outlet/summary?month=${month}`);
+  const data = await res.json();
+
+  const tbody = document.getElementById("summaryTable");
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    tbody.innerHTML =
+      `<tr><td colspan="2">No data</td></tr>`;
+    return;
+  }
+
+  data.forEach(r => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${r.itemName}</td>
+        <td>${r.count}</td>
+      </tr>
+    `;
+  });
+}
+
+/* INIT */
+loadPending();
+</script>
+
+</body>
+</html>

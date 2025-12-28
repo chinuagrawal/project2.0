@@ -16,7 +16,6 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 
-
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
@@ -38,6 +37,12 @@ app.use('/api', customPriceRoute);
 const deleteUserRoute = require('./routes/deleteuser');
 app.use('/api', deleteUserRoute);
 
+app.use("/api", require("./routes/student.routes"));
+app.use("/api", require("./routes/outlet.routes"));
+app.use("/api", require("./routes/admin.routes"));
+
+
+
 const blockUserRoute = require('./routes/blockuser');
 app.use('/api', blockUserRoute);
 
@@ -47,7 +52,6 @@ app.use('/api', pendingDeleteRoutes);
 const extendRoutes = require('./routes/extend');
 const PendingBooking = require('./models/PendingBooking');
 app.use('/api/extend', extendRoutes);
-
 
 
 

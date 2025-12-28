@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant Access</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>🏪 Restaurant Login</h2>
+  <input id="outletId" placeholder="Enter Restaurant ID">
+  <button onclick="enterOutlet()">Enter</button>
+</div>
+
+<script>
+function enterOutlet() {
+  const outletId = document.getElementById("outletId").value.trim();
+  if (!outletId) {
+    alert("Please enter Restaurant ID");
+    return;
+  }
+
+  // store for later use
+  localStorage.setItem("outletId", outletId);
+
+  // redirect
+  window.location.href = "outlet.html";
+}
+</script>
+
+</body>
+</html>

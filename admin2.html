@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    button {
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧑‍💼 Admin Panel</h1>
+
+<h2>🏪 Create Restaurant</h2>
+<div class="card">
+  <input id="outletName" placeholder="Restaurant name">
+  <input id="outletEmail" placeholder="Login email">
+  <input id="outletPassword" placeholder="Password">
+  <button onclick="createOutlet()">Create Restaurant</button>
+</div>
+
+<!-- ================= ITEMS ================= -->
+
+<h2>🍽 Items (per Restaurant)</h2>
+<div class="card">
+  <select id="itemOutlet"></select>
+  <input id="itemName" placeholder="Item name (Tea / Coffee)">
+  <button onclick="addItem()">Add Item</button>
+</div>
+
+<div id="itemsList"></div>
+
+<!-- ================= LIMITS ================= -->
+
+<h2>📅 Item Limits (Monthly + Daily)</h2>
+<div class="card">
+  <select id="limitOutlet"></select>
+  <select id="limitItem"></select>
+  <input id="limitMonth" placeholder="YYYY-MM (e.g. 2025-01)">
+  <input id="monthlyLimit" type="number" placeholder="Monthly limit">
+  <input id="dailyLimit" type="number" placeholder="Daily limit">
+  <button id="saveLimitBtn" onclick="saveLimit()" disabled>
+  Save / Override Limit
+</button>
+
+</div>
+
+<!-- ================= REPORT ================= -->
+
+<h2>📊 Monthly Report (Payments)</h2>
+<div class="card">
+  <input id="reportMonth" placeholder="YYYY-MM">
+  <button onclick="loadReport()">Load Report</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Restaurant</th>
+      <th>Item</th>
+      <th>Served Count</th>
+    </tr>
+  </thead>
+  <tbody id="reportTable"></tbody>
+</table>
+
+<script>
+  async function createOutlet() {
+  const name = document.getElementById("outletName").value.trim();
+  const email = document.getElementById("outletEmail").value.trim();
+  const password = document.getElementById("outletPassword").value.trim();
+
+  if (!name || !email || !password) {
+    return alert("Fill all fields");
+  }
+
+  const res = await fetch("http://localhost:3000/api/admin/outlets", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+
+  document.getElementById("outletName").value = "";
+  document.getElementById("outletEmail").value = "";
+  document.getElementById("outletPassword").value = "";
+
+  loadOutlets(); // refresh dropdowns
+}
+
+/* ---------------- LOAD OUTLETS ---------------- */
+
+async function loadOutlets() {
+  const res = await fetch("http://localhost:3000/api/outlets");
+  const outlets = await res.json();
+
+  const selects = ["itemOutlet", "limitOutlet"];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = "<option value=''>Select Restaurant</option>";
+    outlets.forEach(o => {
+      sel.innerHTML += `<option value="${o._id}">${o.name}</option>`;
+    });
+  });
+}
+
+/* ---------------- ADD ITEM ---------------- */
+
+async function addItem() {
+  const outletId = document.getElementById("itemOutlet").value;
+  const name = document.getElementById("itemName").value.trim();
+
+  if (!outletId || !name) return alert("Select outlet & enter item name");
+
+  const res = await fetch(`http://localhost:3000/api/admin/outlets/${outletId}/items`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  document.getElementById("itemName").value = "";
+  loadItems(outletId);
+}
+
+/* ---------------- LOAD ITEMS ---------------- */
+
+async function loadItems(outletId) {
+  if (!outletId) return;
+
+  const res = await fetch(`http://localhost:3000/api/outlets/${outletId}/items`);
+  const items = await res.json();
+
+  const list = document.getElementById("itemsList");
+  list.innerHTML = "";
+
+  const itemSelect = document.getElementById("limitItem");
+  itemSelect.innerHTML = "<option value=''>Select Item</option>";
+
+  if (items.length === 0) {
+    list.innerHTML = "<p>No items added yet</p>";
+    return;
+  }
+
+  items.forEach(i => {
+    const id = i._id || i.itemId; // ✅ IMPORTANT FIX
+
+    list.innerHTML += `
+      <div class="card">${i.name}</div>
+    `;
+
+    itemSelect.innerHTML += `
+      <option value="${id}">${i.name}</option>
+    `;
+  });
+}
+
+/* ---------------- SAVE LIMIT ---------------- */
+
+async function saveLimit() {
+  const outletId = document.getElementById("limitOutlet").value;
+  const itemId = document.getElementById("limitItem").value;
+  const month = document.getElementById("limitMonth").value.trim();
+  const monthlyLimit = document.getElementById("monthlyLimit").value;
+  const dailyLimit = document.getElementById("dailyLimit").value;
+
+  if (!outletId) return alert("Please select a restaurant");
+  if (!itemId) return alert("Please select an item");
+  if (!month) return alert("Please enter month (YYYY-MM)");
+  if (monthlyLimit === "" || dailyLimit === "")
+    return alert("Please enter both limits");
+
+  const res = await fetch("http://localhost:3000/api/admin/item-limits", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      outletId,
+      itemId,
+      month,
+      monthlyLimit: Number(monthlyLimit),
+      dailyLimit: Number(dailyLimit)
+    })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+}
+
+
+/* ---------------- LOAD REPORT ---------------- */
+
+async function loadReport() {
+  const month = document.getElementById("reportMonth").value;
+  if (!month) return alert("Enter month");
+
+  const res = await fetch(`http://localhost:3000/api/admin/reports?month=${month}`);
+  const data = await res.json();
+
+  const tbody = document.getElementById("reportTable");
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3">No data</td></tr>`;
+    return;
+  }
+
+  data.forEach(r => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${r.outletName}</td>
+        <td>${r.itemName}</td>
+        <td>${r.servedCount}</td>
+      </tr>
+    `;
+  });
+}
+
+function toggleSaveLimit() {
+  const outletId = document.getElementById("limitOutlet").value;
+  const itemId = document.getElementById("limitItem").value;
+  document.getElementById("saveLimitBtn").disabled =
+    !(outletId && itemId);
+}
+
+document.getElementById("limitOutlet").onchange = e => {
+  loadItems(e.target.value);
+  toggleSaveLimit();
+};
+
+document.getElementById("limitItem").onchange = toggleSaveLimit;
+
+/* INIT */
+loadOutlets();
+</script>
+
+</body>
+</html>

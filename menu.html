@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Menu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      padding: 20px;
+    }
+    .menu-card {
+      background: #fff;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+    }
+    button {
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .limit {
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<h2 id="outletName">Menu</h2>
+
+<div id="menu"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const outletId = params.get("outletId");
+
+if (!outletId) {
+  alert("Outlet not selected");
+}
+
+/* ---------------- LOAD OUTLET NAME ---------------- */
+
+async function loadOutletName() {
+  const res = await fetch("http://localhost:3000/api/outlets");
+  const outlets = await res.json();
+  const outlet = outlets.find(o => o._id === outletId);
+  if (outlet) {
+    document.getElementById("outletName").innerText = outlet.name;
+  }
+}
+
+/* ---------------- LOAD ITEMS ---------------- */
+
+async function loadMenu() {
+  const res = await fetch(
+    `http://localhost:3000/api/outlets/${outletId}/items`
+  );
+  const items = await res.json();
+
+  const container = document.getElementById("menu");
+  container.innerHTML = "";
+
+  if (items.length === 0) {
+    container.innerHTML = "<p>No items available</p>";
+    return;
+  }
+
+  items.forEach(item => {
+    const itemId = item._id || item.itemId;
+
+    const div = document.createElement("div");
+    div.className = "menu-card";
+
+    div.innerHTML = `
+      <strong>${item.name}</strong><br>
+      <span class="limit">
+        Monthly limit: ${item.monthlyLimit ?? "—"} |
+        Daily limit: ${item.dailyLimit ?? "—"}
+      </span>
+      <br><br>
+      <button onclick="requestItem('${itemId}')">
+        Request
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+/* ---------------- REQUEST ITEM ---------------- */
+
+async function requestItem(itemId) {
+  const res = await fetch("http://localhost:3000/api/requests", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      outletId,
+      itemId
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || "Request failed");
+    return;
+  }
+
+  alert(data.message);
+}
+
+/* INIT */
+loadOutletName();
+loadMenu();
+</script>
+
+</body>
+</html>
