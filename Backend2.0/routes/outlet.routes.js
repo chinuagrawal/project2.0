@@ -141,6 +141,21 @@ router.get("/outlet/summary", async (req, res) => {
           _id: "$itemId",
           count: { $sum: 1 }
         }
+      },
+      {
+        $lookup: {
+          from: "outletitems",   // ⚠️ collection name (IMPORTANT)
+          localField: "_id",
+          foreignField: "_id",
+          as: "item"
+        }
+      },
+      { $unwind: "$item" },
+      {
+        $project: {
+          itemName: "$item.name",
+          count: 1
+        }
       }
     ]);
 
@@ -151,5 +166,6 @@ router.get("/outlet/summary", async (req, res) => {
     res.status(500).json({ message: "Failed to load summary" });
   }
 });
+
 
 module.exports = router;

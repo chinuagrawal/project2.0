@@ -147,22 +147,29 @@ async function loadSummary() {
   const month = document.getElementById("summaryMonth").value;
   if (!month) return alert("Enter month");
 
-  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/outlet/summary?month=${month}`);
+  const res = await fetch(
+    `https://kanha-backend-yfx1.onrender.com/api/outlet/summary?outletId=${outletId}&month=${month}`
+  );
+
   const data = await res.json();
 
   const tbody = document.getElementById("summaryTable");
   tbody.innerHTML = "";
 
-  if (data.length === 0) {
-    tbody.innerHTML =
-      `<tr><td colspan="2">No data</td></tr>`;
+  if (!res.ok) {
+    alert(data.message || "Failed to load summary");
+    return;
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="2">No data</td></tr>`;
     return;
   }
 
   data.forEach(r => {
     tbody.innerHTML += `
       <tr>
-        <td>${r.itemName}</td>
+        <td>${r.itemName || "Item"}</td>
         <td>${r.count}</td>
       </tr>
     `;
