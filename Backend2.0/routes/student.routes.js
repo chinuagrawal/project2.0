@@ -71,13 +71,27 @@ router.get("/outlets/:outletId/items", async (req, res) => {
  */
 router.post("/requests", async (req, res) => {
   try {
-    const { outletId, itemId } = req.body;
-    const mobile = req.user.mobile;
+    const { outletId, itemId, mobile } = req.body;
+
+    if (!outletId || !itemId || !mobile) {
+      return res.status(400).json({
+        message: "outletId, itemId and mobile are required"
+      });
+    }
+
+    if (
+      !mongoose.Types.ObjectId.isValid(outletId) ||
+      !mongoose.Types.ObjectId.isValid(itemId)
+    ) {
+      return res.status(400).json({
+        message: "Invalid outletId or itemId"
+      });
+    }
 
     const today = getToday();
     const month = getMonth();
 
-    // ensure limits (auto-copy)
+    // ensure limits (auto-copy from previous month)
     const limit = await ensureItemLimit(outletId, itemId, month);
 
     // daily served count
@@ -121,8 +135,10 @@ router.post("/requests", async (req, res) => {
     res.json({ message: "Request sent successfully" });
 
   } catch (err) {
-    console.error(err.message);
-    res.status(400).json({ message: err.message });
+    console.error("REQUEST ERROR:", err);
+    res.status(500).json({
+      message: "Failed to create request"
+    });
   }
 });
 
