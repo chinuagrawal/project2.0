@@ -104,7 +104,7 @@
     return alert("Fill all fields");
   }
 
-  const res = await fetch("http://localhost:3000/api/admin/outlets", {
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/admin/outlets", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, password })
@@ -123,7 +123,7 @@
 /* ---------------- LOAD OUTLETS ---------------- */
 
 async function loadOutlets() {
-  const res = await fetch("http://localhost:3000/api/outlets");
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/outlets");
   const outlets = await res.json();
 
   const selects = ["itemOutlet", "limitOutlet"];
@@ -144,7 +144,7 @@ async function addItem() {
 
   if (!outletId || !name) return alert("Select outlet & enter item name");
 
-  const res = await fetch(`http://localhost:3000/api/admin/outlets/${outletId}/items`, {
+  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/admin/outlets/${outletId}/items`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name })
@@ -161,7 +161,7 @@ async function addItem() {
 async function loadItems(outletId) {
   if (!outletId) return;
 
-  const res = await fetch(`http://localhost:3000/api/outlets/${outletId}/items`);
+  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/outlets/${outletId}/items`);
   const items = await res.json();
 
   const list = document.getElementById("itemsList");
@@ -203,7 +203,7 @@ async function saveLimit() {
   if (monthlyLimit === "" || dailyLimit === "")
     return alert("Please enter both limits");
 
-  const res = await fetch("http://localhost:3000/api/admin/item-limits", {
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/admin/item-limits", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -226,7 +226,7 @@ async function loadReport() {
   const month = document.getElementById("reportMonth").value;
   if (!month) return alert("Enter month");
 
-  const res = await fetch(`http://localhost:3000/api/admin/reports?month=${month}`);
+  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/admin/reports?month=${month}`);
   const data = await res.json();
 
   const tbody = document.getElementById("reportTable");

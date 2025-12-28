@@ -85,7 +85,7 @@ if (!outletId) {
 /* ---------------- LOAD PENDING REQUESTS ---------------- */
 
 async function loadPending() {
-  const res = await fetch(`http://localhost:3000/api/outlet/requests/pending?outletId=${outletId}`)
+  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/outlet/requests/pending?outletId=${outletId}`)
 
   const data = await res.json();
 
@@ -117,7 +117,7 @@ async function loadPending() {
 
 async function serve(requestId) {
   const res = await fetch(
-    `http://localhost:3000/api/outlet/requests/${requestId}/serve`,
+    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/serve`,
     { method: "POST" }
   );
 
@@ -130,7 +130,7 @@ async function serve(requestId) {
 
 async function reject(requestId) {
   const res = await fetch(
-    `http://localhost:3000/api/outlet/requests/${requestId}/reject`,
+    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/reject`,
     { method: "POST" }
   );
 
@@ -145,7 +145,7 @@ async function loadSummary() {
   const month = document.getElementById("summaryMonth").value;
   if (!month) return alert("Enter month");
 
-  const res = await fetch(`http://localhost:3000/api/outlet/summary?month=${month}`);
+  const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/outlet/summary?month=${month}`);
   const data = await res.json();
 
   const tbody = document.getElementById("summaryTable");

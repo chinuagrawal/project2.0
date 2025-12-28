@@ -28,7 +28,7 @@
 
 <script>
 async function loadOutlets() {
-  const res = await fetch("http://localhost:3000/api/outlets");
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/outlets");
   const outlets = await res.json();
 
   const container = document.getElementById("outlets");

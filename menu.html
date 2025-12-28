@@ -41,7 +41,7 @@ if (!outletId) {
 /* ---------------- LOAD OUTLET NAME ---------------- */
 
 async function loadOutletName() {
-  const res = await fetch("http://localhost:3000/api/outlets");
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/outlets");
   const outlets = await res.json();
   const outlet = outlets.find(o => o._id === outletId);
   if (outlet) {
@@ -53,7 +53,7 @@ async function loadOutletName() {
 
 async function loadMenu() {
   const res = await fetch(
-    `http://localhost:3000/api/outlets/${outletId}/items`
+    `https://kanha-backend-yfx1.onrender.com/api/outlets/${outletId}/items`
   );
   const items = await res.json();
 
@@ -90,7 +90,7 @@ async function loadMenu() {
 /* ---------------- REQUEST ITEM ---------------- */
 
 async function requestItem(itemId) {
-  const res = await fetch("http://localhost:3000/api/requests", {
+  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/requests", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
