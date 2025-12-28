@@ -117,7 +117,7 @@ async function loadPending() {
 
 async function serve(requestId) {
   const res = await fetch(
-    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/serve`,
+    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/serve?outletId=${outletId}`,
     { method: "POST" }
   );
 
@@ -125,12 +125,13 @@ async function serve(requestId) {
   alert(data.message);
   loadPending();
 }
+
 
 /* ---------------- REJECT REQUEST ---------------- */
 
 async function reject(requestId) {
   const res = await fetch(
-    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/reject`,
+    `https://kanha-backend-yfx1.onrender.com/api/outlet/requests/${requestId}/reject?outletId=${outletId}`,
     { method: "POST" }
   );
 
@@ -138,6 +139,7 @@ async function reject(requestId) {
   alert(data.message);
   loadPending();
 }
+
 
 /* ---------------- LOAD SUMMARY ---------------- */
 
