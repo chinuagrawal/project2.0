@@ -85,6 +85,8 @@
       /* Hide reCAPTCHA badge */
       .grecaptcha-badge {
         visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
       }
     </style>
 
@@ -322,8 +324,7 @@
           .signInWithPhoneNumber(formattedPhoneNumber, appVerifier)
           .then((confirmationResult) => {
             window.confirmationResult = confirmationResult;
-            
-            
+
             otpBox.style.display = "block";
             sendOtpBtn.style.display = "none";
             verifyOtpBtn.style.display = "block";
@@ -360,13 +361,16 @@
             }
 
             // Call backend to check if user exists in DB and get details
-            const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/login-otp", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
+            const res = await fetch(
+              "https://kanha-backend-yfx1.onrender.com/api/login-otp",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ mobile: verifiedUser.phoneNumber }),
               },
-              body: JSON.stringify({ mobile: verifiedUser.phoneNumber }),
-            });
+            );
 
             const data = await res.json();
 
@@ -376,8 +380,6 @@
                 res.status === 400 &&
                 data.message?.includes("User not found")
               ) {
-                
-                
                 nameBox.style.display = "block";
                 genderBox.style.display = "block";
                 verifyOtpBtn.style.display = "none";
@@ -423,18 +425,21 @@
         const lastName = names.slice(1).join(" ") || "."; // Default dot if no last name
 
         try {
-          const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/signup-otp", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+          const res = await fetch(
+            "https://kanha-backend-yfx1.onrender.com/api/signup-otp",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                mobile: verifiedUser.phoneNumber,
+                firstName: firstName,
+                lastName: lastName,
+                gender: gender,
+              }),
             },
-            body: JSON.stringify({
-              mobile: verifiedUser.phoneNumber,
-              firstName: firstName,
-              lastName: lastName,
-              gender: gender,
-            }),
-          });
+          );
 
           const data = await res.json();
           if (!res.ok) {
@@ -442,8 +447,6 @@
             return;
           }
 
-          
-          
           loginSuccess(data.user);
         } catch (err) {
           console.error(err);
