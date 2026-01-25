@@ -1294,6 +1294,16 @@
               >--</span
             >
           </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 text-sm">From</span>
+            <span class="font-bold text-slate-900" id="modal-start-date"
+              >--</span
+            >
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 text-sm">To</span>
+            <span class="font-bold text-slate-900" id="modal-end-date">--</span>
+          </div>
           <div
             class="flex justify-between items-center pt-3 border-t border-slate-200 hidden"
             id="modal-cash-row"
@@ -1341,6 +1351,8 @@
         const isCash = urlParams.get("cash") === "1";
         const seatId = urlParams.get("seatId");
         const shift = urlParams.get("shift");
+        const startDate = urlParams.get("startDate");
+        const endDate = urlParams.get("endDate");
         const cashId = urlParams.get("cashId");
 
         if (isSuccess && seatId) {
@@ -1353,11 +1365,25 @@
           const modalCashRow = document.getElementById("modal-cash-row");
           const modalCashId = document.getElementById("modal-cash-id");
 
+          // Helper to format date as dd-mm-yyyy
+          const formatDate = (dateStr) => {
+            if (!dateStr) return "--";
+            const parts = dateStr.split("-");
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+          };
+
           // Set common fields
           if (document.getElementById("modal-seat"))
             document.getElementById("modal-seat").textContent = seatId;
           if (document.getElementById("modal-shift"))
             document.getElementById("modal-shift").textContent = shift || "--";
+          if (document.getElementById("modal-start-date"))
+            document.getElementById("modal-start-date").textContent =
+              formatDate(startDate);
+          if (document.getElementById("modal-end-date"))
+            document.getElementById("modal-end-date").textContent =
+              formatDate(endDate);
 
           if (isCash) {
             // Cash Booking Specifics
@@ -1748,16 +1774,17 @@
 
           const liveCounterEl = document.getElementById("liveCounter");
           if (liveCounterEl) {
+            const formattedDate = date.split("-").reverse().join("-");
             if (seatsLeft === 0) {
-              liveCounterEl.textContent = `❌ House Full! No seats available for ${date}.`;
+              liveCounterEl.textContent = `❌ House Full! No seats available for ${formattedDate}.`;
               liveCounterEl.className =
                 "mt-4 text-red-400 font-medium animate-pulse";
             } else if (seatsLeft <= 5) {
-              liveCounterEl.textContent = `⚡ Hurry up! Only ${seatsLeft} seats remaining for ${date}!`;
+              liveCounterEl.textContent = `⚡ Hurry up! Only ${seatsLeft} seats remaining for ${formattedDate}!`;
               liveCounterEl.className =
                 "mt-4 text-amber-300 font-medium animate-pulse";
             } else {
-              liveCounterEl.textContent = `✅ ${seatsLeft} seats available for ${date}`;
+              liveCounterEl.textContent = `✅ ${seatsLeft} seats available for ${formattedDate}`;
               liveCounterEl.className = "mt-4 text-green-400 font-medium";
             }
           }
