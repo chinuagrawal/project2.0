@@ -1292,30 +1292,6 @@
         }
       }
 
-      // Live Counter
-      async function updateLiveCounter() {
-        try {
-          const today = new Date().toISOString().split("T")[0];
-          const res = await fetch(`${API_BASE}/bookings?date=${today}`);
-          const bookings = await res.json();
-          const booked = Array.isArray(bookings) ? bookings.length : 0;
-          const total = 34;
-          const left = total - booked;
-
-          const el = document.getElementById("seatsLeft");
-          if (el) el.textContent = left;
-
-          const msgEl = document.getElementById("liveCounter");
-          if (msgEl) {
-            if (left <= 5)
-              msgEl.textContent = `⚡ Hurry up! Only ${left} seats remaining today!`;
-            else msgEl.textContent = "";
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }
-
       // Seat Layout Renderer
       function renderSeatLayout() {
         const rows = [
@@ -1359,11 +1335,12 @@
         }
       }
 
-      async function fetchSeatStatus(date) {
+      async function fetchSeatStatus(date, isSilent = false) {
         console.log("Fetching seat status for:", date);
         if (!date) return;
         const loadingEl = document.getElementById("loading-seats");
-        if (loadingEl) {
+
+        if (!isSilent && loadingEl) {
           loadingEl.classList.remove("hidden");
           loadingEl.textContent = "Fetching real-time status...";
           loadingEl.className =
@@ -1423,6 +1400,40 @@
               }
             });
           }
+
+          // Update Seats Left Counter (Real-time based on selected date)
+          // Count seats that are NOT fully booked (i.e. Available, Morning, or Evening)
+          const totalSeats = 34;
+          const fullyBookedCount = document.querySelectorAll(
+            ".seat-label.status-booked",
+          ).length;
+          const seatsLeft = totalSeats - fullyBookedCount;
+
+          const seatsLeftEl = document.getElementById("seatsLeft");
+          if (seatsLeftEl) {
+            seatsLeftEl.textContent = seatsLeft;
+            // Add animation effect
+            seatsLeftEl.classList.remove("scale-105");
+            void seatsLeftEl.offsetWidth; // Trigger reflow
+            seatsLeftEl.classList.add("scale-105", "transition-transform");
+          }
+
+          const liveCounterEl = document.getElementById("liveCounter");
+          if (liveCounterEl) {
+            if (seatsLeft === 0) {
+              liveCounterEl.textContent = `❌ House Full! No seats available for ${date}.`;
+              liveCounterEl.className =
+                "mt-4 text-red-400 font-medium animate-pulse";
+            } else if (seatsLeft <= 5) {
+              liveCounterEl.textContent = `⚡ Hurry up! Only ${seatsLeft} seats remaining for ${date}!`;
+              liveCounterEl.className =
+                "mt-4 text-amber-300 font-medium animate-pulse";
+            } else {
+              liveCounterEl.textContent = `✅ ${seatsLeft} seats available for ${date}`;
+              liveCounterEl.className = "mt-4 text-green-400 font-medium";
+            }
+          }
+
           // Success: hide loading
           if (loadingEl) loadingEl.classList.add("hidden");
         } catch (e) {
@@ -1440,9 +1451,16 @@
       // Init
       document.addEventListener("DOMContentLoaded", () => {
         updateUserUI();
-        updateLiveCounter();
         renderSeatLayout();
-        setInterval(updateLiveCounter, 30000);
+
+        // Auto-refresh seat status every 30s based on selected date
+        setInterval(() => {
+          const dateInput = document.getElementById("calendar-date");
+          if (dateInput && dateInput.value) {
+            // fetchSeatStatus updates the live counter too
+            fetchSeatStatus(dateInput.value, true);
+          }
+        }, 30000);
 
         // Mobile Menu Logic
         const btn = document.getElementById("mobile-menu-btn");
