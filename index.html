@@ -1229,8 +1229,185 @@
       </div>
     </footer>
 
+    <!-- Confirmation Modal -->
+    <div
+      id="confirmation-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden"
+    >
+      <div
+        class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform transition-all scale-100 relative overflow-hidden"
+      >
+        <div
+          class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-500"
+          id="modal-header-bar"
+        ></div>
+        <button
+          onclick="
+            document
+              .getElementById('confirmation-modal')
+              .classList.add('hidden');
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname,
+            );
+          "
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="text-center mb-6">
+          <div
+            class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <span class="text-4xl" id="modal-icon">🎉</span>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900" id="modal-title">
+            Booking Confirmed!
+          </h3>
+          <p class="text-slate-500 mt-2" id="modal-subtitle">
+            Your seat has been successfully reserved.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4 mb-6 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 text-sm">Seat Number</span>
+            <span class="font-bold text-slate-900" id="modal-seat">--</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 text-sm">Shift</span>
+            <span class="font-bold text-slate-900 uppercase" id="modal-shift"
+              >--</span
+            >
+          </div>
+          <div
+            class="flex justify-between items-center pt-3 border-t border-slate-200 hidden"
+            id="modal-cash-row"
+          >
+            <span class="text-slate-500 text-sm">Request ID</span>
+            <span
+              class="font-mono font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded"
+              id="modal-cash-id"
+              >--</span
+            >
+          </div>
+        </div>
+
+        <p
+          class="text-xs text-center text-slate-400 mb-6"
+          id="modal-footer-text"
+        >
+          A confirmation email has been sent to you.
+        </p>
+
+        <button
+          onclick="
+            document
+              .getElementById('confirmation-modal')
+              .classList.add('hidden');
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname,
+            );
+          "
+          class="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-all hover:-translate-y-1"
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script>
+      // --- Confirmation Modal Logic ---
+      window.addEventListener("load", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSuccess = urlParams.get("success") === "1";
+        const isCash = urlParams.get("cash") === "1";
+        const seatId = urlParams.get("seatId");
+        const shift = urlParams.get("shift");
+        const cashId = urlParams.get("cashId");
+
+        if (isSuccess && seatId) {
+          const modal = document.getElementById("confirmation-modal");
+          const modalTitle = document.getElementById("modal-title");
+          const modalSubtitle = document.getElementById("modal-subtitle");
+          const modalIcon = document.getElementById("modal-icon");
+          const modalHeaderBar = document.getElementById("modal-header-bar");
+          const modalFooterText = document.getElementById("modal-footer-text");
+          const modalCashRow = document.getElementById("modal-cash-row");
+          const modalCashId = document.getElementById("modal-cash-id");
+
+          // Set common fields
+          if (document.getElementById("modal-seat"))
+            document.getElementById("modal-seat").textContent = seatId;
+          if (document.getElementById("modal-shift"))
+            document.getElementById("modal-shift").textContent = shift || "--";
+
+          if (isCash) {
+            // Cash Booking Specifics
+            if (modalCashRow) {
+              if (cashId) {
+                modalCashRow.classList.remove("hidden");
+                if (modalCashId) modalCashId.textContent = cashId;
+              } else {
+                modalCashRow.classList.add("hidden");
+              }
+            }
+
+            if (modalTitle) modalTitle.textContent = "Request Submitted!";
+            if (modalSubtitle)
+              modalSubtitle.textContent =
+                "Your cash payment request is pending.";
+
+            // Update footer text
+            if (modalFooterText) {
+              if (cashId) {
+                modalFooterText.textContent =
+                  "Please visit the library reception with this Request ID to complete payment.";
+              } else {
+                modalFooterText.textContent =
+                  "Please visit the library reception to complete payment.";
+              }
+            }
+
+            if (modalHeaderBar) {
+              modalHeaderBar.classList.remove(
+                "from-green-400",
+                "to-emerald-500",
+              );
+              modalHeaderBar.classList.add("from-yellow-400", "to-orange-500");
+            }
+            if (modalIcon) modalIcon.textContent = "📝";
+          } else {
+            // Online Payment Success
+            if (modalCashRow) modalCashRow.classList.add("hidden");
+          }
+
+          if (modal) modal.classList.remove("hidden");
+
+          // Refresh bookings list if user is logged in
+          if (typeof loadBookings === "function") {
+            loadBookings();
+          }
+        }
+      });
+
       // --- Mobile Menu Logic (Right-Side Drawer) ---
       const mobileMenuBtn = document.getElementById("mobile-menu-btn");
       const mobileMenuClose = document.getElementById("mobile-menu-close");
