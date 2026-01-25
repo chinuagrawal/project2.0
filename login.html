@@ -317,7 +317,8 @@
           .signInWithPhoneNumber(formattedPhoneNumber, appVerifier)
           .then((confirmationResult) => {
             window.confirmationResult = confirmationResult;
-            alert("OTP Sent!");
+            
+            
             otpBox.style.display = "block";
             sendOtpBtn.style.display = "none";
             verifyOtpBtn.style.display = "block";
@@ -370,9 +371,8 @@
                 res.status === 400 &&
                 data.message?.includes("User not found")
               ) {
-                alert(
-                  "User not found. Please enter your name and gender to register.",
-                );
+                
+                
                 nameBox.style.display = "block";
                 genderBox.style.display = "block";
                 verifyOtpBtn.style.display = "none";
@@ -437,7 +437,8 @@
             return;
           }
 
-          alert("Registration Successful!");
+          
+          
           loginSuccess(data.user);
         } catch (err) {
           console.error(err);
