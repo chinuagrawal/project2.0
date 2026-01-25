@@ -38,6 +38,15 @@
   overflow: hidden;
 }
 
+@media (max-width: 640px) {
+  .seat-label {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+    border-radius: 6px;
+  }
+}
+
 .seat-label::after {
   content: "";
   position: absolute;

@@ -504,41 +504,44 @@
     <!-- Seat Layout Preview (MOVED UP) -->
     <section
       id="seat-layout"
-      class="py-24 bg-white/60 backdrop-blur-xl border-y border-white/50"
+      class="py-8 lg:py-24 bg-white/60 backdrop-blur-xl border-y border-white/50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-4 lg:mb-12">
           <h2
             class="text-sm font-bold text-primary uppercase tracking-widest mb-2"
           >
             Real-Time
           </h2>
-          <h3 class="text-3xl font-bold text-slate-900">Seat Availability</h3>
-          <p class="text-slate-500 mt-2">
+          <h3 class="text-2xl lg:text-3xl font-bold text-slate-900">
+            Seat Availability
+          </h3>
+          <p class="text-slate-500 mt-2 text-sm lg:text-base">
             Select a date to check availability instantly.
           </p>
         </div>
 
         <div
-          class="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-indigo-100 border border-white/50 max-w-5xl mx-auto"
+          class="bg-white rounded-[2rem] lg:rounded-[2.5rem] p-4 lg:p-8 shadow-2xl shadow-indigo-100 border border-white/50 max-w-5xl mx-auto"
         >
-          <div class="flex flex-col items-center justify-center mb-10">
-            <div class="relative">
+          <div class="flex flex-col items-center justify-center mb-4 lg:mb-10">
+            <div class="relative w-full max-w-xs">
               <input
                 type="date"
                 id="calendar-date"
-                class="pl-12 pr-6 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none shadow-sm transition-all hover:bg-slate-100 cursor-pointer"
+                class="w-full pl-12 pr-6 py-2 lg:py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none shadow-sm transition-all hover:bg-slate-100 cursor-pointer text-sm lg:text-base"
               />
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xl"
+              <span
+                class="absolute left-4 top-1/2 -translate-y-1/2 text-lg lg:text-xl"
                 >📅</span
               >
             </div>
             <div
               id="loading-seats"
-              class="hidden mt-4 text-primary font-medium flex items-center gap-2"
+              class="hidden mt-2 lg:mt-4 text-primary font-medium flex items-center gap-2 text-sm"
             >
               <svg
-                class="animate-spin h-5 w-5 text-primary"
+                class="animate-spin h-4 w-4 lg:h-5 lg:w-5 text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -561,54 +564,68 @@
             </div>
           </div>
 
-          <div class="w-full pb-6 flex justify-center">
+          <div class="w-full pb-2 lg:pb-6 flex justify-center">
             <div
-              class="seat-layout-container flex flex-row-reverse justify-center gap-4 px-4"
+              class="seat-layout-container flex flex-row-reverse justify-center gap-2 sm:gap-4 px-2 lg:px-4"
             >
               <!-- Rows will be injected here as Columns -->
               <div
-                class="flex flex-col justify-center gap-3 sm:gap-4"
+                class="flex flex-col justify-center gap-1.5 sm:gap-4"
                 id="row3"
               ></div>
               <div
-                class="flex flex-col justify-center gap-3 sm:gap-4"
+                class="flex flex-col justify-center gap-1.5 sm:gap-4"
                 id="row2"
               ></div>
               <div
-                class="flex flex-col justify-center gap-3 sm:gap-4 mr-8"
+                class="flex flex-col justify-center gap-1.5 sm:gap-4 mr-2 sm:mr-8"
                 id="row1"
               ></div>
             </div>
           </div>
 
           <div
-            class="flex justify-center gap-4 sm:gap-8 mt-10 flex-wrap bg-slate-50 p-4 rounded-2xl mx-auto max-w-2xl border border-slate-100"
+            class="grid grid-cols-2 sm:flex sm:justify-center gap-3 lg:gap-8 mt-4 lg:mt-10 bg-slate-50 p-3 lg:p-4 rounded-xl lg:rounded-2xl mx-auto max-w-2xl border border-slate-100"
           >
-            <div class="flex items-center gap-2">
+            <div
+              class="flex items-center gap-1.5 lg:gap-2 justify-center sm:justify-start"
+            >
               <div
-                class="w-5 h-5 bg-white border border-slate-300 rounded-md shadow-sm"
+                class="w-4 h-4 lg:w-5 lg:h-5 bg-white border border-slate-300 rounded lg:rounded-md shadow-sm flex-shrink-0"
               ></div>
-              <span class="text-sm font-medium text-slate-600">Available</span>
+              <span class="text-xs lg:text-sm font-medium text-slate-600"
+                >Available</span
+              >
             </div>
-            <div class="flex items-center gap-2">
+            <div
+              class="flex items-center gap-1.5 lg:gap-2 justify-center sm:justify-start"
+            >
               <div
-                class="w-5 h-5 bg-gradient-to-br from-red-500 to-red-600 rounded-md shadow-sm"
+                class="w-4 h-4 lg:w-5 lg:h-5 bg-gradient-to-br from-red-500 to-red-600 rounded lg:rounded-md shadow-sm flex-shrink-0"
               ></div>
-              <span class="text-sm font-medium text-slate-600"
+              <span class="text-xs lg:text-sm font-medium text-slate-600"
                 >Full Booked</span
               >
             </div>
-            <div class="flex items-center gap-2">
+            <div
+              class="flex items-center gap-1.5 lg:gap-2 justify-center sm:justify-start"
+            >
               <div
-                class="w-5 h-5 bg-gradient-to-br from-amber-400 to-amber-500 rounded-md shadow-sm"
+                class="w-4 h-4 lg:w-5 lg:h-5 bg-gradient-to-br from-amber-400 to-amber-500 rounded lg:rounded-md shadow-sm flex-shrink-0"
               ></div>
-              <span class="text-sm font-medium text-slate-600">Morning</span>
+              <span class="text-xs lg:text-sm font-medium text-slate-600"
+                >Morning</span
+              >
             </div>
-            <div class="flex items-center gap-2">
+            <div
+              class="flex items-center gap-1.5 lg:gap-2 justify-center sm:justify-start"
+            >
               <div
-                class="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-md shadow-sm"
+                class="w-4 h-4 lg:w-5 lg:h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded lg:rounded-md shadow-sm flex-shrink-0"
               ></div>
-              <span class="text-sm font-medium text-slate-600">Evening</span>
+              <span class="text-xs lg:text-sm font-medium text-slate-600"
+                >Evening</span
+              >
             </div>
           </div>
         </div>
