@@ -1,220 +1,39 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
+/* login.css */
+/* 
+   Most styles have been migrated to Tailwind CSS in login.html.
+   This file is kept for any specific overrides or custom scrollbar logic if needed.
+*/
 
-:root {
-  --white-color: hsl(0, 0%, 100%);
-  --black-color: hsl(0, 0%, 0%);
-  --body-font: "Poppins", sans-serif;
-  --h1-font-size: 1.75rem;
-  --normal-font-size: 1rem;
-  --small-font-size: 0.813rem;
-  --font-medium: 500;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-body,
-input,
-button {
-  font-size: var(--normal-font-size);
-  font-family: var(--body-font);
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
 }
 
-body {
-  color: var(--white-color);
+::-webkit-scrollbar-thumb {
+  background: #4a148c;
+  border-radius: 4px;
 }
 
-input,
-button {
-  border: none;
-  outline: none;
+::-webkit-scrollbar-thumb:hover {
+  background: #7c43bd;
 }
 
-a {
-  text-decoration: none;
+/* Ensure autocomplete background doesn't mess up transparency */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #2a2a2a inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
+/* Ensure dropdown options are readable */
+select option {
+  background-color: #1f1f1f; /* Dark background for options */
+  color: white;
 }
-
-.login {
-  position: relative;
-  height: 100vh;
-  display: grid;
-  align-items: center;
-}
-
-.login__img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.login__form {
-  position: relative;
-  background-color: hsla(0, 0%, 10%, 0.1);
-  border: 2px solid var(--white-color);
-  margin-inline: 1.5rem;
-  padding: 2.5rem 1.5rem;
-  border-radius: 1rem;
-  backdrop-filter: blur(8px);
-}
-
-.login__title {
-  text-align: center;
-  font-size: var(--h1-font-size);
-  font-weight: var(--font-medium);
-  margin-bottom: 2rem;
-}
-
-.login__content,
-.login__box {
-  display: grid;
-}
-
-.login__content {
-  row-gap: 1.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.login__box {
-  grid-template-columns: max-content 1fr;
-  align-items: center;
-  column-gap: 0.75rem;
-  border-bottom: 2px solid var(--white-color);
-  position: relative;
-}
-
-.login__icon,
-.login__eye {
-  font-size: 1.25rem;
-  color: var(--white-color);
-}
-
-.login__box-input {
-  position: relative;
-  width: 100%;
-}
-
-.login__input {
-  width: 100%;
-  padding: 0.8rem 0;
-  background: none;
-  color: var(--white-color);
-  font-size: var(--normal-font-size);
-  position: relative;
-  z-index: 1;
-}
-
-.login__input::placeholder {
-  color: transparent;
-}
-
-.login__label {
-  position: absolute;
-  left: 0;
-  top: 13px;
-  font-weight: var(--font-medium);
-  font-size: var(--normal-font-size);
-  color: var(--white-color);
-  pointer-events: none;
-  transition: top 0.3s, font-size 0.3s;
-}
-
-/* ✅ Floating label fix */
-.login__input:focus + .login__label,
-.login__input:not(:placeholder-shown):not(:focus) + .login__label {
-  top: -12px;
-  font-size: var(--small-font-size);
-}
-
-.login__eye {
-  position: absolute;
-  right: 0;
-  top: 18px;
-  z-index: 10;
-  cursor: pointer;
-}
-
-.login__box:nth-child(2) input {
-  padding-right: 1.8rem;
-}
-
-.login__check,
-.login__check-group {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.login__check {
-  margin-bottom: 1.5rem;
-}
-
-.login__check-label,
-.login__forgot,
-.login__register {
-  font-size: var(--small-font-size);
-}
-
-.login__check-group {
-  column-gap: 0.5rem;
-}
-
-.login__check-input {
-  width: 16px;
-  height: 16px;
-}
-
-.login__forgot {
-  color: var(--white-color);
-}
-.login__forgot:hover {
-  text-decoration: underline;
-}
-
-.login__button {
-  width: 100%;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background-color: var(--white-color);
-  font-weight: var(--font-medium);
-  cursor: pointer;
-  margin-bottom: 2rem;
-  color: var(--black-color);
-}
-
-.login__register {
-  text-align: center;
-}
-
-.login__register a {
-  color: var(--white-color);
-  font-weight: var(--font-medium);
-}
-.login__register a:hover {
-  text-decoration: underline;
-}
-
-/* For medium devices */
-@media screen and (min-width: 576px) {
-  .login {
-    justify-content: center;
-  }
-  .login__form {
-    width: 432px;
-    padding: 4rem 3rem 3.5rem;
-    border-radius: 1.5rem;
-  }
-  .login__title {
-    font-size: 2rem;
-  }
-}
-

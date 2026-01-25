@@ -1,135 +1,463 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MS3QJRDZ7C"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-MS3QJRDZ7C"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-  gtag('config', 'G-MS3QJRDZ7C');
-</script>
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
+      gtag("config", "G-MS3QJRDZ7C");
+    </script>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4a148c" />
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
-  <link rel="stylesheet" href="./login.css">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Kanha Library</title>
 
-<body>
-  <div class="login">
-    <img src="login-bg.png" alt="login image" class="login__img">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
-    <form id="login-form" class="login__form">
-      <h1 class="login__title">Login</h1>
+    <!-- Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
 
-      <div class="login__content">
-        <!-- Login ID (Email or Mobile) -->
-        <div class="login__box">
-          <i class="ri-user-line login__icon"></i>
-          <div class="login__box-input">
-            <input type="text" id="loginId" required class="login__input" placeholder=" " />
-            <label class="login__label">Email or Mobile</label>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+            colors: {
+              primary: "#4a148c",
+              secondary: "#7c43bd",
+              glass: "rgba(255, 255, 255, 0.1)",
+            },
+            animation: {
+              "fade-in-up": "fadeInUp 0.5s ease-out",
+              "pulse-slow": "pulse 3s infinite",
+            },
+            keyframes: {
+              fadeInUp: {
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Fix for autofill overlap - forces label up when browser autofills */
+      input:-webkit-autofill + label,
+      input:not(:placeholder-shown) + label {
+        top: -1.5rem !important;
+        font-size: 0.75rem !important;
+        color: #7c43bd !important;
+      }
+
+      /* Ensure autofilled input text is visible and consistent */
+      input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 30px #2a2a2a inset !important;
+        -webkit-text-fill-color: white !important;
+        caret-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+      }
+    </style>
+
+    <link rel="stylesheet" href="./login.css?v=1.2" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  </head>
+
+  <body
+    class="bg-gray-900 font-sans h-screen w-screen overflow-hidden relative"
+  >
+    <!-- Background Image with Overlay -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="login-bg.png"
+        alt="Background"
+        class="w-full h-full object-cover object-center"
+      />
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex items-center justify-center h-full px-4">
+      <!-- Glassmorphism Card -->
+      <div
+        class="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 animate-fade-in-up transform transition-all hover:scale-[1.01] duration-300"
+      >
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">
+            Welcome Back
+          </h1>
+          <p class="text-gray-300 text-sm">
+            Sign in to access your library account
+          </p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+          <!-- Mobile Number -->
+          <div class="relative group mt-4">
+            <i
+              class="ri-smartphone-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
+            ></i>
+            <input
+              type="text"
+              id="mobile"
+              required
+              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
+              placeholder=" "
+            />
+            <label
+              for="mobile"
+              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
+            >
+              Mobile Number
+            </label>
           </div>
-        </div>
 
-        <!-- Password -->
-        <div class="login__box">
-          <i class="ri-lock-2-line login__icon"></i>
-          <div class="login__box-input">
-            <input type="password" id="password" required class="login__input" placeholder=" " />
-            <label class="login__label">Password</label>
-            <i class="ri-eye-off-line login__eye" id="login-eye"></i>
+          <!-- Name Input (Hidden initially) -->
+          <div
+            id="name-box"
+            class="relative group hidden transition-all duration-300 mt-4"
+          >
+            <i
+              class="ri-user-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
+            ></i>
+            <input
+              type="text"
+              id="fullname"
+              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
+              placeholder=" "
+            />
+            <label
+              for="fullname"
+              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
+            >
+              Full Name
+            </label>
           </div>
-        </div>
+
+          <!-- Gender Input (Hidden initially) -->
+          <div
+            id="gender-box"
+            class="relative group hidden transition-all duration-300"
+          >
+            <i
+              class="ri-women-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors"
+            ></i>
+            <select
+              id="gender"
+              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all appearance-none cursor-pointer"
+            >
+              <option value="" disabled selected class="text-gray-500">
+                Select Gender
+              </option>
+              <option value="Male" class="text-black">Male</option>
+              <option value="Female" class="text-black">Female</option>
+              <option value="Other" class="text-black">Other</option>
+            </select>
+            <div
+              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            >
+              <i class="ri-arrow-down-s-line text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- OTP Input (Initially Hidden) -->
+          <div
+            id="otp-box"
+            class="relative group hidden transition-all duration-300 animate-fade-in-up mt-4"
+          >
+            <i
+              class="ri-lock-2-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
+            ></i>
+            <input
+              type="text"
+              id="otp"
+              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer tracking-widest"
+              placeholder=" "
+            />
+            <label
+              for="otp"
+              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
+            >
+              Enter OTP
+            </label>
+          </div>
+
+          <!-- Buttons -->
+          <div class="pt-2">
+            <button
+              type="button"
+              id="send-otp-btn"
+              class="w-full py-3.5 px-4 bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ring-offset-black"
+            >
+              Send OTP
+            </button>
+
+            <button
+              type="submit"
+              id="verify-otp-btn"
+              class="w-full py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hidden"
+            >
+              Verify & Login
+            </button>
+
+            <button
+              type="button"
+              id="register-btn"
+              class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hidden"
+            >
+              Complete Registration
+            </button>
+          </div>
+
+          <!-- Footer Text -->
+          <div class="text-center mt-6">
+            <p class="text-gray-400 text-sm">
+              Need help?
+              <a
+                href="#"
+                class="text-white hover:text-secondary hover:underline transition-colors"
+                >Contact Support</a
+              >
+            </p>
+          </div>
+        </form>
       </div>
+    </div>
 
-      <div class="login__check">
-        <div class="login__check-group">
-          <input type="checkbox" class="login__check-input">
-          <label class="login__check-label">Remember me</label>
-        </div>
-        <a href="./forgot.html" class="login__forgot">Forgot Password?</a>
+    <!-- Hidden Signup Link (kept for backward compatibility logic if any, but visually removed/minimized) -->
+    <div style="display: none">
+      <a href="./signup.html">Register</a>
+    </div>
 
-      </div>
+    <script>
+      // TODO: REPLACE WITH YOUR FIREBASE CONFIGURATION
+      const firebaseConfig = {
+        apiKey: "AIzaSyDhzexdsI1HpCDgkxpxlwO-A6rNAM7ikIQ",
+        authDomain: "paprplus-912cd.firebaseapp.com",
+        projectId: "paprplus-912cd",
+        storageBucket: "paprplus-912cd.firebasestorage.app",
+        messagingSenderId: "951367264254",
+        appId: "1:951367264254:web:f89d8f8ef715aa9ac502af",
+        measurementId: "G-XZWSFKDHFY",
+      };
 
-      <button type="submit" class="login__button">Login</button>
+      // Initialize Firebase
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
 
-      <p class="login__register">
-        Don't have an account? <a href="./signup.html">Register</a>
-      </p>
-    </form>
-  </div>
+      // Set language to default device language
+      firebase.auth().useDeviceLanguage();
 
-  
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
+        "send-otp-btn",
+        {
+          size: "invisible",
+          callback: (response) => {
+            // reCAPTCHA solved
+            // onSignInSubmit();
+          },
+        },
+      );
 
-   <script>
-     // Toggle password visibility
-    const showHiddenPass = (passId, eyeId) => {
-      const input = document.getElementById(passId),
-            iconEye = document.getElementById(eyeId);
+      const sendOtpBtn = document.getElementById("send-otp-btn");
+      const verifyOtpBtn = document.getElementById("verify-otp-btn");
+      const registerBtn = document.getElementById("register-btn");
+      const otpBox = document.getElementById("otp-box");
+      const nameBox = document.getElementById("name-box");
+      const genderBox = document.getElementById("gender-box");
 
-      iconEye.addEventListener('click', () => {
-        if (input.type === 'password') {
-          input.type = 'text';
-          iconEye.classList.add('ri-eye-line');
-          iconEye.classList.remove('ri-eye-off-line');
-        } else {
-          input.type = 'password';
-          iconEye.classList.remove('ri-eye-line');
-          iconEye.classList.add('ri-eye-off-line');
+      let isRegistration = false;
+      let verifiedUser = null;
+
+      sendOtpBtn.addEventListener("click", function () {
+        const phoneNumber = document.getElementById("mobile").value.trim();
+
+        if (!phoneNumber) {
+          alert("Please enter a mobile number");
+          return;
+        }
+
+        // Add +91 if not present (assuming India)
+        const formattedPhoneNumber = phoneNumber.startsWith("+")
+          ? phoneNumber
+          : "+91" + phoneNumber;
+
+        const appVerifier = window.recaptchaVerifier;
+
+        firebase
+          .auth()
+          .signInWithPhoneNumber(formattedPhoneNumber, appVerifier)
+          .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            alert("OTP Sent!");
+            otpBox.style.display = "block";
+            sendOtpBtn.style.display = "none";
+            verifyOtpBtn.style.display = "block";
+          })
+          .catch((error) => {
+            console.error("Error during signInWithPhoneNumber", error);
+            if (error.code === "auth/invalid-app-credential") {
+              alert(
+                "Configuration Error: Hostname match not found.\n\nPlease go to Firebase Console -> Authentication -> Settings -> Authorized Domains.\nAdd '127.0.0.1' and 'localhost' to the list.",
+              );
+            } else {
+              alert("Error sending OTP: " + error.message);
+            }
+
+            if (window.recaptchaVerifier && window.recaptchaVerifier.clear) {
+              window.recaptchaVerifier.clear();
+            }
+          });
+      });
+
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const otp = document.getElementById("otp").value.trim();
+          if (!otp) return alert("Please enter OTP");
+
+          try {
+            if (!verifiedUser) {
+              const result = await window.confirmationResult.confirm(otp);
+              verifiedUser = result.user;
+              console.log("Firebase Verified User:", verifiedUser);
+            }
+
+            // Call backend to check if user exists in DB and get details
+            const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/login-otp", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ mobile: verifiedUser.phoneNumber }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+              // Handle User Not Found -> Registration Flow
+              if (
+                res.status === 400 &&
+                data.message?.includes("User not found")
+              ) {
+                alert(
+                  "User not found. Please enter your name and gender to register.",
+                );
+                nameBox.style.display = "block";
+                genderBox.style.display = "block";
+                verifyOtpBtn.style.display = "none";
+                registerBtn.style.display = "block";
+                isRegistration = true;
+                return;
+              }
+
+              if (res.status === 403 && data.message?.includes("blocked")) {
+                alert("❌ " + data.message);
+              } else {
+                alert(data.message || "Login failed");
+              }
+              return;
+            }
+
+            // ✅ SUCCESS LOGIN
+            loginSuccess(data.user);
+          } catch (error) {
+            console.error(error);
+            alert("Invalid OTP or Server Error");
+          }
+        });
+
+      // Handle Registration
+      registerBtn.addEventListener("click", async function () {
+        const fullname = document.getElementById("fullname").value.trim();
+        const gender = document.getElementById("gender").value;
+
+        if (!fullname) {
+          alert("Please enter your full name");
+          return;
+        }
+
+        if (!gender) {
+          alert("Please select your gender");
+          return;
+        }
+
+        // Split name
+        const names = fullname.split(" ");
+        const firstName = names[0];
+        const lastName = names.slice(1).join(" ") || "."; // Default dot if no last name
+
+        try {
+          const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/signup-otp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              mobile: verifiedUser.phoneNumber,
+              firstName: firstName,
+              lastName: lastName,
+              gender: gender,
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            alert(data.message || "Registration failed");
+            return;
+          }
+
+          alert("Registration Successful!");
+          loginSuccess(data.user);
+        } catch (err) {
+          console.error(err);
+          alert("Server Error during registration");
         }
       });
-    };
-    showHiddenPass('password', 'login-eye');
-document.getElementById("login-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
 
-  const loginId = document.getElementById("loginId").value.trim();
-  const password = document.getElementById("password").value;
+      function loginSuccess(user) {
+        localStorage.setItem("user", JSON.stringify(user));
 
-  try {
-    const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ loginId, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (res.status === 403 && data.message?.includes("blocked")) {
-        alert("❌ " + data.message);
-      } else {
-        alert(data.message || "Login failed");
+        if (user.role === "admin") {
+          window.location.href = "admin.html";
+        } else if (user.role === "incharge") {
+          window.location.href = "libincharge.html";
+        } else if (user.role === "user") {
+          window.location.href = "booking.html";
+        } else {
+          alert("Unknown role");
+        }
       }
-      return;
-    }
-
-    // ✅ SUCCESS LOGIN
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    if (data.user.role === "admin") {
-      window.location.href = "admin.html";
-    } else if (data.user.role === "incharge") {
-      window.location.href = "libincharge.html";
-    } else if (data.user.role === "user") {
-      window.location.href = "booking.html";
-    } else {
-      alert("Unknown role");
-    }
-
-  } catch (error) {
-    console.error(error);
-    alert("Server error");
-  }
-});
-</script>
-</body>
+    </script>
+  </body>
 </html>
