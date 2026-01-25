@@ -114,7 +114,7 @@
       <div
         class="w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-6 md:p-8 animate-fade-in-up transform transition-all hover:scale-[1.01] duration-300"
       >
-        <div class="text-center mb-8">
+        <div class="text-center mb-8" id="header-text">
           <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">
             Welcome Back
           </h1>
@@ -124,98 +124,26 @@
         </div>
 
         <form id="login-form" class="space-y-6">
-          <!-- Mobile Number -->
-          <div class="relative group mt-4">
-            <i
-              class="ri-smartphone-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
-            ></i>
-            <input
-              type="text"
-              id="mobile"
-              required
-              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
-              placeholder=" "
-            />
-            <label
-              for="mobile"
-              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
-            >
-              Mobile Number
-            </label>
-          </div>
-
-          <!-- Name Input (Hidden initially) -->
-          <div
-            id="name-box"
-            class="relative group hidden transition-all duration-300 mt-4"
-          >
-            <i
-              class="ri-user-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
-            ></i>
-            <input
-              type="text"
-              id="fullname"
-              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
-              placeholder=" "
-            />
-            <label
-              for="fullname"
-              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
-            >
-              Full Name
-            </label>
-          </div>
-
-          <!-- Gender Input (Hidden initially) -->
-          <div
-            id="gender-box"
-            class="relative group hidden transition-all duration-300"
-          >
-            <i
-              class="ri-women-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors"
-            ></i>
-            <select
-              id="gender"
-              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all appearance-none cursor-pointer"
-            >
-              <option value="" disabled selected class="text-gray-500">
-                Select Gender
-              </option>
-              <option value="Male" class="text-black">Male</option>
-              <option value="Female" class="text-black">Female</option>
-              <option value="Other" class="text-black">Other</option>
-            </select>
-            <div
-              class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            >
-              <i class="ri-arrow-down-s-line text-gray-400"></i>
+          <!-- Step 1: Mobile -->
+          <div id="step-mobile" class="space-y-6">
+            <div class="relative group mt-4">
+              <i
+                class="ri-smartphone-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
+              ></i>
+              <input
+                type="text"
+                id="mobile"
+                required
+                class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
+                placeholder=" "
+              />
+              <label
+                for="mobile"
+                class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
+              >
+                Mobile Number
+              </label>
             </div>
-          </div>
-
-          <!-- OTP Input (Initially Hidden) -->
-          <div
-            id="otp-box"
-            class="relative group hidden transition-all duration-300 animate-fade-in-up mt-4"
-          >
-            <i
-              class="ri-lock-2-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
-            ></i>
-            <input
-              type="text"
-              id="otp"
-              class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer tracking-widest"
-              placeholder=" "
-            />
-            <label
-              for="otp"
-              class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
-            >
-              Enter OTP
-            </label>
-          </div>
-
-          <!-- Buttons -->
-          <div class="pt-2">
             <button
               type="button"
               id="send-otp-btn"
@@ -223,19 +151,119 @@
             >
               Send OTP
             </button>
+          </div>
 
+          <!-- Step 2: OTP (Hidden) -->
+          <div id="step-otp" class="hidden space-y-6 animate-fade-in-up">
+            <div id="otp-inputs" class="flex justify-between gap-2 mt-4">
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+              <input
+                type="text"
+                maxlength="1"
+                class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
+              />
+            </div>
             <button
               type="submit"
               id="verify-otp-btn"
-              class="w-full py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hidden"
+              class="w-full py-3.5 px-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
             >
               Verify & Login
             </button>
 
+            <div class="text-center">
+              <button
+                id="resend-otp-btn"
+                type="button"
+                class="text-sm text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Resend OTP in <span id="resend-timer">60</span>s
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Register (Hidden) -->
+          <div id="step-register" class="hidden space-y-6 animate-fade-in-up">
+            <div class="relative group mt-4">
+              <i
+                class="ri-user-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
+              ></i>
+              <input
+                type="text"
+                id="fullname"
+                class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
+                placeholder=" "
+              />
+              <label
+                for="fullname"
+                class="absolute left-10 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-6 peer-focus:text-xs peer-focus:text-secondary peer-not-placeholder-shown:-top-6 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:text-secondary cursor-text pointer-events-none"
+              >
+                Full Name
+              </label>
+            </div>
+
+            <div class="relative group">
+              <i
+                class="ri-women-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors"
+              ></i>
+              <select
+                id="gender"
+                class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all appearance-none cursor-pointer"
+              >
+                <option
+                  value=""
+                  disabled
+                  selected
+                  class="bg-gray-800 text-gray-400"
+                >
+                  Select Gender
+                </option>
+                <option value="Male" class="bg-gray-800 text-white">
+                  Male
+                </option>
+                <option value="Female" class="bg-gray-800 text-white">
+                  Female
+                </option>
+                <option value="Other" class="bg-gray-800 text-white">
+                  Other
+                </option>
+              </select>
+              <div
+                class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              >
+                <i class="ri-arrow-down-s-line text-gray-400"></i>
+              </div>
+            </div>
+
             <button
               type="button"
               id="register-btn"
-              class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hidden"
+              class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
             >
               Complete Registration
             </button>
@@ -295,12 +323,82 @@
       const sendOtpBtn = document.getElementById("send-otp-btn");
       const verifyOtpBtn = document.getElementById("verify-otp-btn");
       const registerBtn = document.getElementById("register-btn");
-      const otpBox = document.getElementById("otp-box");
-      const nameBox = document.getElementById("name-box");
-      const genderBox = document.getElementById("gender-box");
+      const stepMobile = document.getElementById("step-mobile");
+      const stepOtp = document.getElementById("step-otp");
+      const stepRegister = document.getElementById("step-register");
+      const headerText = document.getElementById("header-text");
+      const otpInputs = document.querySelectorAll("#otp-inputs input");
+      const resendOtpBtn = document.getElementById("resend-otp-btn");
+      const resendTimerSpan = document.getElementById("resend-timer");
+      let resendInterval;
 
       let isRegistration = false;
       let verifiedUser = null;
+
+      // Handle OTP Inputs Logic (Auto-focus, Backspace)
+      otpInputs.forEach((input, index) => {
+        input.addEventListener("input", (e) => {
+          if (e.target.value.length === 1) {
+            if (index < otpInputs.length - 1) {
+              otpInputs[index + 1].focus();
+            }
+          }
+
+          // Auto-submit if all fields are filled
+          const otp = getOtpValue();
+          if (otp.length === 6) {
+            verifyOtpBtn.click();
+          }
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !e.target.value) {
+            if (index > 0) {
+              otpInputs[index - 1].focus();
+            }
+          }
+        });
+
+        // Allow only numbers
+        input.addEventListener("keypress", function (e) {
+          if (e.which < 48 || e.which > 57) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      function getOtpValue() {
+        let otp = "";
+        otpInputs.forEach((input) => {
+          otp += input.value;
+        });
+        return otp;
+      }
+
+      function startResendTimer() {
+        let timeLeft = 60;
+        resendOtpBtn.disabled = true;
+        resendTimerSpan.textContent = timeLeft;
+        resendOtpBtn.innerHTML = `Resend OTP in <span id="resend-timer">${timeLeft}</span>s`;
+
+        clearInterval(resendInterval);
+        resendInterval = setInterval(() => {
+          timeLeft--;
+          if (document.getElementById("resend-timer")) {
+            document.getElementById("resend-timer").textContent = timeLeft;
+          }
+
+          if (timeLeft <= 0) {
+            clearInterval(resendInterval);
+            resendOtpBtn.disabled = false;
+            resendOtpBtn.innerHTML = "Resend OTP";
+          }
+        }, 1000);
+      }
+
+      resendOtpBtn.addEventListener("click", function () {
+        sendOtpBtn.click();
+      });
 
       sendOtpBtn.addEventListener("click", function () {
         const phoneNumber = document.getElementById("mobile").value.trim();
@@ -323,15 +421,34 @@
           .then((confirmationResult) => {
             window.confirmationResult = confirmationResult;
 
-            otpBox.style.display = "block";
-            sendOtpBtn.style.display = "none";
-            verifyOtpBtn.style.display = "block";
+            // Switch to OTP Step
+            stepMobile.classList.add("hidden");
+            stepOtp.classList.remove("hidden");
+
+            // Update Header
+            headerText.innerHTML = `
+                <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">Enter Verification Code</h1>
+                <p class="text-gray-300 text-sm">Sent to ${formattedPhoneNumber}</p>
+            `;
+
+            // Focus first OTP input
+            setTimeout(() => otpInputs[0].focus(), 100);
+
+            // Start Resend Timer
+            startResendTimer();
           })
           .catch((error) => {
             console.error("Error during signInWithPhoneNumber", error);
             if (error.code === "auth/invalid-app-credential") {
               alert(
                 "Configuration Error: Hostname match not found.\n\nPlease go to Firebase Console -> Authentication -> Settings -> Authorized Domains.\nAdd '127.0.0.1' and 'localhost' to the list.",
+              );
+            } else if (
+              error.message.includes("blocked all requests from this device") ||
+              error.code === "auth/too-many-requests"
+            ) {
+              alert(
+                "Access Temporarily Blocked:\n\nWe have detected unusual activity from this device and blocked requests to protect your account.\n\nThis usually happens after too many failed login attempts.\n\nPlease try the following:\n1. Wait for 30-60 minutes before trying again.\n2. Switch to a different network (e.g., use Mobile Data instead of WiFi).\n3. Try logging in from a different browser or device.",
               );
             } else {
               alert("Error sending OTP: " + error.message);
@@ -348,8 +465,9 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
-          const otp = document.getElementById("otp").value.trim();
-          if (!otp) return alert("Please enter OTP");
+          const otp = getOtpValue();
+          if (otp.length !== 6)
+            return alert("Please enter a valid 6-digit OTP");
 
           try {
             if (!verifiedUser) {
@@ -378,10 +496,16 @@
                 res.status === 400 &&
                 data.message?.includes("User not found")
               ) {
-                nameBox.style.display = "block";
-                genderBox.style.display = "block";
-                verifyOtpBtn.style.display = "none";
-                registerBtn.style.display = "block";
+                // Switch to Registration Step
+                stepOtp.classList.add("hidden");
+                stepRegister.classList.remove("hidden");
+
+                // Update Header
+                headerText.innerHTML = `
+                    <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">Complete Profile</h1>
+                    <p class="text-gray-300 text-sm">Please tell us a bit about yourself</p>
+                `;
+
                 isRegistration = true;
                 return;
               }
