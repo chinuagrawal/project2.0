@@ -38,6 +38,7 @@ const deleteUserRoute = require('./routes/deleteuser');
 app.use('/api', deleteUserRoute);
 
 app.use("/api", require("./routes/student.routes"));
+app.use("/api", require("./routes/profile.routes")); // Added Profile Route // Added Analytics Route
 app.use("/api", require("./routes/outlet.routes"));
 app.use("/api", require("./routes/admin.routes"));
 

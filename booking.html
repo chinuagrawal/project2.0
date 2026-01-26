@@ -65,6 +65,10 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <style>
       /* ... existing CSS ... */
 
@@ -73,7 +77,7 @@
         position: absolute; /* Position it relative to the body */
         top: var(--space-6); /* 1.5rem from the top */
         left: var(--space-6); /* 1.5rem from the left */
-        z-index: 1000; /* Ensure it's above other elements */
+        z-index: 10001; /* Ensure it's above other elements */
 
         /* Styling */
         display: inline-flex;
@@ -216,6 +220,28 @@
         width: 100%;
         max-width: 1000px;
         align-items: start;
+        position: relative; /* Ensure absolute children are relative to this */
+        padding-top: 60px; /* Space for top bar */
+      }
+
+      /* Skeleton Loader */
+      @keyframes shimmer {
+        0% {
+          background-position: -1000px 0;
+        }
+        100% {
+          background-position: 1000px 0;
+        }
+      }
+      .skeleton {
+        animation: shimmer 2s infinite linear;
+        background: linear-gradient(
+          to right,
+          #f6f7f8 4%,
+          #edeef1 25%,
+          #f6f7f8 36%
+        );
+        background-size: 1000px 100%;
       }
 
       @media (max-width: 768px) {
@@ -774,6 +800,121 @@
       &#x2190; Back
     </a>
     <div class="main-wrapper">
+      <!-- Top Bar for Notifications & Profile -->
+      <div
+        class="top-bar"
+        style="
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          padding: 10px;
+          gap: 15px;
+          position: absolute;
+          top: 0;
+          right: 0;
+          z-index: 9999;
+          pointer-events: none;
+        "
+      >
+        <!-- Notification Bell -->
+        <div style="position: relative; pointer-events: auto">
+          <button
+            id="bellBtn"
+            style="
+              background: white;
+              border: none;
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fas fa-bell" style="font-size: 20px; color: #333"></i>
+            <span
+              id="notifBadge"
+              style="
+                display: none;
+                position: absolute;
+                top: 0;
+                right: 0;
+                background: red;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+              "
+            ></span>
+          </button>
+          <!-- Dropdown -->
+          <div
+            id="notifDropdown"
+            style="
+              display: none;
+              position: absolute;
+              top: 45px;
+              right: 0;
+              width: 280px;
+              background: white;
+              border-radius: 10px;
+              box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+              padding: 10px;
+              z-index: 100;
+            "
+          >
+            <h4
+              style="
+                margin: 0 0 10px 0;
+                font-size: 14px;
+                color: #333;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 5px;
+              "
+            >
+              Notifications
+            </h4>
+            <div id="notifList" style="max-height: 200px; overflow-y: auto">
+              <p style="font-size: 12px; color: #888">No new notifications</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Button -->
+        <a
+          href="profile.html"
+          style="
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            pointer-events: auto;
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#666"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+      </div>
       <div class="container">
         <h1>Library Seat Booking</h1>
         <section id="my-bookings" style="display: none; padding: 20px">
@@ -852,6 +993,7 @@
         </div>
       </div>
     </div>
+    <script src="js/notifications.js"></script>
     <script src="booking.js?v=1.8.9"></script>
     <!-- Mobile action bar (visible only on small screens) -->
     <div class="mobile-action-bar">
