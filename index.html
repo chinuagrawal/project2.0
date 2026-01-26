@@ -18,7 +18,7 @@
       sizes="180x180"
       href="images/fevicon/apple-touch-icon.png"
     />
-    <link rel="manifest" href="images/fevicon/site.webmanifest" />
+    <link rel="manifest" href="manifest.json" />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -72,27 +72,37 @@
 
       // PWA Install Logic
       let deferredPrompt;
-      const installBtn = document.getElementById("installAppBtn");
 
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installBtn.classList.remove("hidden");
-      });
-
-      installBtn.addEventListener("click", async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
-          installBtn.classList.add("hidden");
-        }
-        deferredPrompt = null;
+        const btn = document.getElementById("installAppBtn");
+        if (btn) btn.classList.remove("hidden");
       });
 
       window.addEventListener("appinstalled", () => {
-        installBtn.classList.add("hidden");
+        const btn = document.getElementById("installAppBtn");
+        if (btn) btn.classList.add("hidden");
         deferredPrompt = null;
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const installBtn = document.getElementById("installAppBtn");
+        if (installBtn) {
+          if (deferredPrompt) {
+            installBtn.classList.remove("hidden");
+          }
+
+          installBtn.addEventListener("click", async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === "accepted") {
+              installBtn.classList.add("hidden");
+            }
+            deferredPrompt = null;
+          });
+        }
       });
 
       // Register Service Worker
