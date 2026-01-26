@@ -1,899 +1,1039 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MS3QJRDZ7C"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-MS3QJRDZ7C');
-</script>
-<link rel="icon" href="images/fevicon/favicon.ico" type="image/x-icon">
-
-  <!-- PNG favicons -->
-  <link rel="icon" type="image/png" sizes="16x16" href="images/fevicon/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="images/fevicon/favicon-32x32.png">
-
-  <!-- Android Chrome -->
-  <link rel="icon" type="image/png" sizes="192x192" href="images/fevicon/android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="images/fevicon/android-chrome-512x512.png">
-
-  <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="images/fevicon/apple-touch-icon.png">
-
-  <!-- Manifest for PWA -->
-  <link rel="manifest" href="images/fevicon/site.webmanifest">
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
-<meta name="google-adsense-account" content="ca-pub-9442859388560602">
-
-  <meta charset="UTF-8">
-  <title>Kanha Library Seat Booking</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    /* ... existing CSS ... */
-
-/* New CSS for Back Button */
-#back-button {
-    position: absolute; /* Position it relative to the body */
-    top: var(--space-6); /* 1.5rem from the top */
-    left: var(--space-6); /* 1.5rem from the left */
-    z-index: 1000; /* Ensure it's above other elements */
-    
-    /* Styling */
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-xl);
-    text-decoration: none; /* Remove underline */
-    color: var(--gray-700);
-    font-weight: 500;
-    font-size: 0.9375rem;
-    cursor: pointer;
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
-}
-
-#back-button:hover {
-    background: var(--primary-50);
-    color: var(--primary-700);
-    border-color: var(--primary-500);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-@media (max-width: 480px) {
-    #back-button {
-        top: var(--space-4);
-        left: var(--space-4);
-        padding: var(--space-2) var(--space-3);
-        font-size: 0.875rem;
-    }
-}
-   /* Modern Booking System CSS */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-:root {
-  /* Modern Color Palette */
-  --primary-50: #f0f9ff;
-  --primary-100: #e0f2fe;
-  --primary-500: #0ea5e9;
-  --primary-600: #0284c7;
-  --primary-700: #0369a1;
-  --primary-900: #0c4a6e;
-  
-  --purple-50: #faf5ff;
-  --purple-100: #f3e8ff;
-  --purple-500: #a855f7;
-  --purple-600: #9333ea;
-  --purple-700: #7c3aed;
-  
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-  
-  --success-500: #10b981;
-  --success-600: #059669;
-  --warning-500: #f59e0b;
-  --warning-600: #d97706;
-  --error-500: #ef4444;
-  --error-600: #dc2626;
-  
-  /* Spacing & Layout */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  
-  /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--purple-50) 100%);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: var(--space-4);
-  line-height: 1.6;
-  color: var(--gray-800);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-}
-
-.main-wrapper {
-  display: grid;
-  grid-template-columns: minmax(320px, 1fr) auto;
-  gap: var(--space-8);
-  width: 100%;
-  max-width: 1000px;
-  align-items: start;
-}
-
-@media (max-width: 768px) {
-  .main-wrapper {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-}
-
-.container, .legend {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-xl);
-  padding: var(--space-8);
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-h1 {
-  text-align: center;
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin-bottom: var(--space-2);
-  letter-spacing: -0.025em;
-  margin-top: var(--space-6);
-}
-
-label {
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: var(--gray-700);
-  margin-bottom: var(--space-2);
-  display: block;
-  letter-spacing: 0.025em;
-}
-
-select, input[type="date"] {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  font-size: 0.9375rem;
-  font-family: inherit;
-  background: white;
-  color: var(--gray-900);
-  transition: all var(--transition-fast);
-  outline: none;
-}
-
-select:focus, input[type="date"]:focus {
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-}
-
-select:hover, input[type="date"]:hover {
-  border-color: var(--gray-400);
-}
-
-.seat-map {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-  padding: var(--space-4);
-  background: var(--gray-50);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--gray-200);
-}
-
-.seat {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-  user-select: none;
-}
-
-.seat:hover:not(.disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.seat.available {
-  background: white;
-  border: 2px solid var(--gray-300);
-  color: var(--gray-600);
-}
-
-.seat.available:hover {
-  border-color: var(--primary-500);
-  background: var(--primary-50);
-  color: var(--primary-700);
-}
-
-.seat.booked {
-  background: var(--error-500);
-  color: white;
-  border: 2px solid var(--error-600);
-}
-
-.seat.half-booked {
-  background: var(--warning-500);
-  color: white;
-  border: 2px solid var(--warning-600);
-}
-
-.seat.evening-booked {
-  background: var(--purple-600);
-  color: white;
-  border: 2px solid var(--purple-700);
-}
-
-.seat.selected {
-  background: var(--primary-500);
-  color: white;
-  border: 2px solid var(--primary-600);
-  transform: scale(1.1);
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
-}
-
-.seat.disabled {
-  pointer-events: none;
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.amount-display {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--success-600);
-  text-align: center;
-  padding: var(--space-4);
-  background: var(--success-50);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--success-200);
-}
-
-.radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.radio-group label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  background: var(--gray-50);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: 2px solid transparent;
-  margin-bottom: 0;
-}
-
-.radio-group label:hover {
-  background: var(--gray-100);
-  border-color: var(--gray-300);
-}
-
-.radio-group label:has(input:checked) {
-  background: var(--primary-50);
-  border-color: var(--primary-500);
-  color: var(--primary-700);
-}
-
-.radio-group input[type="radio"] {
-  accent-color: var(--primary-500);
-  width: 18px;
-  height: 18px;
-  margin: 0;
-}
-
-button {
-  width: 100%;
-  padding: var(--space-4) var(--space-6);
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
-  border: none;
-  border-radius: var(--radius-xl);
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-button:focus {
-  outline: none;
-  box-shadow: var(--shadow-xl), 0 0 0 3px rgba(14, 165, 233, 0.3);
-}
-
-.legend {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.legend h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--gray-900);
-  text-align: center;
-  margin-bottom: var(--space-2);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: 0.875rem;
-  color: var(--gray-700);
-}
-
-.color-box {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-sm);
-  border: 2px solid transparent;
-  flex-shrink: 0;
-}
-
-.price-breakdown {
-  font-family: inherit;
-  font-size: 0.9375rem;
-  margin-top: var(--space-4);
-  border: 1px solid var(--gray-200);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: white;
-  box-shadow: var(--shadow-sm);
-}
-
-.price-breakdown div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: var(--space-2) 0;
-}
-
-.price-breakdown .discount {
-  color: var(--success-600);
-  font-weight: 600;
-}
-
-.price-breakdown .total {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  padding-top: var(--space-2);
-  border-top: 2px solid var(--gray-200);
-}
-
-.price-breakdown hr {
-  margin: var(--space-3) 0;
-  border: none;
-  border-top: 1px solid var(--gray-200);
-}
-
-.loader {
-  margin: var(--space-4) auto;
-  border: 4px solid var(--gray-200);
-  border-top: 4px solid var(--primary-500);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-#payment-warning {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(8px);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding: var(--space-8);
-  text-align: center;
-}
-
-/* Mobile Action Bar */
-.mobile-action-bar {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 80px;
-  padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--gray-200);
-  z-index: 9999;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  box-shadow: 0 -10px 25px -5px rgb(0 0 0 / 0.1);
-}
-
-.mobile-amount {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-  color: var(--gray-900);
-  font-size: 1.125rem;
-}
-
-.mobile-amount .currency {
-  font-size: 1rem;
-  opacity: 0.8;
-}
-
-.mobile-amount .amount-num {
-  font-size: 1.25rem;
-  font-weight: 800;
-}
-
-.mobile-book-btn {
-  flex: 0 0 auto;
-  min-width: 120px;
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
-  color: white;
-  border: none;
-  font-weight: 600;
-  font-size: 1rem;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  box-shadow: var(--shadow-lg);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.mobile-book-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
-}
-
-.mobile-book-btn:active {
-  transform: translateY(0);
-}
-
-.mobile-book-btn:focus {
-  outline: none;
-  box-shadow: var(--shadow-xl), 0 0 0 3px rgba(14, 165, 233, 0.3);
-}
-
-@media (max-width: 768px) {
-  .mobile-action-bar {
-    display: flex;
-  }
-  
-  body, .main-wrapper {
-    padding-bottom: 100px;
-  }
-  
-  #book-btn {
-    display: none;
-  }
-  
-  .container {
-    padding: var(--space-6);
-  }
-  
-  .seat-map {
-    gap: var(--space-1);
-  }
-  
-  .seat {
-    width: 36px;
-    height: 36px;
-    font-size: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .mobile-action-bar {
-    height: 88px;
-    padding: var(--space-3);
-  }
-  
-  .mobile-book-btn {
-    flex: 1;
-    min-width: 0;
-    padding: var(--space-4);
-  }
-  
-  .seat {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .container {
-    padding: var(--space-4);
-  }
-}
-
-/* Focus styles for better accessibility */
-*:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Better text rendering */
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-/* Hover effects for interactive elements */
-@media (hover: hover) {
-  .container, .legend {
-    transition: all var(--transition-normal);
-  }
-  
-  .container:hover, .legend:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-2xl);
-  }
-}
-
-/* Reduced motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-#my-bookings {
-  background-color: rgba(255, 255, 255, 0.05); /* Light frosted layer */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-#booking-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-section {
-  padding: 80px 5%; /* Use percentage for responsive padding */
-  max-width: 1200px;
-  margin: 0 auto;
-}
-  </style>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9442859388560602"
-     crossorigin="anonymous"></script>
-</head>
-
-<script>
-  const userData = localStorage.getItem("user");
-  if (!userData) {
-    
-    window.location.href = "login.html";
-  }
-</script>
-<script src="https://mercury.phonepe.com/web/bundle/checkout.js" defer></script>
-
-
-
-<body>
-  <a href="./index.html" id="back-button" aria-label="Go Back">
-        &#x2190; Back
-    </a>
-  <div class="main-wrapper">
-    <div class="container">
-      <h1>Library Seat Booking</h1>
-      <section id="my-bookings" style="display:none; padding: 20px;">
-      <h2>📚 My Booked Seats</h2>
-      <div id="booking-list" class="booking-list"></div>
-    </section>
-
-      <div><label>Start Date:</label><input type="date" id="start-date"></div>
-
-      <div><label>Duration:</label>
-        <select id="duration">
-          <option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option>
-          <option value="4">4 Months</option><option value="5">5 Months</option><option value="6">6 Months</option>
-          <option value="7">7 Months</option><option value="8">8 Months</option><option value="9">9 Months</option>
-          <option value="10">10 Months</option><option value="11">11 Months</option><option value="12">12 Months</option>
-        </select>
-      </div>
-
-      <div><label>Shift:</label>
-        <select id="shift">
-          <option value="am">Morning</option><option value="pm">Evening</option><option value="full">Full Day</option>
-        </select>
-      </div>
-      <label>Payment Mode:</label>
-      <div class="radio-group">
-        <label><input type="radio" name="paymentMode" value="online" checked> Pay Online</label>
-        <label><input type="radio" name="paymentMode" value="cash"> Pay Cash at Library (+ ₹20)</label>
-      </div>
-
-      <div class="seat-map" id="seat-map"></div>
-
-      <div class="amount-display">Total Amount: <span id="amount-display">₹ 0</span></div>
-
-      
-      
-
-      <button id="book-btn">Pay</button>
-
-      
-    </div>
-    
-
-
-      
-
-    <div class="legend">
-      <h3>Legend</h3>
-      <div class="legend-item"><div class="color-box" style="background:white;"></div> Available</div>
-      <div class="legend-item"><div class="color-box" style="background:#e53935"></div> Fully Booked</div>
-      <div class="legend-item"><div class="color-box" style="background:#ffa726"></div> Morning Booked</div>
-      <div class="legend-item"><div class="color-box" style="background:#8e24aa"></div> Evening Booked</div>
-    </div>
-
-    
-    
-  </div>
-  <script src="booking.js?v=1.8.9"></script>
-  <!-- Mobile action bar (visible only on small screens) -->
-<div class="mobile-action-bar">
-  <div class="mobile-amount">Total: <span id="mobile-amount"><span class="currency">₹</span><span class="amount-num">0</span></span></div>
-  <button id="mobile-book-btn" class="mobile-book-btn">Pay</button>
-</div>
-
-
-<script>
-
-  
-(function(){
-  const API_PRICES = 'https://kanha-backend-yfx1.onrender.com/api/prices';
-  const mobileAmountEl = document.getElementById('mobile-amount');
-  const shiftEl = document.getElementById('shift');
-  const durationEl = document.getElementById('duration');
-  const bookBtn = document.getElementById('book-btn');
-
-  if (!mobileAmountEl) {
-    console.warn('mobile-amount element not found. Script will not run.');
-    return;
-  }
-
-  // Try to reuse already-fetched priceSettings if present (common in booking.js)
-  let _prices = window.priceSettings || window._priceSettings || null;
-
-  async function fetchPricesIfNeeded() {
-    if (_prices) return _prices;
-    try {
-      const res = await fetch(API_PRICES);
-      if (!res.ok) throw new Error('fetch failed');
-      _prices = await res.json();
-      // also expose globally for reuse
-      window._priceSettings = _prices;
-      return _prices;
-    } catch (e) {
-      console.warn('Could not fetch prices, using fallback defaults.', e);
-      _prices = { am: 500, pm: 400, full: 900, paymentGatewayFeePercent: 2.5, convenienceFee: 25, offers: [] };
-      window._priceSettings = _prices;
-      return _prices;
-    }
-  }
-
-  function getDiscountForDuration(offers, months) {
-    if (!Array.isArray(offers)) return 0;
-    let best = 0;
-    for (const o of offers) {
-      const dur = Number(o.duration || 0);
-      const disc = Number(o.discount || 0);
-      if (months >= dur && disc > best) best = disc;
-    }
-    return best;
-  }
-
-  function computeTotal(basePrice, months, discount, pgPercent, convenience) {
-    const baseTimesMonths = Number(basePrice) * Number(months);
-    const subtotal = baseTimesMonths - Number(discount || 0);
-    const pgFee = Math.round(((subtotal + Number(convenience || 0)) * Number(pgPercent || 0)) / 100);
-    const total = subtotal + pgFee + Number(convenience || 0);
-    return { subtotal, pgFee, convenience, total };
-  }
-
-  function formatINRWithSpace(n) {
-    if (isNaN(n)) return '₹ 0';
-    // simple thousands separator
-    return '₹ ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  async function updateMobileAmount() {
-    const prices = await fetchPricesIfNeeded();
-    const shift = (shiftEl && shiftEl.value) || 'am';
-    const months = parseInt((durationEl && durationEl.value) || '1', 10) || 1;
-
-    // try to use user customPricing if available
-    let basePrice;
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (user && user.customPricing && user.customPricing[shift]) {
-        basePrice = Number(user.customPricing[shift]);
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-MS3QJRDZ7C"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
       }
-    } catch (e) { /* ignore */ }
+      gtag("js", new Date());
 
-    if (!basePrice) {
-      basePrice = (shift === 'full') ? (prices.full || 0) : (prices[shift] || 0);
+      gtag("config", "G-MS3QJRDZ7C");
+    </script>
+    <link rel="icon" href="images/fevicon/favicon.ico" type="image/x-icon" />
+
+    <!-- PNG favicons -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="images/fevicon/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="images/fevicon/favicon-32x32.png"
+    />
+
+    <!-- Android Chrome -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="images/fevicon/android-chrome-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="images/fevicon/android-chrome-512x512.png"
+    />
+
+    <!-- Apple Touch Icon -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="images/fevicon/apple-touch-icon.png"
+    />
+
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="images/fevicon/site.webmanifest" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4a148c" />
+    <meta name="google-adsense-account" content="ca-pub-9442859388560602" />
+
+    <meta charset="UTF-8" />
+    <title>Kanha Library Seat Booking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ... existing CSS ... */
+
+      /* New CSS for Back Button */
+      #back-button {
+        position: absolute; /* Position it relative to the body */
+        top: var(--space-6); /* 1.5rem from the top */
+        left: var(--space-6); /* 1.5rem from the left */
+        z-index: 1000; /* Ensure it's above other elements */
+
+        /* Styling */
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-xl);
+        text-decoration: none; /* Remove underline */
+        color: var(--gray-700);
+        font-weight: 500;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-fast);
+      }
+
+      #back-button:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-500);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      @media (max-width: 480px) {
+        #back-button {
+          top: var(--space-4);
+          left: var(--space-4);
+          padding: var(--space-2) var(--space-3);
+          font-size: 0.875rem;
+        }
+      }
+      /* Modern Booking System CSS */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+      :root {
+        /* Modern Color Palette */
+        --primary-50: #f0f9ff;
+        --primary-100: #e0f2fe;
+        --primary-500: #0ea5e9;
+        --primary-600: #0284c7;
+        --primary-700: #0369a1;
+        --primary-900: #0c4a6e;
+
+        --purple-50: #faf5ff;
+        --purple-100: #f3e8ff;
+        --purple-500: #a855f7;
+        --purple-600: #9333ea;
+        --purple-700: #7c3aed;
+
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+
+        --success-500: #10b981;
+        --success-600: #059669;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --error-500: #ef4444;
+        --error-600: #dc2626;
+
+        /* Spacing & Layout */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --space-10: 2.5rem;
+        --space-12: 3rem;
+        --space-16: 4rem;
+
+        /* Border Radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-2xl: 1.5rem;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md:
+          0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg:
+          0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl:
+          0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+        /* Transitions */
+        --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--primary-50) 0%,
+          var(--purple-50) 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: var(--space-4);
+        line-height: 1.6;
+        color: var(--gray-800);
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      }
+
+      .main-wrapper {
+        display: grid;
+        grid-template-columns: minmax(320px, 1fr) auto;
+        gap: var(--space-8);
+        width: 100%;
+        max-width: 1000px;
+        align-items: start;
+      }
+
+      @media (max-width: 768px) {
+        .main-wrapper {
+          grid-template-columns: 1fr;
+          gap: var(--space-6);
+        }
+      }
+
+      .container,
+      .legend {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        padding: var(--space-8);
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-2);
+        letter-spacing: -0.025em;
+        margin-top: var(--space-6);
+      }
+
+      label {
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        margin-bottom: var(--space-2);
+        display: block;
+        letter-spacing: 0.025em;
+      }
+
+      select,
+      input[type="date"] {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        font-size: 0.9375rem;
+        font-family: inherit;
+        background: white;
+        color: var(--gray-900);
+        transition: all var(--transition-fast);
+        outline: none;
+      }
+
+      select:focus,
+      input[type="date"]:focus {
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      }
+
+      select:hover,
+      input[type="date"]:hover {
+        border-color: var(--gray-400);
+      }
+
+      .seat-map {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: var(--space-8); /* Wider gap between columns */
+        margin-top: var(--space-4);
+        padding: var(--space-4);
+        background: var(--gray-50);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--gray-200);
+      }
+
+      .seat-column {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .seat {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        position: relative;
+        user-select: none;
+      }
+
+      .seat:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .seat.available {
+        background: white;
+        border: 2px solid var(--gray-300);
+        color: var(--gray-600);
+      }
+
+      .seat.available:hover {
+        border-color: var(--primary-500);
+        background: var(--primary-50);
+        color: var(--primary-700);
+      }
+
+      .seat.booked {
+        background: var(--error-500);
+        color: white;
+        border: 2px solid var(--error-600);
+      }
+
+      .seat.half-booked {
+        background: var(--warning-500);
+        color: white;
+        border: 2px solid var(--warning-600);
+      }
+
+      .seat.evening-booked {
+        background: var(--purple-600);
+        color: white;
+        border: 2px solid var(--purple-700);
+      }
+
+      .seat.selected {
+        background: var(--primary-500);
+        color: white;
+        border: 2px solid var(--primary-600);
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+      }
+
+      .seat.disabled {
+        pointer-events: none;
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .amount-display {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--success-600);
+        text-align: center;
+        padding: var(--space-4);
+        background: var(--success-50);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--success-200);
+      }
+
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        background: var(--gray-50);
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: 2px solid transparent;
+        margin-bottom: 0;
+      }
+
+      .radio-group label:hover {
+        background: var(--gray-100);
+        border-color: var(--gray-300);
+      }
+
+      .radio-group label:has(input:checked) {
+        background: var(--primary-50);
+        border-color: var(--primary-500);
+        color: var(--primary-700);
+      }
+
+      .radio-group input[type="radio"] {
+        accent-color: var(--primary-500);
+        width: 18px;
+        height: 18px;
+        margin: 0;
+      }
+
+      button {
+        width: 100%;
+        padding: var(--space-4) var(--space-6);
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--purple-600) 100%
+        );
+        border: none;
+        border-radius: var(--radius-xl);
+        font-size: 1rem;
+        font-weight: 600;
+        color: white;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:focus {
+        outline: none;
+        box-shadow:
+          var(--shadow-xl),
+          0 0 0 3px rgba(14, 165, 233, 0.3);
+      }
+
+      .legend {
+        width: 240px;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+      }
+
+      .legend h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        text-align: center;
+        margin-bottom: var(--space-2);
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+      }
+
+      .color-box {
+        width: 24px;
+        height: 24px;
+        border-radius: var(--radius-sm);
+        border: 2px solid transparent;
+        flex-shrink: 0;
+      }
+
+      .price-breakdown {
+        font-family: inherit;
+        font-size: 0.9375rem;
+        margin-top: var(--space-4);
+        border: 1px solid var(--gray-200);
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+        background: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .price-breakdown div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: var(--space-2) 0;
+      }
+
+      .price-breakdown .discount {
+        color: var(--success-600);
+        font-weight: 600;
+      }
+
+      .price-breakdown .total {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        padding-top: var(--space-2);
+        border-top: 2px solid var(--gray-200);
+      }
+
+      .price-breakdown hr {
+        margin: var(--space-3) 0;
+        border: none;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      .loader {
+        margin: var(--space-4) auto;
+        border: 4px solid var(--gray-200);
+        border-top: 4px solid var(--primary-500);
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      #payment-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(8px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: var(--space-8);
+        text-align: center;
+      }
+
+      /* Mobile Action Bar */
+      .mobile-action-bar {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 80px;
+        padding: var(--space-4);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--gray-200);
+        z-index: 9999;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        box-shadow: 0 -10px 25px -5px rgb(0 0 0 / 0.1);
+      }
+
+      .mobile-amount {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-weight: 700;
+        color: var(--gray-900);
+        font-size: 1.125rem;
+      }
+
+      .mobile-amount .currency {
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+
+      .mobile-amount .amount-num {
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+
+      .mobile-book-btn {
+        flex: 0 0 auto;
+        min-width: 120px;
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-xl);
+        background: linear-gradient(
+          135deg,
+          var(--primary-600) 0%,
+          var(--purple-600) 100%
+        );
+        color: white;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        box-shadow: var(--shadow-lg);
+        transition: all var(--transition-fast);
+        cursor: pointer;
+      }
+
+      .mobile-book-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .mobile-book-btn:active {
+        transform: translateY(0);
+      }
+
+      .mobile-book-btn:focus {
+        outline: none;
+        box-shadow:
+          var(--shadow-xl),
+          0 0 0 3px rgba(14, 165, 233, 0.3);
+      }
+
+      @media (max-width: 768px) {
+        .mobile-action-bar {
+          display: flex;
+        }
+
+        body,
+        .main-wrapper {
+          padding-bottom: 100px;
+        }
+
+        #book-btn {
+          display: none;
+        }
+
+        .container {
+          padding: var(--space-6);
+        }
+
+        .seat-map {
+          gap: var(--space-1);
+        }
+
+        .seat {
+          width: 36px;
+          height: 36px;
+          font-size: 0.75rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .mobile-action-bar {
+          height: 88px;
+          padding: var(--space-3);
+        }
+
+        .mobile-book-btn {
+          flex: 1;
+          min-width: 0;
+          padding: var(--space-4);
+        }
+
+        .seat {
+          width: 32px;
+          height: 32px;
+        }
+
+        .container {
+          padding: var(--space-4);
+        }
+      }
+
+      /* Focus styles for better accessibility */
+      *:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Better text rendering */
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+
+      /* Hover effects for interactive elements */
+      @media (hover: hover) {
+        .container,
+        .legend {
+          transition: all var(--transition-normal);
+        }
+
+        .container:hover,
+        .legend:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-2xl);
+        }
+      }
+
+      /* Reduced motion for accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      #my-bookings {
+        background-color: rgba(255, 255, 255, 0.05); /* Light frosted layer */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px); /* Safari support */
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+      #booking-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      section {
+        padding: 80px 5%; /* Use percentage for responsive padding */
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    </style>
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9442859388560602"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <script>
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      window.location.href = "login.html";
     }
+  </script>
+  <script
+    src="https://mercury.phonepe.com/web/bundle/checkout.js"
+    defer
+  ></script>
 
-    const discount = getDiscountForDuration(prices.offers || [], months);
+  <body>
+    <a href="./index.html" id="back-button" aria-label="Go Back">
+      &#x2190; Back
+    </a>
+    <div class="main-wrapper">
+      <div class="container">
+        <h1>Library Seat Booking</h1>
+        <section id="my-bookings" style="display: none; padding: 20px">
+          <h2>📚 My Booked Seats</h2>
+          <div id="booking-list" class="booking-list"></div>
+        </section>
 
-    const paymentMode = (document.querySelector('input[name="paymentMode"]:checked') || {}).value || 'online';
-    const pgPercent = (paymentMode === 'cash') ? 0 : (prices.paymentGatewayFeePercent || 0);
-    const convenience = (paymentMode === 'cash') ? 20 : (prices.convenienceFee || 0);
+        <div>
+          <label>Start Date:</label><input type="date" id="start-date" />
+        </div>
 
-    const { total } = computeTotal(basePrice, months, discount, pgPercent, convenience);
+        <div>
+          <label>Duration:</label>
+          <select id="duration">
+            <option value="1">1 Month</option>
+            <option value="2">2 Months</option>
+            <option value="3">3 Months</option>
+            <option value="4">4 Months</option>
+            <option value="5">5 Months</option>
+            <option value="6">6 Months</option>
+            <option value="7">7 Months</option>
+            <option value="8">8 Months</option>
+            <option value="9">9 Months</option>
+            <option value="10">10 Months</option>
+            <option value="11">11 Months</option>
+            <option value="12">12 Months</option>
+          </select>
+        </div>
 
-    // update the mobile amount span
-   // update the mobile amount using the centralized helper (keeps currency + numeric spans)
-updateMobileBarAmount(total);
+        <div>
+          <label>Shift:</label>
+          <select id="shift">
+            <option value="am">Morning</option>
+            <option value="pm">Evening</option>
+            <option value="full">Full Day</option>
+          </select>
+        </div>
+        <label>Payment Mode:</label>
+        <div class="radio-group">
+          <label
+            ><input type="radio" name="paymentMode" value="online" checked />
+            Pay Online</label
+          >
+          <label
+            ><input type="radio" name="paymentMode" value="cash" /> Pay Cash at
+            Library (+ ₹20)</label
+          >
+        </div>
 
+        <div class="seat-map" id="seat-map"></div>
 
-    // also update book button dataset so booking.js (if it reads it) can use it
-    if (bookBtn) bookBtn.dataset.amount = total;
+        <div class="amount-display">
+          Total Amount: <span id="amount-display">₹ 0</span>
+        </div>
 
-    return total;
-  }
+        <button id="book-btn">Pay</button>
+      </div>
 
-  // attach listeners
-  if (durationEl) durationEl.addEventListener('change', updateMobileAmount);
-  if (shiftEl) shiftEl.addEventListener('change', updateMobileAmount);
-  document.querySelectorAll('input[name="paymentMode"]').forEach(r => r.addEventListener('change', updateMobileAmount));
+      <div class="legend">
+        <h3>Legend</h3>
+        <div class="legend-item">
+          <div class="color-box" style="background: white"></div>
+          Available
+        </div>
+        <div class="legend-item">
+          <div class="color-box" style="background: #e53935"></div>
+          Fully Booked
+        </div>
+        <div class="legend-item">
+          <div class="color-box" style="background: #ffa726"></div>
+          Morning Booked
+        </div>
+        <div class="legend-item">
+          <div class="color-box" style="background: #8e24aa"></div>
+          Evening Booked
+        </div>
+      </div>
+    </div>
+    <script src="booking.js?v=1.8.9"></script>
+    <!-- Mobile action bar (visible only on small screens) -->
+    <div class="mobile-action-bar">
+      <div class="mobile-amount">
+        Total:
+        <span id="mobile-amount"
+          ><span class="currency">₹</span
+          ><span class="amount-num">0</span></span
+        >
+      </div>
+      <button id="mobile-book-btn" class="mobile-book-btn">Pay</button>
+    </div>
 
-  // run on load (small delay to let other scripts finish)
-  window.addEventListener('load', () => { setTimeout(updateMobileAmount, 150); });
+    <script>
+      (function () {
+        const API_PRICES = "https://kanha-backend-yfx1.onrender.com/api/prices";
+        const mobileAmountEl = document.getElementById("mobile-amount");
+        const shiftEl = document.getElementById("shift");
+        const durationEl = document.getElementById("duration");
+        const bookBtn = document.getElementById("book-btn");
 
-  // expose for manual calls
-  window.__Kanha_updateMobileAmount = updateMobileAmount;
-})();
-function updateMobileBarAmount(numericAmount) {
-  const mobileAmountEl = document.getElementById('mobile-amount');
-  if (!mobileAmountEl) return;
-  // if using structured HTML (currency + amount)
-  const amountNum = mobileAmountEl.querySelector('.amount-num');
-  if (amountNum) {
-    amountNum.textContent = new Intl.NumberFormat('en-IN', { maximumFractionDigits:0 }).format(numericAmount ? numericAmount : 0);
-    // ensure currency symbol exists
-    if (!mobileAmountEl.querySelector('.currency')) {
-      mobileAmountEl.insertAdjacentHTML('afterbegin', '<span class="currency">₹</span>');
-    }
-  } else {
-    // fallback: plain text
-    mobileAmountEl.textContent = '₹ ' + (numericAmount ? numericAmount : 0);
-  }
-}
+        if (!mobileAmountEl) {
+          console.warn("mobile-amount element not found. Script will not run.");
+          return;
+        }
 
+        // Try to reuse already-fetched priceSettings if present (common in booking.js)
+        let _prices = window.priceSettings || window._priceSettings || null;
 
+        async function fetchPricesIfNeeded() {
+          if (_prices) return _prices;
+          try {
+            const res = await fetch(API_PRICES);
+            if (!res.ok) throw new Error("fetch failed");
+            _prices = await res.json();
+            // also expose globally for reuse
+            window._priceSettings = _prices;
+            return _prices;
+          } catch (e) {
+            console.warn("Could not fetch prices, using fallback defaults.", e);
+            _prices = {
+              am: 500,
+              pm: 400,
+              full: 900,
+              paymentGatewayFeePercent: 2.5,
+              convenienceFee: 25,
+              offers: [],
+            };
+            window._priceSettings = _prices;
+            return _prices;
+          }
+        }
 
+        function getDiscountForDuration(offers, months) {
+          if (!Array.isArray(offers)) return 0;
+          let best = 0;
+          for (const o of offers) {
+            const dur = Number(o.duration || 0);
+            const disc = Number(o.discount || 0);
+            if (months >= dur && disc > best) best = disc;
+          }
+          return best;
+        }
 
-</script>
-<script>
-  document.getElementById("mobile-book-btn")
-    .addEventListener("click", () => {
-      document.getElementById("book-btn").click();
-    });
-</script>
+        function computeTotal(
+          basePrice,
+          months,
+          discount,
+          pgPercent,
+          convenience,
+        ) {
+          const baseTimesMonths = Number(basePrice) * Number(months);
+          const subtotal = baseTimesMonths - Number(discount || 0);
+          const pgFee = Math.round(
+            ((subtotal + Number(convenience || 0)) * Number(pgPercent || 0)) /
+              100,
+          );
+          const total = subtotal + pgFee + Number(convenience || 0);
+          return { subtotal, pgFee, convenience, total };
+        }
 
+        function formatINRWithSpace(n) {
+          if (isNaN(n)) return "₹ 0";
+          // simple thousands separator
+          return "₹ " + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
 
-</body>
+        async function updateMobileAmount() {
+          const prices = await fetchPricesIfNeeded();
+          const shift = (shiftEl && shiftEl.value) || "am";
+          const months =
+            parseInt((durationEl && durationEl.value) || "1", 10) || 1;
+
+          // try to use user customPricing if available
+          let basePrice;
+          try {
+            const user = JSON.parse(localStorage.getItem("user") || "null");
+            if (user && user.customPricing && user.customPricing[shift]) {
+              basePrice = Number(user.customPricing[shift]);
+            }
+          } catch (e) {
+            /* ignore */
+          }
+
+          if (!basePrice) {
+            basePrice =
+              shift === "full" ? prices.full || 0 : prices[shift] || 0;
+          }
+
+          const discount = getDiscountForDuration(prices.offers || [], months);
+
+          const paymentMode =
+            (document.querySelector('input[name="paymentMode"]:checked') || {})
+              .value || "online";
+          const pgPercent =
+            paymentMode === "cash" ? 0 : prices.paymentGatewayFeePercent || 0;
+          const convenience =
+            paymentMode === "cash" ? 20 : prices.convenienceFee || 0;
+
+          const { total } = computeTotal(
+            basePrice,
+            months,
+            discount,
+            pgPercent,
+            convenience,
+          );
+
+          // update the mobile amount span
+          // update the mobile amount using the centralized helper (keeps currency + numeric spans)
+          updateMobileBarAmount(total);
+
+          // also update book button dataset so booking.js (if it reads it) can use it
+          if (bookBtn) bookBtn.dataset.amount = total;
+
+          return total;
+        }
+
+        // attach listeners
+        if (durationEl)
+          durationEl.addEventListener("change", updateMobileAmount);
+        if (shiftEl) shiftEl.addEventListener("change", updateMobileAmount);
+        document
+          .querySelectorAll('input[name="paymentMode"]')
+          .forEach((r) => r.addEventListener("change", updateMobileAmount));
+
+        // run on load (small delay to let other scripts finish)
+        window.addEventListener("load", () => {
+          setTimeout(updateMobileAmount, 150);
+        });
+
+        // expose for manual calls
+        window.__Kanha_updateMobileAmount = updateMobileAmount;
+      })();
+      function updateMobileBarAmount(numericAmount) {
+        const mobileAmountEl = document.getElementById("mobile-amount");
+        if (!mobileAmountEl) return;
+        // if using structured HTML (currency + amount)
+        const amountNum = mobileAmountEl.querySelector(".amount-num");
+        if (amountNum) {
+          amountNum.textContent = new Intl.NumberFormat("en-IN", {
+            maximumFractionDigits: 0,
+          }).format(numericAmount ? numericAmount : 0);
+          // ensure currency symbol exists
+          if (!mobileAmountEl.querySelector(".currency")) {
+            mobileAmountEl.insertAdjacentHTML(
+              "afterbegin",
+              '<span class="currency">₹</span>',
+            );
+          }
+        } else {
+          // fallback: plain text
+          mobileAmountEl.textContent =
+            "₹ " + (numericAmount ? numericAmount : 0);
+        }
+      }
+    </script>
+    <script>
+      document
+        .getElementById("mobile-book-btn")
+        .addEventListener("click", () => {
+          document.getElementById("book-btn").click();
+        });
+    </script>
+  </body>
 </html>

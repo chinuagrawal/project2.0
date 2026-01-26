@@ -426,53 +426,70 @@ async function fetchBookings() {
   }
 }
 
-// ⚠️ MODIFIED renderSeats to handle the new `window.isExtensionMode`
+// ⚠️ MODIFIED renderSeats to handle the new `window.isExtensionMode` AND Rotated Layout (3 columns)
 function renderSeats() {
-  seatMap.innerHTML = '';
-  for (let i = 1; i <= totalSeats; i++) {
-    const seatId = `${i}`;
-    const seat = document.createElement('div');
-    seat.classList.add('seat');
-    seat.dataset.seatId = seatId;
+  seatMap.innerHTML = '';
 
-    const seatBookings = bookings.filter(b => b.seatId === seatId);
-    const hasFull = seatBookings.some(b => b.shift === 'full');
-    const hasAM = seatBookings.some(b => b.shift === 'am');
-    const hasPM = seatBookings.some(b => b.shift === 'pm');
+  // Create 3 columns to match index.html layout
+  const col1 = document.createElement('div');
+  col1.className = 'seat-column'; // Seats 1-12
+  
+  const col2 = document.createElement('div');
+  col2.className = 'seat-column'; // Seats 13-23
+  
+  const col3 = document.createElement('div');
+  col3.className = 'seat-column'; // Seats 24-34
+  
+  // Append columns to seatMap in reverse order (to match index.html's row-reverse + DOM order)
+  // DOM Order: col3, col2, col1 -> Visual (Row Reverse): [Col1] [Col2] [Col3]
+  seatMap.appendChild(col3);
+  seatMap.appendChild(col2);
+  seatMap.appendChild(col1);
 
-    const selectedShift = shiftInput.value;
-    let isSelectable = true;
+  for (let i = 1; i <= totalSeats; i++) {
+    const seatId = `${i}`;
+    const seat = document.createElement('div');
+    seat.classList.add('seat');
+    seat.dataset.seatId = seatId;
+
+    const seatBookings = bookings.filter(b => b.seatId === seatId);
+    const hasFull = seatBookings.some(b => b.shift === 'full');
+    const hasAM = seatBookings.some(b => b.shift === 'am');
+    const hasPM = seatBookings.some(b => b.shift === 'pm');
+
+    const selectedShift = shiftInput.value;
+    let isSelectable = true;
     
     // Determine booking status
-    if (hasFull || (hasAM && hasPM)) {
-      seat.classList.add('booked');
-      isSelectable = false;
-    } else if (hasAM) {
-      seat.classList.add('half-booked');
-      if (selectedShift === 'full' || selectedShift === 'am') isSelectable = false;
-    } else if (hasPM) {
-      seat.classList.add('evening-booked');
-      if (selectedShift === 'full' || selectedShift === 'pm') isSelectable = false;
-    } else {
-      seat.classList.add('available');
-    }
+    if (hasFull || (hasAM && hasPM)) {
+      seat.classList.add('booked');
+      isSelectable = false;
+    } else if (hasAM) {
+      seat.classList.add('half-booked');
+      if (selectedShift === 'full' || selectedShift === 'am') isSelectable = false;
+    } else if (hasPM) {
+      seat.classList.add('evening-booked');
+      if (selectedShift === 'full' || selectedShift === 'pm') isSelectable = false;
+    } else {
+      seat.classList.add('available');
+    }
     
     // Determine clickability based on mode
     let isClickable = isSelectable;
 
-    if (window.isExtensionMode) {
+    if (window.isExtensionMode) {
         // In extension mode, ONLY the locked seat should be "selectable" (and automatically selected)
-        if (seatId === window.extensionDetails.seatId) {
+        if (seatId === window.extensionDetails.seatId) {
             seat.classList.add('selected');
             // The extension seat is *effectively* selectable, but we don't need a click handler
             // as it's pre-selected. We still want to allow selection to show the highlight.
             isClickable = true; // Technically clickable, but handler is simple
-        } else {
+        } else {
             // Other seats are disabled when extending
-            seat.classList.add('disabled');
-            isClickable = false;
-        }
-    } else {
+            seat.classList.add('disabled');
+            isClickable = false;
+        }
+    } else {
         // New Booking Mode: only available seats are clickable
         if (!isSelectable) {
             seat.classList.add('disabled');
@@ -482,21 +499,29 @@ function renderSeats() {
 
 
     if (isClickable) {
-      seat.addEventListener('click', () => {
-        document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
-        seat.classList.add('selected');
+      seat.addEventListener('click', () => {
+        document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
+        seat.classList.add('selected');
         // If we switch to 'new' mode, we need to allow selection, but in 'extend' mode,
         // this only applies to the one designated seat.
-      });
+      });
     } else if (!seat.classList.contains('disabled')) {
         // If it's not selectable for the current shift (e.g., trying full-day on a half-booked seat)
         seat.classList.add('disabled');
     }
 
 
-    seat.innerText = i;
-    seatMap.appendChild(seat);
-  }
+    seat.innerText = i;
+    
+    // Distribute seats into columns
+    if (i <= 12) {
+        col1.appendChild(seat);
+    } else if (i <= 23) {
+        col2.appendChild(seat);
+    } else {
+        col3.appendChild(seat);
+    }
+  }
 }
 
 // ⚠️ MODIFIED bookBtn.addEventListener to check the new global flag
