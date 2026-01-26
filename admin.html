@@ -112,6 +112,45 @@
         background: white;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+        position: relative;
+      }
+
+      .top-navbar {
+        background: white;
+        padding: 15px 30px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+      }
+
+      .stats-container {
+        display: flex;
+        gap: 20px;
+      }
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8f9fa;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .stat-item i {
+        color: #7c4dff;
+      }
+
+      .stat-item span.value {
+        color: #ff4081;
+        font-weight: 700;
       }
 
       iframe {
@@ -277,14 +316,95 @@
       <a onclick="logout()">Logout</a>
     </div>
 
-    <div class="content" id="mainContent">
-      <div class="welcome-container">
-        <h1>Welcome Admin Ji</h1>
-        <p>Side panel mai option select kijiye</p>
+    <div class="content">
+      <!-- Top Navbar with Stats -->
+      <div class="top-navbar">
+        <h3 style="margin: 0; font-weight: 700; color: #333">
+          Admin Dashboard
+        </h3>
+        <div class="stats-container">
+          <div class="stat-item">
+            <i class="fas fa-chair"></i>
+            Total Seats: <span class="value">34</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-user-check"></i>
+            Occupied: <span class="value" id="occupied-count">...</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-check-circle"></i>
+            Available: <span class="value" id="available-count">...</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="mainContent"
+        style="
+          flex: 1;
+          width: 100%;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <div class="welcome-container">
+          <h1>Welcome Admin Ji</h1>
+          <p>Side panel mai option select kijiye</p>
+        </div>
       </div>
     </div>
 
+    <!-- Font Awesome for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
     <script>
+      // Fetch and update seat stats
+      async function updateSeatStats() {
+        try {
+          const res = await fetch(
+            "https://kanha-backend-yfx1.onrender.com/api/bookings",
+          );
+          if (!res.ok) throw new Error("Failed to fetch bookings");
+          const bookings = await res.json();
+
+          // Get today's date in YYYY-MM-DD format
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, "0");
+          const day = String(today.getDate()).padStart(2, "0");
+          const dateStr = `${year}-${month}-${day}`;
+
+          // Filter bookings for today and status 'paid'
+          // We count a seat as occupied if it has ANY paid booking for today (AM, PM, or FULL)
+          const todayBookings = bookings.filter(
+            (b) => b.date === dateStr && b.status === "paid",
+          );
+
+          // Count unique occupied seats
+          const occupiedSeats = new Set(todayBookings.map((b) => b.seatId));
+          const occupiedCount = occupiedSeats.size;
+          const totalSeats = 34;
+          const availableCount = totalSeats - occupiedCount;
+
+          document.getElementById("occupied-count").textContent = occupiedCount;
+          document.getElementById("available-count").textContent =
+            availableCount;
+        } catch (error) {
+          console.error("Error fetching seat stats:", error);
+          document.getElementById("occupied-count").textContent = "-";
+          document.getElementById("available-count").textContent = "-";
+        }
+      }
+
+      // Initial call and periodic refresh (every 30 seconds)
+      updateSeatStats();
+      setInterval(updateSeatStats, 30000);
+
       // ✅ Protect admin page
       const user = JSON.parse(localStorage.getItem("user"));
 
