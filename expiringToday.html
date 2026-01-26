@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expiring Bookings</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4f46e5;
+        --secondary: #ec4899;
+        --bg: #f8fafc;
+        --text: #1e293b;
+        --white: #ffffff;
+        --danger: #ef4444;
+        --success: #22c55e;
+        --border: #e2e8f0;
+      }
+
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        background: var(--white);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Controls Section */
+      .controls-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        background: #f1f5f9;
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      button,
+      input,
+      select {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.2s;
+      }
+
+      button {
+        cursor: pointer;
+        background: var(--white);
+        color: var(--text);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      button:hover {
+        background: #e0e7ff;
+        color: var(--primary);
+        border-color: var(--primary);
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+      }
+
+      /* Stats Pills */
+      .stats-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+      }
+
+      .stat-pill {
+        background: var(--white);
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stat-pill span {
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      /* Table Styles */
+      .table-container {
+        background: var(--white);
+        border-radius: 15px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+      }
+
+      th,
+      td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      tr:hover {
+        background-color: #f8fafc;
+      }
+
+      .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 5px;
+        text-decoration: none;
+        transition: transform 0.2s;
+      }
+
+      .btn-whatsapp {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .btn-call {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .btn-extend {
+        background: #f3e8ff;
+        color: #7e22ce;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .loading,
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+      }
+
+      @media (max-width: 768px) {
+        .header-top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .controls-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .control-group {
+          justify-content: space-between;
+        }
+        .stats-row {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="header-top">
+          <h1>⚠️ Expiring Bookings</h1>
+          <div
+            class="stat-pill"
+            style="
+              border-color: var(--secondary);
+              color: var(--secondary);
+              background: #fdf2f8;
+            "
+          >
+            <i class="fas fa-calendar-day"></i>
+            <span id="display-date-str">--</span>
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <!-- Date Navigation -->
+          <div class="control-group">
+            <button onclick="changeDate(-1)" title="Previous Day">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <input
+              type="date"
+              id="date-picker"
+              onchange="onDateChange(this.value)"
+            />
+            <button onclick="changeDate(1)" title="Next Day">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            <button onclick="goToToday()" title="Go to Today">Today</button>
+          </div>
+
+          <!-- Filters -->
+          <div class="control-group" style="flex-grow: 1">
+            <select
+              id="shift-filter"
+              onchange="applyFilters()"
+              style="min-width: 120px"
+            >
+              <option value="all">All Shifts</option>
+              <option value="morning">Morning</option>
+              <option value="evening">Evening</option>
+              <option value="full">Full Day</option>
+            </select>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search name, seat, mobile..."
+              onkeyup="applyFilters()"
+              style="flex-grow: 1"
+            />
+          </div>
+        </div>
+
+        <div class="stats-row" id="stats-bar">
+          <!-- Populated via JS -->
+        </div>
+      </header>
+
+      <div class="table-container">
+        <table id="bookings-table">
+          <thead>
+            <tr>
+              <th>Seat</th>
+              <th>Student</th>
+              <th>Contact</th>
+              <th>Shift</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="5" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Auth Check
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "admin") {
+        alert("Access denied! Admins only.");
+        window.location.href = "login.html";
+      }
+
+      // State
+      let currentDate = new Date();
+      let rawData = []; // Stores all expiring bookings for the current date
+
+      // Init
+      document.addEventListener("DOMContentLoaded", () => {
+        goToToday();
+      });
+
+      // Date Handling
+      function goToToday() {
+        currentDate = new Date();
+        updateDatePicker();
+        fetchData();
+      }
+
+      function changeDate(days) {
+        currentDate.setDate(currentDate.getDate() + days);
+        updateDatePicker();
+        fetchData();
+      }
+
+      function onDateChange(val) {
+        if (!val) return;
+        currentDate = new Date(val);
+        fetchData();
+      }
+
+      function updateDatePicker() {
+        const yyyy = currentDate.getFullYear();
+        const mm = String(currentDate.getMonth() + 1).padStart(2, "0");
+        const dd = String(currentDate.getDate()).padStart(2, "0");
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        document.getElementById("date-picker").value = dateStr;
+
+        // Friendly Display
+        const options = {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        };
+        document.getElementById("display-date-str").textContent =
+          currentDate.toLocaleDateString("en-IN", options);
+      }
+
+      function formatDateIN(dateStr) {
+        if (!dateStr) return "N/A";
+        const parts = dateStr.split("-");
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+
+      // Data Fetching
+      async function fetchData() {
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = `<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading data...</td></tr>`;
+
+        try {
+          // Use current selected date
+          const dateStr = document.getElementById("date-picker").value;
+
+          const [bookingsRes, usersRes] = await Promise.all([
+            fetch("https://kanha-backend-yfx1.onrender.com/api/bookings"),
+            fetch("https://kanha-backend-yfx1.onrender.com/api/users"),
+          ]);
+
+          const allBookings = await bookingsRes.json();
+          const allUsers = await usersRes.json();
+
+          // Map Users
+          const usersByEmail = {};
+          allUsers.forEach((u) => {
+            usersByEmail[u.email] = {
+              name:
+                `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Unknown",
+              mobile: u.mobile || "",
+              gender: u.gender,
+            };
+          });
+
+          // Group Bookings logic (Same as before)
+          const grouped = {};
+          allBookings.forEach((b) => {
+            const key = `${b.email}_${b.seatId}_${b.shift}`;
+            if (!grouped[key]) {
+              grouped[key] = {
+                email: b.email,
+                seat: b.seatId,
+                shift: b.shift,
+                dates: [],
+              };
+            }
+            grouped[key].dates.push(b.date);
+          });
+
+          // Filter Logic: Find bookings expiring on `dateStr`
+          const expiring = [];
+          Object.values(grouped).forEach((g) => {
+            g.dates.sort();
+            const lastDate = g.dates[g.dates.length - 1]; // "YYYY-MM-DD"
+
+            if (lastDate === dateStr) {
+              const userData = usersByEmail[g.email] || {
+                name: g.email,
+                mobile: "",
+              };
+              expiring.push({
+                ...g,
+                ...userData,
+                endDate: lastDate,
+              });
+            }
+          });
+
+          rawData = expiring; // Store for filtering
+          applyFilters();
+        } catch (err) {
+          console.error(err);
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Failed to load data. Please refresh.</td></tr>`;
+        }
+      }
+
+      // Filtering & Rendering
+      function applyFilters() {
+        const shiftFilter = document.getElementById("shift-filter").value;
+        const search = document
+          .getElementById("search-input")
+          .value.toLowerCase();
+
+        const filtered = rawData.filter((item) => {
+          // Shift Filter
+          if (shiftFilter !== "all") {
+            const s = item.shift.toLowerCase();
+            const f = shiftFilter.toLowerCase();
+            if (f === "morning" && !s.includes("morning") && s !== "am")
+              return false;
+            if (f === "evening" && !s.includes("evening") && s !== "pm")
+              return false;
+            if (f === "full" && !s.includes("full")) return false;
+          }
+
+          // Search Filter
+          if (search) {
+            const term = search;
+            const matchName = item.name.toLowerCase().includes(term);
+            const matchSeat = item.seat.toString().includes(term);
+            const matchMobile = (item.mobile || "").includes(term);
+            if (!matchName && !matchSeat && !matchMobile) return false;
+          }
+
+          return true;
+        });
+
+        renderStats(filtered);
+        renderTable(filtered);
+      }
+
+      function renderStats(list) {
+        const total = list.length;
+        const morning = list.filter(
+          (i) => i.shift.includes("morning") || i.shift === "am",
+        ).length;
+        const evening = list.filter(
+          (i) => i.shift.includes("evening") || i.shift === "pm",
+        ).length;
+        const full = list.filter((i) => i.shift.includes("full")).length;
+
+        document.getElementById("stats-bar").innerHTML = `
+          <div class="stat-pill">Total: <span>${total}</span></div>
+          <div class="stat-pill">Morning: <span>${morning}</span></div>
+          <div class="stat-pill">Evening: <span>${evening}</span></div>
+          <div class="stat-pill">Full Day: <span>${full}</span></div>
+        `;
+      }
+
+      function renderTable(list) {
+        const tbody = document.getElementById("table-body");
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="far fa-calendar-check" style="font-size:2rem; margin-bottom:10px;"></i><p>No bookings expiring on this date matching your filters.</p></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = list
+          .map((item) => {
+            const waMsg = encodeURIComponent(
+              `Hello ${item.name}, your library seat (${item.seat}) booking expires on ${formatDateIN(item.endDate)}. Please renew if you wish to continue.`,
+            );
+            const waLink = item.mobile
+              ? `https://wa.me/91${item.mobile}?text=${waMsg}`
+              : "#";
+            const callLink = item.mobile ? `tel:${item.mobile}` : "#";
+            const extendLink = `booking.html?extend=1&seatId=${item.seat}&shift=${item.shift}&fromDate=${item.dates[0]}&toDate=${item.endDate}`;
+
+            return `
+              <tr>
+                <td><div style="font-weight:bold; color:var(--primary); font-size:1.1rem;">${item.seat}</div></td>
+                <td>
+                  <div style="font-weight:600">${item.name}</div>
+                  <div style="font-size:0.8rem; color:#64748b">${item.email}</div>
+                </td>
+                <td>${item.mobile || "N/A"}</td>
+                <td><span style="text-transform:uppercase; font-weight:bold; font-size:0.8rem; background:#f1f5f9; padding:2px 6px; rounded:4px;">${item.shift}</span></td>
+                <td>
+                  <div style="display:flex;">
+                    <a href="${waLink}" target="_blank" class="action-btn btn-whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="${callLink}" class="action-btn btn-call" title="Call"><i class="fas fa-phone"></i></a>
+                    <a href="${extendLink}" target="_top" class="action-btn btn-extend" title="Extend"><i class="fas fa-clock"></i></a>
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+    </script>
+  </body>
+</html>
