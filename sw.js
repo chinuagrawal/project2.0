@@ -1,13 +1,11 @@
-const CACHE_NAME = "kanha-library-v2";
+const CACHE_NAME = "kanha-library-v3";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
   "/index.css",
   "/manifest.json",
   "/images/logo.jpg",
-  "/images/fevicon/favicon.ico",
-  "/images/fevicon/android-chrome-192x192.png",
-  "/images/fevicon/android-chrome-512x512.png",
+  "/images/icon-512.png",
   "https://cdn.tailwindcss.com",
   "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css",
