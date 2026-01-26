@@ -69,6 +69,45 @@
       }
       gtag("js", new Date());
       gtag("config", "G-MS3QJRDZ7C");
+
+      // PWA Install Logic
+      let deferredPrompt;
+      const installBtn = document.getElementById("installAppBtn");
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.classList.remove("hidden");
+      });
+
+      installBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          installBtn.classList.add("hidden");
+        }
+        deferredPrompt = null;
+      });
+
+      window.addEventListener("appinstalled", () => {
+        installBtn.classList.add("hidden");
+        deferredPrompt = null;
+      });
+
+      // Register Service Worker
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((reg) => {
+              console.log("SW registered: ", reg);
+            })
+            .catch((err) => {
+              console.log("SW registration failed: ", err);
+            });
+        });
+      }
     </script>
 
     <link rel="stylesheet" href="index.css?v=2.1" />
@@ -246,6 +285,25 @@
                 >Login</a
               >
             </div>
+            <button
+              id="installAppBtn"
+              class="hidden px-4 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                ></path>
+              </svg>
+              Install App
+            </button>
           </div>
 
           <!-- Mobile menu button -->

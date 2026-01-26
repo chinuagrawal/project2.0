@@ -1,64 +1,70 @@
-const cacheName = 'kanha-library-cache-v4'; // updated version
-
-const assetsToCache = [
+const CACHE_NAME = 'kanha-library-v1';
+const ASSETS_TO_CACHE = [
   '/',
-  // Add more static assets here (CSS, JS, images, etc.)
+  '/index.html',
+  '/index.css',
+  '/manifest.json',
+  '/images/logo.jpg',
+  '/images/fevicon/favicon.ico',
+  '/images/fevicon/android-chrome-192x192.png',
+  '/images/fevicon/android-chrome-512x512.png',
+  'https://cdn.tailwindcss.com',
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
-// Install: cache essential files
+// Install Event
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(cacheName).then((cache) => {
-      return cache.addAll(assetsToCache);
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate Event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((name) => name !== cacheName)
-          .map((name) => caches.delete(name))
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
       );
     })
   );
   self.clients.claim();
 });
 
-// Fetch: network first, fallback to cache
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
-
-  // Skip caching Google Maps & tracking scripts
-  const url = event.request.url;
-  if (
-    url.includes('google.com/maps') ||
-    url.includes('googletagmanager.com') ||
-    url.includes('googlesyndication.com') ||
-    url.includes('cloudflareinsights.com')
-  ) {
-    return; // Let them load normally without caching
+  // Network First, Fallback to Cache Strategy for HTML
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match('/index.html');
+        })
+    );
+    return;
   }
 
+  // Stale-While-Revalidate for other resources
   event.respondWith(
-    fetch(event.request)
-      .then((res) => {
-        // Only cache valid 200 OK responses of type 'basic'
-        if (!res || res.status !== 200 || res.type !== 'basic') {
-          return res;
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        const resClone = res.clone();
-        caches.open(cacheName).then((cache) => {
-          cache.put(event.request, resClone);
-        });
-        return res;
-      })
-      .catch(() => caches.match(event.request))
+        return networkResponse;
+      });
+      return cachedResponse || fetchPromise;
+    })
   );
 });
