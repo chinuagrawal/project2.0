@@ -452,6 +452,44 @@ function renderSeats() {
   seatMap.appendChild(col2);
   seatMap.appendChild(col1);
 
+  const selectedShift = shiftInput.value;
+
+  // ---------------------------------------------------------
+  // 🧠 OPTIMIZATION LOGIC:
+  // If user wants AM, and there are seats with PM booked (but AM free),
+  // FORCE them to pick those seats first. (Block fully empty seats).
+  // Same for PM (force pick AM-booked seats).
+  // ---------------------------------------------------------
+  let restrictFullyEmptySeats = false;
+
+  if (
+    !window.isExtensionMode &&
+    (selectedShift === "am" || selectedShift === "pm")
+  ) {
+    // Check if any "Perfect Match" exists
+    for (let i = 1; i <= totalSeats; i++) {
+      const sId = `${i}`;
+      const sBookings = bookings.filter((b) => b.seatId === sId);
+      const sFull = sBookings.some((b) => b.shift === "full");
+      const sAM = sBookings.some((b) => b.shift === "am");
+      const sPM = sBookings.some((b) => b.shift === "pm");
+
+      if (selectedShift === "am") {
+        // Looking for a seat that is FREE for AM, but BOOKED for PM
+        if (!sFull && !sAM && sPM) {
+          restrictFullyEmptySeats = true;
+          break;
+        }
+      } else if (selectedShift === "pm") {
+        // Looking for a seat that is FREE for PM, but BOOKED for AM
+        if (!sFull && !sPM && sAM) {
+          restrictFullyEmptySeats = true;
+          break;
+        }
+      }
+    }
+  }
+
   for (let i = 1; i <= totalSeats; i++) {
     const seatId = `${i}`;
     const seat = document.createElement("div");
@@ -463,7 +501,6 @@ function renderSeats() {
     const hasAM = seatBookings.some((b) => b.shift === "am");
     const hasPM = seatBookings.some((b) => b.shift === "pm");
 
-    const selectedShift = shiftInput.value;
     let isSelectable = true;
 
     // Determine booking status
@@ -480,6 +517,15 @@ function renderSeats() {
         isSelectable = false;
     } else {
       seat.classList.add("available");
+
+      // 🔒 APPLY RESTRICTION HERE
+      if (restrictFullyEmptySeats) {
+        // This is a fully available seat, but we are restricting them
+        // because a "better fit" seat exists.
+        isSelectable = false;
+        seat.title =
+          "Please select a half-booked seat to optimize library capacity.";
+      }
     }
 
     // Determine clickability based on mode
