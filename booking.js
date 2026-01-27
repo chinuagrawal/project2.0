@@ -166,22 +166,7 @@ function createSwitchButton(text, mode) {
   if (!btn) {
     btn = document.createElement("button");
     btn.id = "switch-mode-btn";
-    // Styling for Button (Centered below title)
-    btn.style.cssText = `
-        background: var(--primary-50, #f0f9ff);
-        border: 1px solid var(--primary-200, #bae6fd);
-        border-radius: 20px;
-        padding: 6px 16px;
-        margin: 0 auto 15px auto;
-        display: block;
-        width: fit-content;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        cursor: pointer;
-        font-weight: 500;
-        color: var(--primary-700, #0369a1);
-        font-size: 13px;
-        transition: all 0.2s;
-    `;
+    // Styling is now handled by CSS (#switch-mode-btn)
     btn.addEventListener("click", () => {
       // Reload the page: either force new booking or clear params to default to extend
       window.location.href = `booking.html${mode === "new" ? "?new=1" : ""}`;
