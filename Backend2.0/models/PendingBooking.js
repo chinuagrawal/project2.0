@@ -12,6 +12,10 @@ const pendingBookingSchema = new mongoose.Schema({
   startDate: String,
   endDate: String,
   shift: String,
+
+  // For Seat Change
+  type: { type: String, default: 'booking' }, // 'booking' or 'seat_change'
+  oldSeatId: String,
 }, { timestamps: true });
 
 module.exports = mongoose.model('PendingBooking', pendingBookingSchema);

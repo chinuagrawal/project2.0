@@ -29,32 +29,54 @@ router.post('/phonepe/webhook', async (req, res) => {
         // 2️⃣ Find Pending Booking
         const pending = await PendingBooking.findOne({ txnId: merchantOrderId });
         if (pending) {
-          // ✅ Generate all dates between startDate and endDate
-          const dates = [];
-          let current = new Date(pending.startDate);
-          const end = new Date(pending.endDate);
-          while (current <= end) {
-            dates.push(current.toISOString().split('T')[0]);
-            current.setDate(current.getDate() + 1);
+          
+          if (pending.type === 'seat_change') {
+             // ✅ HANDLE SEAT CHANGE
+             console.log(`🔄 Processing Seat Change for ${email}: ${pending.oldSeatId} -> ${pending.seatId}`);
+             
+             await Booking.updateMany({
+                email: pending.email,
+                seatId: pending.oldSeatId,
+                shift: pending.shift,
+                date: { $gte: pending.startDate, $lte: pending.endDate },
+                status: 'paid'
+             }, { 
+                $set: { seatId: pending.seatId } 
+             });
+             
+             await PendingBooking.deleteOne({ txnId: merchantOrderId });
+             console.log(`✅ Seat change successful for ${email}`);
+
+          } else {
+            // ✅ NORMAL BOOKING
+            // ✅ Generate all dates between startDate and endDate
+            const dates = [];
+            let current = new Date(pending.startDate);
+            const end = new Date(pending.endDate);
+            while (current <= end) {
+              dates.push(current.toISOString().split('T')[0]);
+              current.setDate(current.getDate() + 1);
+            }
+
+            // ✅ Create bookings for each date
+            const bookings = dates.map(date => ({
+              seatId: pending.seatId,
+              date,
+              shift: pending.shift,
+              email: pending.email,
+              amount: pending.amount,
+              status: "paid",
+              paymentMode,
+              paymentTxnId: merchantOrderId,  // your TXN_xxx
+              transactionId: phonepeTxn,      // PhonePe txn id
+              paymentConfirmedVia: "webhook"
+            }));
+
+            await Booking.insertMany(bookings);
+            await PendingBooking.deleteOne({ txnId: merchantOrderId });
+            console.log(`✅ Seats booked for ${email}, TXN: ${merchantOrderId}, Dates: ${dates.length}`);
           }
 
-          // ✅ Create bookings for each date
-          const bookings = dates.map(date => ({
-            seatId: pending.seatId,
-            date,
-            shift: pending.shift,
-            email: pending.email,
-            amount: pending.amount,
-            status: "paid",
-            paymentMode,
-            paymentTxnId: merchantOrderId,  // your TXN_xxx
-            transactionId: phonepeTxn,      // PhonePe txn id
-            paymentConfirmedVia: "webhook"
-          }));
-
-          await Booking.insertMany(bookings);
-          await PendingBooking.deleteOne({ txnId: merchantOrderId });
-          console.log(`✅ Seats booked for ${email}, TXN: ${merchantOrderId}, Dates: ${dates.length}`);
         } else {
           console.warn("⚠️ Pending booking not found for:", merchantOrderId);
         }

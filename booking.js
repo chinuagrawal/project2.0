@@ -94,6 +94,7 @@ function setExtendMode(groupedBookings) {
 
   // 1. Set the global flag and details
   window.isExtensionMode = true;
+  window.isChangeSeatMode = false;
   const nextDay = new Date(mostRecent.end);
   nextDay.setDate(nextDay.getDate() + 1);
 
@@ -118,18 +119,157 @@ function setExtendMode(groupedBookings) {
   document.querySelector("h1").textContent =
     `Extend Seat ${mostRecent.seatId} (${mostRecent.shift.toUpperCase()})`;
 
+  // Create a container for the buttons to sit side-by-side
+  const btnContainer = document.createElement("div");
+  btnContainer.id = "action-buttons-container";
+  btnContainer.style.display = "flex";
+  btnContainer.style.justifyContent = "center";
+  btnContainer.style.gap = "10px";
+  btnContainer.style.alignItems = "center";
+  btnContainer.style.marginTop = "10px";
+  btnContainer.style.width = "100%";
+
   // Use a shorter text for the top bar button
   const newBookingBtn = createSwitchButton("New Seat", "new");
+  newBookingBtn.style.margin = "0"; // Override CSS margin for flex layout
+
+  // Create Change Seat Button
+  const changeSeatBtn = document.createElement("button");
+  changeSeatBtn.id = "change-seat-btn";
+  changeSeatBtn.textContent = "Change Seat";
+
+  // Match #switch-mode-btn style but with pink background
+  changeSeatBtn.style.background = "#ec4899";
+  changeSeatBtn.style.color = "white";
+  changeSeatBtn.style.border = "none"; // No border for filled button
+  changeSeatBtn.style.padding = "8px 20px"; // Match #switch-mode-btn
+  changeSeatBtn.style.borderRadius = "30px"; // Match #switch-mode-btn
+  changeSeatBtn.style.cursor = "pointer";
+  changeSeatBtn.style.fontSize = "0.9rem"; // Match #switch-mode-btn
+  changeSeatBtn.style.fontWeight = "600"; // Match #switch-mode-btn
+  changeSeatBtn.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.05)";
+  changeSeatBtn.style.fontFamily = '"Poppins", sans-serif';
+  changeSeatBtn.style.transition = "all 0.3s ease";
+
+  changeSeatBtn.addEventListener("mouseover", () => {
+    changeSeatBtn.style.transform = "translateY(-2px)";
+    changeSeatBtn.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.1)";
+  });
+  changeSeatBtn.addEventListener("mouseout", () => {
+    changeSeatBtn.style.transform = "translateY(0)";
+    changeSeatBtn.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.05)";
+  });
+
+  changeSeatBtn.addEventListener("click", () => {
+    setChangeSeatMode(mostRecent);
+  });
+
+  // Append buttons to container (New Seat first, then Change Seat)
+  btnContainer.appendChild(newBookingBtn);
+  btnContainer.appendChild(changeSeatBtn);
 
   // Place below the H1 title
   const h1 = document.querySelector("h1");
+  // Remove existing buttons/containers if any to avoid duplicates
+  const existingContainer = document.getElementById("action-buttons-container");
+  const existingSwitch = document.getElementById("switch-mode-btn");
+  const existingChange = document.getElementById("change-seat-btn");
+
+  if (existingContainer) existingContainer.remove();
+  if (existingSwitch) existingSwitch.remove();
+  if (existingChange) existingChange.remove();
+
   if (h1 && h1.parentNode) {
-    h1.parentNode.insertBefore(newBookingBtn, h1.nextSibling);
+    h1.parentNode.insertBefore(btnContainer, h1.nextSibling);
   }
 
   // Also update main and mobile book buttons
   bookBtn.textContent = "Extend Booking";
   document.getElementById("mobile-book-btn").textContent = "Extend";
+
+  // Re-fetch bookings for extension period
+  fetchBookings();
+}
+
+function setChangeSeatMode(mostRecent) {
+  window.isExtensionMode = false;
+  window.isChangeSeatMode = true;
+
+  const today = new Date().toISOString().split("T")[0];
+  const endDate = mostRecent.end;
+
+  window.changeSeatDetails = {
+    oldSeatId: mostRecent.seatId,
+    shift: mostRecent.shift,
+    startDate: today,
+    endDate: endDate,
+  };
+
+  // Update Inputs
+  if (shiftInput) {
+    shiftInput.value = mostRecent.shift;
+    shiftInput.disabled = true;
+  }
+  if (startDateInput) {
+    startDateInput.value = today;
+    startDateInput.disabled = true; // Fixed start date
+  }
+  if (durationInput) {
+    durationInput.disabled = true; // Duration fixed by range
+  }
+
+  // Update UI
+  document.querySelector("h1").textContent = `Change Seat ${mostRecent.seatId}`;
+
+  // Button to Cancel Change (Go back to Extend)
+  const btnContainer = document.createElement("div");
+  btnContainer.id = "action-buttons-container";
+  btnContainer.style.display = "flex";
+  btnContainer.style.justifyContent = "center";
+  btnContainer.style.width = "100%";
+  btnContainer.style.marginTop = "10px";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "Cancel Change";
+  cancelBtn.style.background = "#6b7280";
+  cancelBtn.style.color = "white";
+  cancelBtn.style.border = "none";
+  cancelBtn.style.padding = "8px 20px";
+  cancelBtn.style.borderRadius = "30px";
+  cancelBtn.style.cursor = "pointer";
+  cancelBtn.style.fontSize = "0.9rem";
+  cancelBtn.style.fontWeight = "600";
+  cancelBtn.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.05)";
+  cancelBtn.style.fontFamily = '"Poppins", sans-serif';
+
+  cancelBtn.addEventListener("click", () => {
+    // Reload or call checkAndLoadBookings to reset
+    window.location.reload();
+  });
+
+  btnContainer.appendChild(cancelBtn);
+
+  const h1 = document.querySelector("h1");
+  // Remove existing buttons
+  const existingContainer = document.getElementById("action-buttons-container");
+  const existingSwitch = document.getElementById("switch-mode-btn");
+  const existingChange = document.getElementById("change-seat-btn");
+
+  if (existingContainer) existingContainer.remove();
+  if (existingSwitch) existingSwitch.remove();
+  if (existingChange) existingChange.remove();
+
+  if (h1 && h1.parentNode) {
+    h1.parentNode.insertBefore(btnContainer, h1.nextSibling);
+  }
+
+  bookBtn.textContent = "Pay ₹49 & Change";
+  document.getElementById("mobile-book-btn").textContent = "Pay";
+
+  // Fetch bookings for the change period
+  fetchBookings();
+  updateAmount();
+  if (window.__Kanha_updateMobileAmount) window.__Kanha_updateMobileAmount();
 }
 
 /**
@@ -137,11 +277,14 @@ function setExtendMode(groupedBookings) {
  */
 function setNewBookingMode() {
   window.isExtensionMode = false;
+  window.isChangeSeatMode = false;
   window.extensionDetails = null;
+  window.changeSeatDetails = null;
 
   // Ensure inputs are enabled and reset
   if (shiftInput) shiftInput.disabled = false;
   if (startDateInput) startDateInput.disabled = false;
+  if (durationInput) durationInput.disabled = false;
 
   // Reset UI text
   document.querySelector("h1").textContent = `Library Seat Booking`;
@@ -149,12 +292,28 @@ function setNewBookingMode() {
   document.getElementById("mobile-book-btn").textContent = "Pay";
 
   // Add the "Switch to EXTEND" button
+  const btnContainer = document.createElement("div");
+  btnContainer.id = "action-buttons-container";
+  btnContainer.style.display = "flex";
+  btnContainer.style.justifyContent = "center";
+  btnContainer.style.width = "100%";
+  btnContainer.style.marginTop = "10px";
+
   const newBookingBtn = createSwitchButton("Extend Seat", "extend");
+  newBookingBtn.style.margin = "0"; // Override CSS margin
+  btnContainer.appendChild(newBookingBtn);
+
+  // Remove Change Seat button if exists
+  const existingContainer = document.getElementById("action-buttons-container");
+  const existingChange = document.getElementById("change-seat-btn");
+
+  if (existingContainer) existingContainer.remove();
+  if (existingChange) existingChange.remove();
 
   // Place below the H1 title
   const h1 = document.querySelector("h1");
   if (h1 && h1.parentNode) {
-    h1.parentNode.insertBefore(newBookingBtn, h1.nextSibling);
+    h1.parentNode.insertBefore(btnContainer, h1.nextSibling);
   }
 }
 
@@ -348,6 +507,19 @@ function getTotalAmount(base, duration, discount, pgPercent, convenience) {
 }
 
 async function updateAmount() {
+  if (window.isChangeSeatMode) {
+    amountDisplay.innerHTML = `
+        <div class="price-breakdown">
+          <div><span>Seat Change Fee</span> <span>₹49</span></div>
+          <hr>
+          <div class="total"><span>Total Amount</span> <span>₹49</span></div>
+        </div>
+      `;
+    updateMobileBarAmount(49);
+    if (bookBtn) bookBtn.dataset.amount = 49;
+    return;
+  }
+
   // ... (Existing logic remains) ...
   const shift = shiftInput.value;
   const duration = parseInt(durationInput.value);
@@ -355,6 +527,7 @@ async function updateAmount() {
 
   if (!shift || !duration || isNaN(duration)) {
     amountDisplay.innerText = "₹ 0";
+    updateMobileBarAmount(0);
     return;
   }
 
@@ -388,16 +561,18 @@ async function updateAmount() {
   );
 
   amountDisplay.innerHTML = `
-    <div class="price-breakdown">
-      <div><span>Base Price</span> <span>₹${basePrice} × ${duration} months</span></div>
-      <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
-      <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
-      <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
-      <div><span>PG Fee (${pgPercent}%)</span> <span>+ ₹${pgFee}</span></div>
-      <hr>
-      <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
-    </div>
-  `;
+    <div class="price-breakdown">
+      <div><span>Base Price</span> <span>₹${basePrice} × ${duration} months</span></div>
+      <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
+      <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
+      <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
+      <div><span>PG Fee (${pgPercent}%)</span> <span>+ ₹${pgFee}</span></div>
+      <hr>
+      <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
+    </div>
+  `;
+  updateMobileBarAmount(total);
+  if (bookBtn) bookBtn.dataset.amount = total;
 }
 
 function calculateEndDate(start, months) {
@@ -412,13 +587,18 @@ function calculateEndDate(start, months) {
 }
 
 async function fetchBookings() {
-  // ... (Existing logic remains) ...
   const startDate = startDateInput.value;
   const duration = durationInput.value;
 
-  if (!startDate || !duration) return;
+  let endDate;
+  if (window.isChangeSeatMode && window.changeSeatDetails) {
+    endDate = window.changeSeatDetails.endDate;
+    // startDate is already set to Today in setChangeSeatMode
+  } else {
+    if (!startDate || !duration) return;
+    endDate = calculateEndDate(startDate, duration);
+  }
 
-  const endDate = calculateEndDate(startDate, duration);
   if (!endDate) return;
 
   try {
@@ -563,7 +743,22 @@ function renderSeats() {
     // Determine clickability based on mode
     let isClickable = isSelectable;
 
-    if (window.isExtensionMode) {
+    if (window.isChangeSeatMode) {
+      // Change Seat Mode Logic
+      if (seatId === window.changeSeatDetails.oldSeatId) {
+        // This is the current seat
+        seat.classList.add("booked");
+        seat.style.backgroundColor = "#6b7280"; // Gray to indicate "Current"
+        seat.innerText = "Curr";
+        isClickable = false;
+      } else {
+        // Standard availability rules apply
+        if (!isSelectable) {
+          seat.classList.add("disabled");
+          isClickable = false;
+        }
+      }
+    } else if (window.isExtensionMode) {
       // In extension mode, ONLY the locked seat should be "selectable" (and automatically selected)
       if (seatId === window.extensionDetails.seatId) {
         // CHECK FOR CONFLICTS: Even in extension mode, we must respect existing bookings
@@ -626,6 +821,53 @@ function renderSeats() {
 
 // ⚠️ MODIFIED bookBtn.addEventListener to check the new global flag
 bookBtn.addEventListener("click", async () => {
+  if (window.isChangeSeatMode) {
+    const seat = document.querySelector(".seat.selected");
+    if (!seat) return alert("Please select a new seat.");
+    const newSeatId = seat.dataset.seatId;
+
+    const { oldSeatId, startDate, endDate, shift } = window.changeSeatDetails;
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.email) return alert("Please login.");
+
+    try {
+      const res = await fetch(
+        "https://kanha-backend-yfx1.onrender.com/api/payment/initiate-change-seat",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user.email,
+            oldSeatId,
+            newSeatId,
+            startDate,
+            endDate,
+            shift,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok)
+        return alert(data.message || "Failed to initiate seat change.");
+
+      if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
+        window.PhonePeCheckout.transact({
+          tokenUrl: data.redirectUrl,
+          callback: function (response) {
+            console.log("📦 PhonePe response:", response);
+          },
+          type: "REDIRECT",
+        });
+      } else {
+        window.location.href = data.redirectUrl;
+      }
+      return;
+    } catch (err) {
+      console.error(err);
+      return alert("Error initiating seat change.");
+    }
+  }
+
   let seatId;
   let shift;
   let startDate;
@@ -855,126 +1097,6 @@ window.onload = async () => {
 };
 
 // ... (The IIFE for mobile amount updates remains the same) ...
-(function () {
-  const API_PRICES = "https://kanha-backend-yfx1.onrender.com/api/prices";
-  const mobileAmountEl = document.getElementById("mobile-amount");
-  const shiftEl = document.getElementById("shift");
-  const durationEl = document.getElementById("duration");
-  const bookBtn = document.getElementById("book-btn");
-
-  if (!mobileAmountEl) {
-    console.warn("mobile-amount element not found. Script will not run.");
-    return;
-  } // Try to reuse already-fetched priceSettings if present (common in booking.js)
-
-  let _prices = window.priceSettings || window._priceSettings || null;
-
-  async function fetchPricesIfNeeded() {
-    if (_prices) return _prices;
-    try {
-      const res = await fetch(API_PRICES);
-      if (!res.ok) throw new Error("fetch failed");
-      _prices = await res.json(); // also expose globally for reuse
-      window._priceSettings = _prices;
-      return _prices;
-    } catch (e) {
-      console.warn("Could not fetch prices, using fallback defaults.", e);
-      _prices = {
-        am: 500,
-        pm: 400,
-        full: 900,
-        paymentGatewayFeePercent: 2.5,
-        convenienceFee: 25,
-        offers: [],
-      };
-      window._priceSettings = _prices;
-      return _prices;
-    }
-  }
-
-  function getDiscountForDuration(offers, months) {
-    if (!Array.isArray(offers)) return 0;
-    let best = 0;
-    for (const o of offers) {
-      const dur = Number(o.duration || 0);
-      const disc = Number(o.discount || 0);
-      if (months >= dur && disc > best) best = disc;
-    }
-    return best;
-  }
-
-  function computeTotal(basePrice, months, discount, pgPercent, convenience) {
-    const baseTimesMonths = Number(basePrice) * Number(months);
-    const subtotal = baseTimesMonths - Number(discount || 0);
-    const pgFee = Math.round(
-      ((subtotal + Number(convenience || 0)) * Number(pgPercent || 0)) / 100,
-    );
-    const total = subtotal + pgFee + Number(convenience || 0);
-    return { subtotal, pgFee, convenience, total };
-  }
-
-  function formatINRWithSpace(n) {
-    if (isNaN(n)) return "₹ 0"; // simple thousands separator
-    return "₹ " + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  async function updateMobileAmount() {
-    const prices = await fetchPricesIfNeeded();
-    const shift = (shiftEl && shiftEl.value) || "am";
-    const months = parseInt((durationEl && durationEl.value) || "1", 10) || 1; // try to use user customPricing if available
-
-    let basePrice;
-    try {
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      if (user && user.customPricing && user.customPricing[shift]) {
-        basePrice = Number(user.customPricing[shift]);
-      }
-    } catch (e) {
-      /* ignore */
-    }
-
-    if (!basePrice) {
-      basePrice = shift === "full" ? prices.full || 0 : prices[shift] || 0;
-    }
-
-    const discount = getDiscountForDuration(prices.offers || [], months);
-
-    const paymentMode =
-      (document.querySelector('input[name="paymentMode"]:checked') || {})
-        .value || "online";
-    const pgPercent =
-      paymentMode === "cash" ? 0 : prices.paymentGatewayFeePercent || 0;
-    const convenience =
-      paymentMode === "cash" ? 100 : prices.convenienceFee || 0;
-
-    const { total } = computeTotal(
-      basePrice,
-      months,
-      discount,
-      pgPercent,
-      convenience,
-    ); // update the mobile amount span
-    // update the mobile amount using the centralized helper (keeps currency + numeric spans)
-
-    updateMobileBarAmount(total); // also update book button dataset so booking.js (if it reads it) can use it
-
-    if (bookBtn) bookBtn.dataset.amount = total;
-
-    return total;
-  } // attach listeners
-
-  if (durationEl) durationEl.addEventListener("change", updateMobileAmount);
-  if (shiftEl) shiftEl.addEventListener("change", updateMobileAmount);
-  document
-    .querySelectorAll('input[name="paymentMode"]')
-    .forEach((r) => r.addEventListener("change", updateMobileAmount)); // run on load (small delay to let other scripts finish)
-
-  window.addEventListener("load", () => {
-    setTimeout(updateMobileAmount, 150);
-  }); // expose for manual calls
-
-  window.__Kanha_updateMobileAmount = updateMobileAmount;
-})();
 function updateMobileBarAmount(numericAmount) {
   const mobileAmountEl = document.getElementById("mobile-amount");
   if (!mobileAmountEl) return; // if using structured HTML (currency + amount)
@@ -994,6 +1116,9 @@ function updateMobileBarAmount(numericAmount) {
     mobileAmountEl.textContent = "₹ " + (numericAmount ? numericAmount : 0);
   }
 }
+
+// Expose updateMobileBarAmount to window so it can be used if needed
+window.__Kanha_updateMobileAmount = updateAmount;
 
 document.getElementById("mobile-book-btn").addEventListener("click", () => {
   document.getElementById("book-btn").click();

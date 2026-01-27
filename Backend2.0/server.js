@@ -179,15 +179,15 @@ app.post('/api/payment/initiate', async (req, res) => {
   try {
     // ✅ Save pending booking
     await PendingBooking.create({
-  txnId: merchantTransactionId,
-  email,
-  amount,
-  status: 'pending',
-  seatId,
-  startDate,
-  endDate,
-  shift
-});
+      txnId: merchantTransactionId,
+      email,
+      amount,
+      status: 'pending',
+      seatId,
+      startDate,
+      endDate,
+      shift
+    });
 
 
     // ✅ Get PhonePe token
@@ -232,6 +232,98 @@ app.post('/api/payment/initiate', async (req, res) => {
   } catch (err) {
     console.error("❌ PhonePe API Error:", err.response?.data || err.message);
     res.status(500).json({ message: 'PhonePe API error', details: err.response?.data || err.message });
+  }
+});
+
+// ✅ SEAT CHANGE PAYMENT INITIATION
+app.post('/api/payment/initiate-change-seat', async (req, res) => {
+  const { email, oldSeatId, newSeatId, startDate, endDate, shift } = req.body;
+  
+  if (!email || !oldSeatId || !newSeatId || !startDate || !endDate || !shift) {
+      return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  // Check conflicts
+  const dates = [];
+  let current = new Date(startDate);
+  const end = new Date(endDate);
+  while (current <= end) {
+    dates.push(current.toISOString().split('T')[0]);
+    current.setDate(current.getDate() + 1);
+  }
+
+  const conflictQuery = {
+      seatId: String(newSeatId),
+      date: { $in: dates },
+      status: 'paid'
+  };
+  
+  if (shift === 'full') {
+      conflictQuery.shift = { $in: ['full', 'am', 'pm'] };
+  } else {
+      conflictQuery.shift = { $in: ['full', shift] };
+  }
+  
+  const realConflicts = await Booking.countDocuments(conflictQuery);
+  
+  if (realConflicts > 0) {
+      return res.status(400).json({ message: "Selected seat is not available for the entire duration." });
+  }
+
+  const amount = 49;
+  const merchantTransactionId = 'TXN_CHG_' + Date.now(); 
+  const merchantId = process.env.PHONEPE_MERCHANT_ID;
+  const baseUrl = process.env.PHONEPE_BASE_URL;
+  const redirectUrl = `${process.env.PHONEPE_REDIRECT_URL}?txnId=${merchantTransactionId}`;
+
+  try {
+      await PendingBooking.create({
+          txnId: merchantTransactionId,
+          email,
+          amount,
+          status: 'pending',
+          seatId: newSeatId,
+          oldSeatId,
+          startDate,
+          endDate,
+          shift,
+          type: 'seat_change'
+      });
+
+      const accessToken = await getPhonePeAccessToken();
+
+      const payload = {
+        merchantId,
+        merchantOrderId: merchantTransactionId,
+        amount: amount * 100,
+        expireAfter: 1200,
+        metaInfo: { udf1: email },
+        paymentFlow: {
+          type: 'PG_CHECKOUT',
+          redirectMode: 'AUTO',
+          merchantUrls: { redirectUrl }
+        }
+      };
+
+      const response = await axios.post(
+        `${baseUrl}/apis/pg/checkout/v2/pay`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `O-Bearer ${accessToken}`
+          }
+        }
+      );
+
+      res.json({
+          redirectUrl: response.data.redirectUrl || redirectUrl,
+          merchantTransactionId
+      });
+
+  } catch (err) {
+      console.error("Change Seat Payment Error:", err);
+      res.status(500).json({ message: "Payment initiation failed", details: err.response?.data || err.message });
   }
 });
 
