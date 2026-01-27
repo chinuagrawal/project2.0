@@ -821,16 +821,24 @@ function renderSeats() {
 
 // ⚠️ MODIFIED bookBtn.addEventListener to check the new global flag
 bookBtn.addEventListener("click", async () => {
-  if (window.isChangeSeatMode) {
-    const seat = document.querySelector(".seat.selected");
-    if (!seat) return alert("Please select a new seat.");
-    const newSeatId = seat.dataset.seatId;
+  // Visual feedback: Prevent double clicks
+  const originalText = bookBtn.textContent;
+  bookBtn.disabled = true;
+  bookBtn.textContent = "Processing...";
 
-    const { oldSeatId, startDate, endDate, shift } = window.changeSeatDetails;
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user?.email) return alert("Please login.");
+  try {
+    if (window.isChangeSeatMode) {
+      const seat = document.querySelector(".seat.selected");
+      if (!seat) throw new Error("Please select a new seat.");
+      const newSeatId = seat.dataset.seatId;
 
-    try {
+      const { oldSeatId, startDate, endDate, shift } =
+        window.changeSeatDetails || {};
+      if (!oldSeatId) throw new Error("Missing seat change details.");
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.email) throw new Error("Please login.");
+
       const res = await fetch(
         "https://kanha-backend-yfx1.onrender.com/api/payment/initiate-change-seat",
         {
@@ -848,7 +856,7 @@ bookBtn.addEventListener("click", async () => {
       );
       const data = await res.json();
       if (!res.ok)
-        return alert(data.message || "Failed to initiate seat change.");
+        throw new Error(data.message || "Failed to initiate seat change.");
 
       if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
         window.PhonePeCheckout.transact({
@@ -862,58 +870,52 @@ bookBtn.addEventListener("click", async () => {
         window.location.href = data.redirectUrl;
       }
       return;
-    } catch (err) {
-      console.error(err);
-      return alert("Error initiating seat change.");
     }
-  }
 
-  let seatId;
-  let shift;
-  let startDate;
-  if (window.isExtensionMode) {
-    seatId = window.extensionDetails.seatId;
-    shift = window.extensionDetails.shift;
-    startDate = startDateInput.value; // Get the start date from the input
+    let seatId;
+    let shift;
+    let startDate;
+    if (window.isExtensionMode) {
+      seatId = window.extensionDetails?.seatId;
+      shift = window.extensionDetails?.shift;
+      startDate = startDateInput.value;
 
-    // Safety Check: Ensure the extension seat is not blocked/booked
-    const seatEl = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
-    if (seatEl && seatEl.classList.contains("booked")) {
-      return alert(
-        'This seat is unavailable for the selected dates (already booked). Please switch to "Book a NEW Seat" to choose a different seat.',
-      );
+      const seatEl = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
+      if (seatEl && seatEl.classList.contains("booked")) {
+        throw new Error(
+          'This seat is unavailable for the selected dates. Please switch to "Book a NEW Seat".',
+        );
+      }
+    } else {
+      const seat = document.querySelector(".seat.selected");
+      if (!seat) throw new Error("Please select a seat.");
+      seatId = seat.dataset.seatId;
+      shift = shiftInput.value;
+      startDate = startDateInput.value;
     }
-  } else {
-    const seat = document.querySelector(".seat.selected");
-    if (!seat) return alert("Please select a seat.");
-    seatId = seat.dataset.seatId;
-    shift = shiftInput.value;
-    startDate = startDateInput.value;
-  }
 
-  const duration = durationInput.value;
+    const duration = durationInput.value;
 
-  if (!startDate || !duration || !shift)
-    return alert("Fill all booking details.");
+    if (!startDate || !duration || !shift)
+      throw new Error("Fill all booking details.");
 
-  const endDate = calculateEndDate(startDate, duration);
-  if (!endDate) return alert("Invalid start date.");
+    const endDate = calculateEndDate(startDate, duration);
+    if (!endDate) throw new Error("Invalid start date.");
 
-  const userData = localStorage.getItem("user");
-  const user = JSON.parse(userData);
-  const email = user?.email;
-  if (!email) return alert("Please login first.");
+    const userData = localStorage.getItem("user");
+    const user = JSON.parse(userData);
+    const email = user?.email;
+    if (!email) throw new Error("Please login first.");
 
-  const months = parseInt(duration);
-  if (!months || isNaN(months)) return alert("Invalid duration selected.");
+    const months = parseInt(duration);
+    if (!months || isNaN(months)) throw new Error("Invalid duration selected.");
 
-  const paymentMode = document.querySelector(
-    'input[name="paymentMode"]:checked',
-  ).value;
+    const paymentMode = document.querySelector(
+      'input[name="paymentMode"]:checked',
+    ).value;
 
-  if (paymentMode === "cash") {
-    try {
-      // ... (Cash booking logic remains the same, but uses new seatId, shift, startDate) ...
+    if (paymentMode === "cash") {
+      // ... (Cash booking logic) ...
       if (!priceSettings) await fetchPrices();
 
       let basePrice;
@@ -924,8 +926,7 @@ bookBtn.addEventListener("click", async () => {
           shift === "full" ? priceSettings.full : priceSettings[shift];
       }
 
-      const discount = getDiscount(duration); // Cash booking: add ₹100 convenience for cash (you already do)
-
+      const discount = getDiscount(duration);
       let amount = basePrice * duration - discount + 100;
 
       const res = await fetch(
@@ -942,61 +943,51 @@ bookBtn.addEventListener("click", async () => {
             duration,
             amount,
             isExtension: window.isExtensionMode,
-          }), // <-- Added isExtension flag
+          }),
         },
       );
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Booking failed.");
 
-      if (!res.ok) {
-        alert(data.message || "Booking failed.");
-      } else {
-        // prepare query string with useful info and cashRequestId (if returned)
-        const qs = new URLSearchParams({
-          success: "1",
-          cash: "1",
-          seatId,
-          shift,
-          startDate,
-          endDate,
-        });
+      const qs = new URLSearchParams({
+        success: "1",
+        cash: "1",
+        seatId,
+        shift,
+        startDate,
+        endDate,
+      });
 
-        if (data.cashRequestId) qs.set("cashId", data.cashRequestId); // Redirect to index where the modal logic will handle cash=1 differently
-
-        window.location.href = `index.html?${qs.toString()}`;
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Cash booking request failed.");
+      if (data.cashRequestId) qs.set("cashId", data.cashRequestId);
+      window.location.href = `index.html?${qs.toString()}`;
+      return;
     }
-    return;
-  } // 🟣 Online booking via PhonePe
 
-  if (!priceSettings) await fetchPrices();
-  let basePrice;
+    // 🟣 Online booking via PhonePe
+    if (!priceSettings) await fetchPrices();
+    let basePrice;
 
-  if (user?.customPricing && user.customPricing[shift]) {
-    basePrice = user.customPricing[shift];
-  } else {
-    basePrice = shift === "full" ? priceSettings.full : priceSettings[shift];
-  }
+    if (user?.customPricing && user.customPricing[shift]) {
+      basePrice = user.customPricing[shift];
+    } else {
+      basePrice = shift === "full" ? priceSettings.full : priceSettings[shift];
+    }
 
-  const discount = getDiscount(months);
+    const discount = getDiscount(months);
+    const { total: amount } = getTotalAmount(
+      basePrice,
+      months,
+      discount,
+      priceSettings.paymentGatewayFeePercent,
+      priceSettings.convenienceFee,
+    );
 
-  const { total: amount } = getTotalAmount(
-    basePrice,
-    months,
-    discount,
-    priceSettings.paymentGatewayFeePercent,
-    priceSettings.convenienceFee,
-  );
-
-  try {
     const res = await fetch(
       "https://kanha-backend-yfx1.onrender.com/api/payment/initiate",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, // ⚠️ MODIFIED body to include the isExtension flag
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount,
           email,
@@ -1010,10 +1001,9 @@ bookBtn.addEventListener("click", async () => {
     );
 
     const data = await res.json();
-
     if (!res.ok || !data.redirectUrl) {
-      return alert(data.message || "Payment initiation failed.");
-    } // Store pending booking in session
+      throw new Error(data.message || "Payment initiation failed.");
+    }
 
     sessionStorage.setItem(
       "pendingBooking",
@@ -1031,16 +1021,18 @@ bookBtn.addEventListener("click", async () => {
       window.PhonePeCheckout.transact({
         tokenUrl: data.redirectUrl,
         callback: function (response) {
-          console.log("📦 PhonePe response:", response); // No need to handle CONCLUDED here in REDIRECT mode
+          console.log("📦 PhonePe response:", response);
         },
         type: "REDIRECT",
       });
     } else {
-      alert("PhonePe SDK not loaded");
+      window.location.href = data.redirectUrl;
     }
   } catch (err) {
     console.error(err);
-    alert("Payment or booking failed.");
+    alert(err.message || "An error occurred.");
+    bookBtn.disabled = false;
+    bookBtn.textContent = originalText;
   }
 });
 
