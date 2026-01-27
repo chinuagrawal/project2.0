@@ -490,6 +490,38 @@ function renderSeats() {
     }
   }
 
+  // ---------------------------------------------------------
+  // 📢 GUIDANCE MESSAGE LOGIC
+  // ---------------------------------------------------------
+  const guidanceMsgEl = document.getElementById("seat-guidance-msg");
+  if (guidanceMsgEl) {
+    guidanceMsgEl.style.display = "block";
+    guidanceMsgEl.innerHTML = ""; // Clear previous
+
+    if (window.isExtensionMode) {
+      guidanceMsgEl.innerHTML =
+        "You are extending your current seat. Please proceed to payment.";
+    } else {
+      if (selectedShift === "am") {
+        if (restrictFullyEmptySeats) {
+          guidanceMsgEl.innerHTML = `Please select a <span style="color: #a855f7; font-weight: bold;">PURPLE</span> seat.`;
+        } else {
+          guidanceMsgEl.innerHTML = `Please select a <span style="color: #6b7280; font-weight: bold;">WHITE</span> seat.`;
+        }
+      } else if (selectedShift === "pm") {
+        if (restrictFullyEmptySeats) {
+          guidanceMsgEl.innerHTML = `Please select an <span style="color: #f97316; font-weight: bold;">ORANGE</span> seat.`;
+        } else {
+          guidanceMsgEl.innerHTML = `Please select a <span style="color: #6b7280; font-weight: bold;">WHITE</span> seat.`;
+        }
+      } else if (selectedShift === "full") {
+        guidanceMsgEl.innerHTML = `Please select a <span style="color: #6b7280; font-weight: bold;">WHITE</span> seat.`;
+      } else {
+        guidanceMsgEl.style.display = "none";
+      }
+    }
+  }
+
   for (let i = 1; i <= totalSeats; i++) {
     const seatId = `${i}`;
     const seat = document.createElement("div");
