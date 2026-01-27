@@ -25,7 +25,7 @@
             if (!user || !user.email) return;
 
             try {
-                const res = await fetch(`http://localhost:3000/api/users/bookings?email=${user.email}`);
+                const res = await fetch(`https://kanha-backend-yfx1.onrender.com/api/users/bookings?email=${user.email}`);
                 if(!res.ok) return;
                 
                 const bookings = await res.json();
