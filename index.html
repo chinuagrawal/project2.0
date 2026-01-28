@@ -1443,6 +1443,7 @@
         const startDate = urlParams.get("startDate");
         const endDate = urlParams.get("endDate");
         const cashId = urlParams.get("cashId");
+        const type = urlParams.get("type");
 
         if (isSuccess && seatId) {
           const modal = document.getElementById("confirmation-modal");
@@ -1512,6 +1513,12 @@
           } else {
             // Online Payment Success
             if (modalCashRow) modalCashRow.classList.add("hidden");
+
+            // Custom message for Seat Change
+            if (type === "seat_change") {
+                if (modalTitle) modalTitle.textContent = "Seat Changed Successfully!";
+                if (modalSubtitle) modalSubtitle.textContent = "Your new seat has been reserved.";
+            }
           }
 
           if (modal) modal.classList.remove("hidden");

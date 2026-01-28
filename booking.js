@@ -864,6 +864,20 @@ bookBtn.addEventListener("click", async () => {
       if (!res.ok)
         throw new Error(data.message || "Failed to initiate seat change.");
 
+      // ✅ Store pending booking details for payment-status.html
+      sessionStorage.setItem(
+        "pendingBooking",
+        JSON.stringify({
+          seatId: newSeatId,
+          shift,
+          startDate,
+          endDate,
+          email: user.email,
+          txnId: data.merchantTransactionId,
+          type: "seat_change", // Optional: helps if we need to distinguish later
+        }),
+      );
+
       if (window.PhonePeCheckout && window.PhonePeCheckout.transact) {
         window.PhonePeCheckout.transact({
           tokenUrl: data.redirectUrl,

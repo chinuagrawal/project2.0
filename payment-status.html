@@ -1,72 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
+  <head>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4a148c" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Status | Kanha Library</title>
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Checking Payment Status...</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-      padding: 40px;
-      background: linear-gradient(to right, #f3e5f5, #e1f5fe);
-    }
-    h2 {
-      color: #6a1b9a;
-    }
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #6a1b9a;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-</style>
-</head>
-<body>
-  <h2 id="status">✅ Checking Payment Status, please wait...</h2>
-  <div class="spinner"></div>
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const txnId = urlParams.get('txnId');
+    <style>
+      :root {
+        /* Modern Vibrant Palette */
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --secondary-500: #ec4899;
+        --secondary-600: #db2777;
 
-    let booking = null;
-    try {
-      booking = JSON.parse(sessionStorage.getItem('pendingBooking'));
-    } catch (e) {
-      booking = null;
-    }
+        --success-500: #10b981;
+        --error-500: #ef4444;
 
-    if (!txnId || !booking) {
-      document.body.innerHTML = "<h2>❌ Missing payment details.</h2>";
-    } else {
-      fetch(`https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.code === "PAYMENT_SUCCESS") {
-            // ✅ Payment confirmed, assume webhook will create booking
-            sessionStorage.removeItem('pendingBooking');
-            const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}`;
-            window.location.href = `index.html${query}`;
-          } else {
-            document.body.innerHTML = `<h2>❌ Payment failed or was cancelled.</h2>`;
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          document.body.innerHTML = `<h2>⚠️ Error checking payment status.</h2>`;
-        });
-    }
-  </script>
-</body>
+        --bg-gradient-start: #e0c3fc;
+        --bg-gradient-end: #8ec5fc;
+
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+
+        --radius-xl: 24px;
+        --radius-lg: 16px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--bg-gradient-start),
+          var(--bg-gradient-end)
+        );
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: var(--text-main);
+      }
+
+      .status-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--glass-shadow);
+        padding: 40px;
+        width: 100%;
+        max-width: 480px;
+        text-align: center;
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .icon-wrapper.loading {
+        color: var(--primary-600);
+      }
+      .icon-wrapper.success {
+        color: var(--success-500);
+        background: #d1fae5;
+      }
+      .icon-wrapper.error {
+        color: var(--error-500);
+        background: #fee2e2;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-main);
+      }
+
+      p {
+        color: var(--text-muted);
+        margin-bottom: 32px;
+        line-height: 1.6;
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-600);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 32px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-600),
+          var(--primary-500)
+        );
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-lg);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+      }
+
+      .btn.hidden {
+        display: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="status-card">
+      <div id="icon-container" class="icon-wrapper loading">
+        <div id="spinner" class="loader"></div>
+        <i id="status-icon" class="fas fa-check hidden"></i>
+      </div>
+
+      <h1 id="status-title">Verifying Payment</h1>
+      <p id="status-message">
+        Please wait while we confirm your transaction with the bank...
+      </p>
+
+      <a id="action-btn" href="index.html" class="btn hidden">Return to Home</a>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const txnId = urlParams.get("txnId");
+
+      const iconContainer = document.getElementById("icon-container");
+      const spinner = document.getElementById("spinner");
+      const statusIcon = document.getElementById("status-icon");
+      const title = document.getElementById("status-title");
+      const message = document.getElementById("status-message");
+      const actionBtn = document.getElementById("action-btn");
+
+      function showSuccess(msg) {
+        iconContainer.className = "icon-wrapper success";
+        spinner.classList.add("hidden");
+        statusIcon.className = "fas fa-check-circle";
+        statusIcon.classList.remove("hidden");
+        title.textContent = "Payment Successful!";
+        message.textContent =
+          msg || "Your booking has been confirmed successfully.";
+        actionBtn.classList.remove("hidden");
+      }
+
+      function showError(titleText, msg) {
+        iconContainer.className = "icon-wrapper error";
+        spinner.classList.add("hidden");
+        statusIcon.className = "fas fa-times-circle";
+        statusIcon.classList.remove("hidden");
+        title.textContent = titleText || "Payment Failed";
+        message.textContent = msg || "Something went wrong. Please try again.";
+        actionBtn.textContent = "Try Again";
+        actionBtn.classList.remove("hidden");
+      }
+
+      let booking = null;
+      try {
+        booking = JSON.parse(sessionStorage.getItem("pendingBooking"));
+      } catch (e) {
+        booking = null;
+      }
+
+      if (!txnId || !booking) {
+        showError(
+          "Missing Details",
+          "We could not find the payment details for this session.",
+        );
+      } else {
+        // Poll status or single check
+        fetch(
+          `https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`,
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.code === "PAYMENT_SUCCESS") {
+              // Clear pending booking
+              sessionStorage.removeItem("pendingBooking");
+
+              // Prepare redirect URL
+              const query = `?success=1&seatId=${booking.seatId}&shift=${booking.shift}&startDate=${booking.startDate}&endDate=${booking.endDate}&type=${booking.type || "booking"}`;
+              const targetUrl = `index.html${query}`;
+
+              showSuccess("Redirecting you to your booking details...");
+
+              // Auto redirect after short delay
+              setTimeout(() => {
+                window.location.href = targetUrl;
+              }, 1500);
+
+              actionBtn.href = targetUrl;
+            } else {
+              showError(
+                "Payment Failed",
+                "The transaction was not successful or was cancelled.",
+              );
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            showError(
+              "Connection Error",
+              "We could not verify the payment status at this time.",
+            );
+          });
+      }
+    </script>
+  </body>
 </html>
