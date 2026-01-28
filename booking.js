@@ -826,6 +826,12 @@ bookBtn.addEventListener("click", async () => {
   bookBtn.disabled = true;
   bookBtn.textContent = "Processing...";
 
+  const mobileBtn = document.getElementById("mobile-book-btn");
+  if (mobileBtn) {
+    mobileBtn.disabled = true;
+    mobileBtn.textContent = "Processing...";
+  }
+
   try {
     if (window.isChangeSeatMode) {
       const seat = document.querySelector(".seat.selected");
@@ -1033,6 +1039,12 @@ bookBtn.addEventListener("click", async () => {
     alert(err.message || "An error occurred.");
     bookBtn.disabled = false;
     bookBtn.textContent = originalText;
+
+    const mobileBtn = document.getElementById("mobile-book-btn");
+    if (mobileBtn) {
+      mobileBtn.disabled = false;
+      mobileBtn.textContent = "Pay";
+    }
   }
 });
 
@@ -1086,6 +1098,16 @@ window.onload = async () => {
   setTimeout(() => {
     fetchBookings();
   }, 300);
+
+  // Mobile Button Logic
+  const mobileBtn = document.getElementById("mobile-book-btn");
+  if (mobileBtn) {
+    mobileBtn.addEventListener("click", () => {
+      if (bookBtn && !bookBtn.disabled) {
+        bookBtn.click();
+      }
+    });
+  }
 };
 
 // ... (The IIFE for mobile amount updates remains the same) ...
