@@ -8,7 +8,7 @@ const crypto = require("crypto");
 // Signup route
 router.post("/signup", async (req, res) => {
   try {
-    const {
+    let {
       firstName,
       lastName,
       gender,
@@ -167,11 +167,9 @@ router.post("/signup-otp", async (req, res) => {
     const { mobile, firstName, lastName, gender } = req.body;
 
     if (!mobile || !firstName || !lastName || !gender) {
-      return res
-        .status(400)
-        .json({
-          message: "Mobile, First Name, Last Name and Gender are required.",
-        });
+      return res.status(400).json({
+        message: "Mobile, First Name, Last Name and Gender are required.",
+      });
     }
 
     // Check if user already exists

@@ -5,7 +5,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 require("dotenv").config();
-const router = express.Router();
 const app = express();
 app.get("/", (req, res) => res.send("Server is running"));
 const PORT = process.env.PORT || 3000;
@@ -327,8 +326,6 @@ app.post("/api/payment/initiate-change-seat", async (req, res) => {
     });
   }
 });
-
-module.exports = router;
 
 // Endpoint: Payment callback
 app.post("/api/payment/callback", (req, res) => {
