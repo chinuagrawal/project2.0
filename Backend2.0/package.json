@@ -22,9 +22,11 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.9",
     "pg-sdk-node": "^2.0.2",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "twilio": "^5.12.0"
   },
   "description": ""
 }
