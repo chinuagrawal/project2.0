@@ -368,7 +368,10 @@ function showDetails(seat) {
 
   Object.values(grouped).forEach(entry => {
     entry.dates.sort();
-    const mobile = entry.mobile.replace(/\D/g, "");
+    
+    // Clean mobile number: remove +91 or 91 prefix, then remove non-digits
+    const rawMobile = entry.mobile || "";
+    const mobileClean = rawMobile.replace(/^\+?91/, '').replace(/\D/g, '');
 
    html += `
 <tr>
@@ -382,13 +385,13 @@ function showDetails(seat) {
   <td data-label="Days">${calculateDays(entry.dates[0], entry.dates.at(-1))}</td>
 
   <td data-label="Call">
-    <a href="tel:+91${mobile}" class="icon-btn icon-call">
+    <a href="tel:+91${mobileClean}" class="icon-btn icon-call">
       <i class="fa-solid fa-phone"></i>
     </a>
   </td>
 
   <td data-label="WhatsApp">
-    <a href="https://wa.me/91${mobile}" target="_blank" class="icon-btn icon-wa">
+    <a href="https://wa.me/91${mobileClean}" target="_blank" class="icon-btn icon-wa">
       <i class="fa-brands fa-whatsapp"></i>
     </a>
   </td>

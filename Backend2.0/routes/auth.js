@@ -34,6 +34,11 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Passwords do not match." });
     }
 
+    // Sanitize mobile: remove +91 if present
+    if (mobile && mobile.startsWith("+91")) {
+      mobile = mobile.slice(3);
+    }
+
     const existingUser = await User.findOne({
       $or: [{ email }, { mobile }],
     });
