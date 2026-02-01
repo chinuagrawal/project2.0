@@ -345,7 +345,8 @@
     </div>
 
     <script>
-      const API_URL = "https://kanha-backend-yfx1.onrender.com/api/insights/dashboard";
+      const API_URL =
+        "https://kanha-backend-yfx1.onrender.com/api/insights/dashboard";
 
       async function fetchInsights() {
         try {
@@ -474,7 +475,10 @@
         new Chart(shiftCtx, {
           type: "doughnut",
           data: {
-            labels: data.shiftPopularity.map((s) => s._id.toUpperCase()),
+            labels: data.shiftPopularity.map((s) => {
+              const map = { am: "Morning", pm: "Evening", full: "Full Day" };
+              return map[s._id] || s._id.toUpperCase();
+            }),
             datasets: [
               {
                 data: data.shiftPopularity.map((s) => s.count),

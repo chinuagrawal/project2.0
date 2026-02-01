@@ -131,7 +131,7 @@ router.post("/", async (req, res) => {
         2. If user asks about a SPECIFIC SEAT (e.g., "Is seat 5 free?"), check the SEAT STATUS lists above.
            - If seat 5 is NOT in Today's lists, say "Yes, Seat 5 is available today."
            - If seat 5 is in 'Full Day Booked', say "Seat 5 is fully booked today."
-           - If seat 5 is in 'AM Booked', say "Seat 5 is booked for Morning, but available for Evening."
+           - If seat 5 is in 'Morning Booked', say "Seat 5 is booked for Morning, but available for Evening."
         3. If user asks "When is it getting empty?", check Tomorrow's status. If free tomorrow, say "It will be free tomorrow."
         4. If asked about general availability, use the counts: ${JSON.stringify(libraryState.counts)}.
         5. Keep answers concise.
