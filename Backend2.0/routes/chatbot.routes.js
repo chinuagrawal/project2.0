@@ -21,8 +21,8 @@ const getToday = () => {
   return new Date().toISOString().split("T")[0];
 };
 
-// Helper: Get Availability Summary
-async function getAvailabilitySummary() {
+// Helper: Get Detailed Library State
+async function getLibraryState() {
   const today = getToday();
   const tomorrow = getTomorrow();
   const totalSeats = 34;
@@ -32,30 +32,35 @@ async function getAvailabilitySummary() {
     status: "paid",
   });
 
-  const stats = {
-    [today]: { am: 0, pm: 0, full: 0 },
-    [tomorrow]: { am: 0, pm: 0, full: 0 },
+  const state = {
+    [today]: { full: [], am: [], pm: [] },
+    [tomorrow]: { full: [], am: [], pm: [] },
   };
 
   bookings.forEach((b) => {
-    if (stats[b.date]) {
-      if (b.shift === "full") stats[b.date].full++;
-      else if (b.shift === "am") stats[b.date].am++;
-      else if (b.shift === "pm") stats[b.date].pm++;
+    if (state[b.date]) {
+      // Assume seatId is a number or string number
+      const sid = parseInt(b.seatId);
+      if (b.shift === "full") state[b.date].full.push(sid);
+      else if (b.shift === "am") state[b.date].am.push(sid);
+      else if (b.shift === "pm") state[b.date].pm.push(sid);
     }
   });
 
-  const format = (date) => {
-    const s = stats[date];
-    // Approximation: Full shift takes a seat from AM and PM availability
-    const occupiedAM = s.full + s.am;
-    const occupiedPM = s.full + s.pm;
-    return `AM Free: ${Math.max(0, totalSeats - occupiedAM)}, PM Free: ${Math.max(0, totalSeats - occupiedPM)}`;
-  };
+  // Helper to format list
+  const fmt = (list) =>
+    list.length > 0 ? list.sort((a, b) => a - b).join(", ") : "None";
 
   return {
-    today: format(today),
-    tomorrow: format(tomorrow),
+    raw: state,
+    summary: {
+      today: `Full Day Booked: [${fmt(state[today].full)}], AM Booked: [${fmt(state[today].am)}], PM Booked: [${fmt(state[today].pm)}]`,
+      tomorrow: `Full Day Booked: [${fmt(state[tomorrow].full)}], AM Booked: [${fmt(state[tomorrow].am)}], PM Booked: [${fmt(state[tomorrow].pm)}]`,
+    },
+    counts: {
+      today: `AM Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].am.length))}, PM Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].pm.length))}`,
+      tomorrow: `AM Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].am.length))}, PM Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].pm.length))}`,
+    },
   };
 }
 
@@ -76,11 +81,8 @@ router.post("/", async (req, res) => {
   try {
     user = await User.findOne({ mobile });
     if (!user) {
-      // Allow chat but mark as unknown, or strict block?
-      // User asked for "genuine answers", let's allow general queries but restrict personal ones.
       userContext = "User not found in database (Unregistered).";
     } else {
-      // Fetch User Bookings
       const myBookings = await Booking.find({
         email: user.email,
         status: "paid",
@@ -103,7 +105,7 @@ router.post("/", async (req, res) => {
       ? `Prices: Full Day ₹${prices.full}, AM ₹${prices.am}, PM ₹${prices.pm}`
       : "Prices unavailable.";
 
-    const availability = await getAvailabilitySummary();
+    const libraryState = await getLibraryState();
     const todayDate = getToday();
 
     // 2. AI Processing
@@ -115,17 +117,24 @@ router.post("/", async (req, res) => {
         CURRENT CONTEXT:
         - Today's Date: ${todayDate}
         - User Context: ${userContext}
-        - Seat Availability: Today [${availability.today}], Tomorrow [${availability.tomorrow}]
         - Pricing: ${priceText}
         - Library Features: Pin-drop silence, High-speed WiFi, AC, Comfortable chairs.
         
+        SEAT STATUS (Total 34 Seats):
+        - Today (${todayDate}): ${libraryState.summary.today}
+        - Tomorrow: ${libraryState.summary.tomorrow}
+        
+        (Note: If a seat is listed in 'Full Day Booked', it is unavailable for both AM and PM. If in 'AM Booked', it is unavailable for AM but free for PM.)
+
         GUIDELINES:
-        1. Answer naturally. If asked "How are you?", be polite.
-        2. If asked about availability, use the data above.
-        3. If asked about booking, say: "You can book directly on our website." (If you can, guide them to the booking page link /booking.html).
-        4. If the user wants to book specific shifts (e.g., "I want to book AM"), confirm availability from context and tell them to proceed to the booking page.
-        5. Keep answers concise (max 2-3 sentences unless details needed).
-        6. Do not make up data. If unsure, say you don't know.
+        1. Answer naturally (Hinglish/Hindi/English supported).
+        2. If user asks about a SPECIFIC SEAT (e.g., "Is seat 5 free?"), check the SEAT STATUS lists above.
+           - If seat 5 is NOT in Today's lists, say "Yes, Seat 5 is available today."
+           - If seat 5 is in 'Full Day Booked', say "Seat 5 is fully booked today."
+           - If seat 5 is in 'AM Booked', say "Seat 5 is booked for Morning, but available for Evening."
+        3. If user asks "When is it getting empty?", check Tomorrow's status. If free tomorrow, say "It will be free tomorrow."
+        4. If asked about general availability, use the counts: ${JSON.stringify(libraryState.counts)}.
+        5. Keep answers concise.
         `;
 
       try {
@@ -134,19 +143,40 @@ router.post("/", async (req, res) => {
             { role: "system", content: systemPrompt },
             { role: "user", content: message },
           ],
-          model: "gpt-3.5-turbo", // Cost-effective and fast
-          max_tokens: 150,
+          model: "gpt-3.5-turbo",
+          max_tokens: 200,
         });
 
         return res.json({ reply: completion.choices[0].message.content });
       } catch (openaiErr) {
         console.error("OpenAI API Failed:", openaiErr);
-        // Fallback to manual logic below
       }
     }
 
     // 3. Fallback Logic (Manual)
     const userMessage = message.toLowerCase();
+
+    // --- QUERY: SPECIFIC SEAT CHECK (Regex) ---
+    // Matches "seat 5", "seat no 5", "5 number seat"
+    const seatMatch =
+      userMessage.match(/seat\s*(?:no\.?)?\s*(\d+)/) ||
+      userMessage.match(/(\d+)\s*number/);
+    if (seatMatch) {
+      const seatId = parseInt(seatMatch[1]);
+      if (seatId >= 1 && seatId <= 34) {
+        const today = getToday();
+        const raw = libraryState.raw[today];
+        let status = "Available";
+
+        if (raw.full.includes(seatId)) status = "Fully Booked";
+        else if (raw.am.includes(seatId)) status = "Booked for Morning (AM)";
+        else if (raw.pm.includes(seatId)) status = "Booked for Evening (PM)";
+
+        return res.json({
+          reply: `Seat ${seatId} status for Today (${today}): ${status}.`,
+        });
+      }
+    }
 
     // --- QUERY: FREE SEATS ---
     if (
@@ -158,7 +188,7 @@ router.post("/", async (req, res) => {
         ? getTomorrow()
         : getToday();
       return res.json({
-        reply: `For ${targetDate}: ${targetDate === getTomorrow() ? availability.tomorrow : availability.today}.`,
+        reply: `For ${targetDate}: ${targetDate === getTomorrow() ? libraryState.counts.tomorrow : libraryState.counts.today}.`,
       });
     }
 
@@ -169,7 +199,7 @@ router.post("/", async (req, res) => {
       userMessage.includes("status")
     ) {
       if (!user) return res.json({ reply: "I couldn't find your account." });
-      return res.json({ reply: userContext }); // Simplified for fallback
+      return res.json({ reply: userContext });
     }
 
     // --- QUERY: EXTENSION ---
@@ -198,7 +228,11 @@ router.post("/", async (req, res) => {
     }
 
     // --- GENERAL ---
-    if (userMessage.includes("hello") || userMessage.includes("hi")) {
+    if (
+      userMessage.includes("hello") ||
+      userMessage.includes("hi") ||
+      userMessage.includes("namaste")
+    ) {
       return res.json({
         reply: "Hello! How can I help you with your library seat today?",
       });
