@@ -220,30 +220,35 @@
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                autocomplete="off"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                autocomplete="off"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                autocomplete="off"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                autocomplete="off"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                autocomplete="off"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
             </div>
@@ -433,31 +438,41 @@
       let isRegistration = false;
       let verifiedUser = null;
 
+      // Helper to fill OTP inputs
+      function fillOTPInputs(code) {
+        const cleanCode = code ? code.toString().replace(/\D/g, "") : "";
+        if (cleanCode.length > 0) {
+          const codeArr = cleanCode.split("").slice(0, 6);
+          otpInputs.forEach((input, i) => {
+            if (codeArr[i]) input.value = codeArr[i];
+          });
+
+          // Focus logic
+          const lastIndex = Math.min(codeArr.length, otpInputs.length - 1);
+          if (lastIndex < otpInputs.length) {
+            otpInputs[lastIndex].focus();
+          } else {
+            otpInputs[otpInputs.length - 1].focus();
+          }
+
+          // Auto submit if full
+          if (cleanCode.length >= 6) {
+            verifyOtpBtn.focus(); // Visual feedback
+            setTimeout(() => verifyOtpBtn.click(), 100);
+          }
+        }
+      }
+
       // Handle OTP Inputs Logic (Auto-focus, Backspace, Paste)
       otpInputs.forEach((input, index) => {
         input.addEventListener("input", (e) => {
-          let value = e.target.value.replace(/\D/g, ""); // Keep only numbers
-          e.target.value = value; // Update input value with numbers only
+          let value = e.target.value;
+          value = value.replace(/\D/g, "");
+          e.target.value = value;
 
-          // Handle Paste of full code
+          // Handle Paste/Autofill of full code
           if (value.length > 1) {
-            const pasteData = value.split("");
-            for (let i = 0; i < otpInputs.length; i++) {
-              if (pasteData[i]) {
-                otpInputs[i].value = pasteData[i];
-              }
-            }
-            // Focus last filled input or last input
-            const lastIndex = Math.min(
-              pasteData.length - 1,
-              otpInputs.length - 1,
-            );
-            otpInputs[lastIndex].focus();
-
-            // Auto-submit if full code
-            if (getOtpValue().length === 6) {
-              verifyOtpBtn.click();
-            }
+            fillOTPInputs(value);
             return;
           }
 
@@ -479,21 +494,7 @@
           const paste = (e.clipboardData || window.clipboardData).getData(
             "text",
           );
-          const pasteData = paste.split("");
-          for (let i = 0; i < otpInputs.length; i++) {
-            if (pasteData[i]) {
-              otpInputs[i].value = pasteData[i];
-            }
-          }
-          const lastIndex = Math.min(
-            pasteData.length - 1,
-            otpInputs.length - 1,
-          );
-          otpInputs[lastIndex].focus();
-
-          if (getOtpValue().length === 6) {
-            verifyOtpBtn.click();
-          }
+          fillOTPInputs(paste);
         });
 
         input.addEventListener("keydown", (e) => {
@@ -556,12 +557,7 @@
               const cleanCode = code ? code.replace(/\D/g, "") : "";
 
               if (cleanCode && cleanCode.length >= 4) {
-                // Allow slight variations
-                const codeArr = cleanCode.split("").slice(0, 6); // Take first 6 digits
-                otpInputs.forEach((input, i) => {
-                  if (codeArr[i]) input.value = codeArr[i];
-                });
-                if (cleanCode.length >= 6) verifyOtpBtn.click();
+                fillOTPInputs(cleanCode);
               } else {
                 showToast("Received incomplete code: " + code, "error");
               }
