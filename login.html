@@ -82,6 +82,55 @@
         transition: background-color 5000s ease-in-out 0s;
       }
 
+      /* Toast Notification */
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        min-width: 300px;
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        font-size: 14px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out forwards;
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      .toast.success {
+        background: rgba(16, 185, 129, 0.9);
+        border: 1px solid #10b981;
+      }
+      .toast.error {
+        background: rgba(239, 68, 68, 0.9);
+        border: 1px solid #ef4444;
+      }
+      .toast.info {
+        background: rgba(59, 130, 246, 0.9);
+        border: 1px solid #3b82f6;
+      }
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+      }
+
       /* Hide reCAPTCHA badge */
       .grecaptcha-badge {
         visibility: hidden;
@@ -109,6 +158,7 @@
     </div>
 
     <!-- Main Container -->
+    <div id="toast-container"></div>
     <div class="relative z-10 flex items-center justify-center h-full px-4">
       <!-- Glassmorphism Card -->
       <div
@@ -301,6 +351,43 @@
         measurementId: "G-XZWSFKDHFY",
       };
 
+      // Toast Notification Function
+      function showToast(message, type = "info") {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+
+        let icon = "ri-information-line";
+        if (type === "success") icon = "ri-checkbox-circle-line";
+        if (type === "error") icon = "ri-error-warning-line";
+
+        toast.innerHTML = `
+          <i class="${icon} text-lg"></i>
+          <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+          toast.style.animation = "fadeOut 0.3s ease-out forwards";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function setLoading(btn, isLoading, text = "Loading...") {
+        if (isLoading) {
+          btn.dataset.originalText = btn.innerHTML;
+          btn.innerHTML = `<i class="ri-loader-4-line animate-spin text-xl"></i>`;
+          btn.disabled = true;
+          btn.classList.add("opacity-75", "cursor-not-allowed");
+        } else {
+          btn.innerHTML = btn.dataset.originalText || text;
+          btn.disabled = false;
+          btn.classList.remove("opacity-75", "cursor-not-allowed");
+        }
+      }
+
       // Initialize Firebase
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -315,10 +402,11 @@
           size: "invisible",
           callback: (response) => {
             // reCAPTCHA solved
-            // onSignInSubmit();
           },
         },
       );
+      // Pre-render reCAPTCHA to improve performance
+      window.recaptchaVerifier.render();
 
       const sendOtpBtn = document.getElementById("send-otp-btn");
       const verifyOtpBtn = document.getElementById("verify-otp-btn");
@@ -404,7 +492,7 @@
         const phoneNumber = document.getElementById("mobile").value.trim();
 
         if (!phoneNumber) {
-          alert("Please enter a mobile number");
+          showToast("Please enter a mobile number", "error");
           return;
         }
 
@@ -412,6 +500,8 @@
         const formattedPhoneNumber = phoneNumber.startsWith("+")
           ? phoneNumber
           : "+91" + phoneNumber;
+
+        setLoading(sendOtpBtn, true);
 
         const appVerifier = window.recaptchaVerifier;
 
@@ -436,22 +526,25 @@
 
             // Start Resend Timer
             startResendTimer();
+            showToast("OTP sent successfully!", "success");
+            setLoading(sendOtpBtn, false);
           })
           .catch((error) => {
+            setLoading(sendOtpBtn, false);
             console.error("Error during signInWithPhoneNumber", error);
+
             if (error.code === "auth/invalid-app-credential") {
-              alert(
-                "Configuration Error: Hostname match not found.\n\nPlease go to Firebase Console -> Authentication -> Settings -> Authorized Domains.\nAdd '127.0.0.1' and 'localhost' to the list.",
+              // Silent fail or log for dev, don't annoy user
+              console.warn(
+                "Firebase Auth Config Error (localhost/domain mismatch)",
               );
             } else if (
               error.message.includes("blocked all requests from this device") ||
               error.code === "auth/too-many-requests"
             ) {
-              alert(
-                "Access Temporarily Blocked:\n\nWe have detected unusual activity from this device and blocked requests to protect your account.\n\nThis usually happens after too many failed login attempts.\n\nPlease try the following:\n1. Wait for 30-60 minutes before trying again.\n2. Switch to a different network (e.g., use Mobile Data instead of WiFi).\n3. Try logging in from a different browser or device.",
-              );
+              showToast("Too many attempts. Please try again later.", "error");
             } else {
-              alert("Error sending OTP: " + error.message);
+              showToast("Error sending OTP. Please check the number.", "error");
             }
 
             if (window.recaptchaVerifier && window.recaptchaVerifier.clear) {
@@ -466,8 +559,12 @@
           e.preventDefault();
 
           const otp = getOtpValue();
-          if (otp.length !== 6)
-            return alert("Please enter a valid 6-digit OTP");
+          if (otp.length !== 6) {
+            showToast("Please enter a valid 6-digit OTP", "error");
+            return;
+          }
+
+          setLoading(verifyOtpBtn, true);
 
           try {
             if (!verifiedUser) {
@@ -507,22 +604,26 @@
                 `;
 
                 isRegistration = true;
+                setLoading(verifyOtpBtn, false);
                 return;
               }
 
               if (res.status === 403 && data.message?.includes("blocked")) {
-                alert("❌ " + data.message);
+                showToast("Account blocked by admin.", "error");
               } else {
-                alert(data.message || "Login failed");
+                showToast(data.message || "Login failed", "error");
               }
+              setLoading(verifyOtpBtn, false);
               return;
             }
 
             // ✅ SUCCESS LOGIN
-            loginSuccess(data.user);
+            showToast("Login successful!", "success");
+            setTimeout(() => loginSuccess(data.user), 500);
           } catch (error) {
             console.error(error);
-            alert("Invalid OTP or Server Error");
+            setLoading(verifyOtpBtn, false);
+            showToast("Invalid OTP or Server Error", "error");
           }
         });
 
@@ -532,14 +633,16 @@
         const gender = document.getElementById("gender").value;
 
         if (!fullname) {
-          alert("Please enter your full name");
+          showToast("Please enter your full name", "error");
           return;
         }
 
         if (!gender) {
-          alert("Please select your gender");
+          showToast("Please select your gender", "error");
           return;
         }
+
+        setLoading(registerBtn, true);
 
         // Split name
         const names = fullname.split(" ");
@@ -565,14 +668,17 @@
 
           const data = await res.json();
           if (!res.ok) {
-            alert(data.message || "Registration failed");
+            showToast(data.message || "Registration failed", "error");
+            setLoading(registerBtn, false);
             return;
           }
 
-          loginSuccess(data.user);
+          showToast("Registration successful!", "success");
+          setTimeout(() => loginSuccess(data.user), 500);
         } catch (err) {
           console.error(err);
-          alert("Server Error during registration");
+          setLoading(registerBtn, false);
+          showToast("Server Error during registration", "error");
         }
       });
 
@@ -586,7 +692,7 @@
         } else if (user.role === "user") {
           window.location.href = "booking.html";
         } else {
-          alert("Unknown role");
+          showToast("Unknown role", "error");
         }
       }
     </script>
