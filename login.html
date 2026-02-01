@@ -213,42 +213,42 @@
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="one-time-code"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="off"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="off"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="off"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="off"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                autocomplete="off"
+                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
             </div>
@@ -542,32 +542,6 @@
         }, 1000);
       }
 
-      function listenForWebOTP() {
-        if ("OTPCredential" in window) {
-          const ac = new AbortController();
-
-          navigator.credentials
-            .get({
-              otp: { transport: ["sms"] },
-              signal: ac.signal,
-            })
-            .then((otp) => {
-              const code = otp.code;
-              // Remove any non-numeric chars just in case
-              const cleanCode = code ? code.replace(/\D/g, "") : "";
-
-              if (cleanCode && cleanCode.length >= 4) {
-                fillOTPInputs(cleanCode);
-              } else {
-                showToast("Received incomplete code: " + code, "error");
-              }
-            })
-            .catch((err) => {
-              console.log("WebOTP Error:", err);
-            });
-        }
-      }
-
       resendOtpBtn.addEventListener("click", function () {
         sendOtpBtn.click();
       });
@@ -607,9 +581,6 @@
 
             // Focus first OTP input
             setTimeout(() => otpInputs[0].focus(), 100);
-
-            // Listen for WebOTP (Auto-fill from SMS)
-            listenForWebOTP();
 
             // Start Resend Timer
             startResendTimer();
