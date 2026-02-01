@@ -214,42 +214,36 @@
                 inputmode="numeric"
                 pattern="[0-9]*"
                 autocomplete="one-time-code"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
             </div>
@@ -442,9 +436,12 @@
       // Handle OTP Inputs Logic (Auto-focus, Backspace, Paste)
       otpInputs.forEach((input, index) => {
         input.addEventListener("input", (e) => {
+          let value = e.target.value.replace(/\D/g, ""); // Keep only numbers
+          e.target.value = value; // Update input value with numbers only
+
           // Handle Paste of full code
-          if (e.target.value.length > 1) {
-            const pasteData = e.target.value.split("");
+          if (value.length > 1) {
+            const pasteData = value.split("");
             for (let i = 0; i < otpInputs.length; i++) {
               if (pasteData[i]) {
                 otpInputs[i].value = pasteData[i];
@@ -464,7 +461,7 @@
             return;
           }
 
-          if (e.target.value.length === 1) {
+          if (value.length === 1) {
             if (index < otpInputs.length - 1) {
               otpInputs[index + 1].focus();
             }
@@ -555,12 +552,18 @@
             })
             .then((otp) => {
               const code = otp.code;
-              if (code && code.length === 6) {
-                const codeArr = code.split("");
+              // Remove any non-numeric chars just in case
+              const cleanCode = code ? code.replace(/\D/g, "") : "";
+
+              if (cleanCode && cleanCode.length >= 4) {
+                // Allow slight variations
+                const codeArr = cleanCode.split("").slice(0, 6); // Take first 6 digits
                 otpInputs.forEach((input, i) => {
-                  input.value = codeArr[i];
+                  if (codeArr[i]) input.value = codeArr[i];
                 });
-                verifyOtpBtn.click();
+                if (cleanCode.length >= 6) verifyOtpBtn.click();
+              } else {
+                showToast("Received incomplete code: " + code, "error");
               }
             })
             .catch((err) => {
