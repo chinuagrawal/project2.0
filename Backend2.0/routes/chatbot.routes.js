@@ -54,12 +54,12 @@ async function getLibraryState() {
   return {
     raw: state,
     summary: {
-      today: `Full Day Booked: [${fmt(state[today].full)}], AM Booked: [${fmt(state[today].am)}], PM Booked: [${fmt(state[today].pm)}]`,
-      tomorrow: `Full Day Booked: [${fmt(state[tomorrow].full)}], AM Booked: [${fmt(state[tomorrow].am)}], PM Booked: [${fmt(state[tomorrow].pm)}]`,
+      today: `Full Day Booked: [${fmt(state[today].full)}], Morning Booked: [${fmt(state[today].am)}], Evening Booked: [${fmt(state[today].pm)}]`,
+      tomorrow: `Full Day Booked: [${fmt(state[tomorrow].full)}], Morning Booked: [${fmt(state[tomorrow].am)}], Evening Booked: [${fmt(state[tomorrow].pm)}]`,
     },
     counts: {
-      today: `AM Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].am.length))}, PM Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].pm.length))}`,
-      tomorrow: `AM Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].am.length))}, PM Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].pm.length))}`,
+      today: `Morning Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].am.length))}, Evening Free: ${Math.max(0, totalSeats - (state[today].full.length + state[today].pm.length))}`,
+      tomorrow: `Morning Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].am.length))}, Evening Free: ${Math.max(0, totalSeats - (state[tomorrow].full.length + state[tomorrow].pm.length))}`,
     },
   };
 }
@@ -102,7 +102,7 @@ router.post("/", async (req, res) => {
     // Global Context
     const prices = await PriceSetting.findOne();
     const priceText = prices
-      ? `Prices: Full Day ₹${prices.full}, AM ₹${prices.am}, PM ₹${prices.pm}`
+      ? `Prices: Full Day ₹${prices.full}, Morning ₹${prices.am}, Evening ₹${prices.pm}`
       : "Prices unavailable.";
 
     const libraryState = await getLibraryState();
@@ -124,7 +124,7 @@ router.post("/", async (req, res) => {
         - Today (${todayDate}): ${libraryState.summary.today}
         - Tomorrow: ${libraryState.summary.tomorrow}
         
-        (Note: If a seat is listed in 'Full Day Booked', it is unavailable for both AM and PM. If in 'AM Booked', it is unavailable for AM but free for PM.)
+        (Note: If a seat is listed in 'Full Day Booked', it is unavailable for both Morning and Evening. If in 'Morning Booked', it is unavailable for Morning but free for Evening.)
 
         GUIDELINES:
         1. Answer naturally (Hinglish/Hindi/English supported).
@@ -169,8 +169,8 @@ router.post("/", async (req, res) => {
         let status = "Available";
 
         if (raw.full.includes(seatId)) status = "Fully Booked";
-        else if (raw.am.includes(seatId)) status = "Booked for Morning (AM)";
-        else if (raw.pm.includes(seatId)) status = "Booked for Evening (PM)";
+        else if (raw.am.includes(seatId)) status = "Booked for Morning";
+        else if (raw.pm.includes(seatId)) status = "Booked for Evening";
 
         return res.json({
           reply: `Seat ${seatId} status for Today (${today}): ${status}.`,

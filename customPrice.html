@@ -1,248 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Custom Pricing - Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Custom Pricing - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
-  <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(135deg, #f6f9fc, #e9f0f5);
-      margin: 0;
-      padding: 20px;
-      color: #2c3e50;
-    }
-
-    h2 {
-      text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 25px;
-      font-weight: 600;
-      color: #34495e;
-    }
-
-    .message {
-      text-align: center;
-      margin-bottom: 15px;
-      font-weight: 500;
-      font-size: 14px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    thead {
-      background: #4a90e2;
-      color: white;
-    }
-
-    th, td {
-      padding: 14px 16px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #f1f1f1;
-      transition: background 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background: #f9fbfd;
-    }
-
-    input {
-      width: 70px;
-      padding: 6px 8px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 13px;
-      transition: border 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input:focus {
-      border-color: #4a90e2;
-      box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
-      outline: none;
-    }
-
-    button {
-      padding: 8px 12px;
-      font-size: 13px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background-color: #4a90e2;
-      color: white;
-      transition: background 0.2s ease;
-    }
-
-    button:hover {
-      background-color: #3b78c4;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-    table, thead, tbody, th, td, tr {
-      display: block;
-    }
-
-    thead {
-      display: none;
-    }
-
-    tr {
-      margin-bottom: 15px;
-      background: white;
-      border-radius: 6px;
-      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-      padding: 10px;
-    }
-
-    td {
-      position: relative;
-      padding-left: 55%;
-      text-align: left;
-      border: none;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    td:last-child {
-      border-bottom: none;
-    }
-
-    td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 15px;
-      top: 12px;
-      font-weight: bold;
-      color: #555;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-  
-      input {
-        width: 100px;
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #f6f9fc, #e9f0f5);
+        margin: 0;
+        padding: 20px;
+        color: #2c3e50;
       }
-    }
-  </style>
-</head>
-<body>
 
-<h2><i class="fas fa-tags"></i> Custom Pricing for Users</h2>
-<div class="message" id="msg"></div>
+      h2 {
+        text-align: center;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        font-weight: 600;
+        color: #34495e;
+      }
 
-<table id="users-table">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Mobile</th>
-      <th>AM</th>
-      <th>PM</th>
-      <th>Full</th>
-      <th>Update</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+      .message {
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: 500;
+        font-size: 14px;
+      }
 
-<script>
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user || user.role !== "admin") {
-    alert("Access denied! Admins only.");
-    window.location.href = "login.html";
-  }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+      }
 
-  const API_BASE = 'https://kanha-backend-yfx1.onrender.com';
+      thead {
+        background: #4a90e2;
+        color: white;
+      }
 
-  async function fetchUsers() {
-    try {
-      const res = await fetch(`${API_BASE}/api/users`);
-      const users = await res.json();
-      const tbody = document.querySelector('#users-table tbody');
+      th,
+      td {
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 14px;
+      }
 
-      users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      tbody tr {
+        border-bottom: 1px solid #f1f1f1;
+        transition: background 0.2s ease;
+      }
 
-      users.forEach((user, index) => {
-        const tr = document.createElement('tr');
+      tbody tr:hover {
+        background: #f9fbfd;
+      }
 
-        const am = user.customPricing?.am ?? '';
-        const pm = user.customPricing?.pm ?? '';
-        const full = user.customPricing?.full ?? '';
+      input {
+        width: 70px;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 13px;
+        transition:
+          border 0.2s ease,
+          box-shadow 0.2s ease;
+      }
 
-        tr.innerHTML = `
+      input:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+        outline: none;
+      }
+
+      button {
+        padding: 8px 12px;
+        font-size: 13px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background-color: #4a90e2;
+        color: white;
+        transition: background 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #3b78c4;
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tr {
+          margin-bottom: 15px;
+          background: white;
+          border-radius: 6px;
+          box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+          padding: 10px;
+        }
+
+        td {
+          position: relative;
+          padding-left: 55%;
+          text-align: left;
+          border: none;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        td:last-child {
+          border-bottom: none;
+        }
+
+        td::before {
+          content: attr(data-label);
+          position: absolute;
+          left: 15px;
+          top: 12px;
+          font-weight: bold;
+          color: #555;
+          font-size: 13px;
+          white-space: nowrap;
+        }
+
+        input {
+          width: 100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2><i class="fas fa-tags"></i> Custom Pricing for Users</h2>
+    <div class="message" id="msg"></div>
+
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Mobile</th>
+          <th>Morning</th>
+          <th>Evening</th>
+          <th>Full</th>
+          <th>Update</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "admin") {
+        alert("Access denied! Admins only.");
+        window.location.href = "login.html";
+      }
+
+      const API_BASE = "https://kanha-backend-yfx1.onrender.com";
+
+      async function fetchUsers() {
+        try {
+          const res = await fetch(`${API_BASE}/api/users`);
+          const users = await res.json();
+          const tbody = document.querySelector("#users-table tbody");
+
+          users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+          users.forEach((user, index) => {
+            const tr = document.createElement("tr");
+
+            const am = user.customPricing?.am ?? "";
+            const pm = user.customPricing?.pm ?? "";
+            const full = user.customPricing?.full ?? "";
+
+            tr.innerHTML = `
           <td data-label="#">${index + 1}</td>
           <td data-label="Name">${user.firstName} ${user.lastName}</td>
           <td data-label="Email">${user.email}</td>
           <td data-label="Mobile">${user.mobile}</td>
-          <td data-label="AM"><input type="number" value="${am}" class="am" /></td>
-          <td data-label="PM"><input type="number" value="${pm}" class="pm" /></td>
+          <td data-label="Morning"><input type="number" value="${am}" class="am" /></td>
+          <td data-label="Evening"><input type="number" value="${pm}" class="pm" /></td>
           <td data-label="Full"><input type="number" value="${full}" class="full" /></td>
           <td data-label="Update"><button onclick="updatePricing('${user.email}', this)">Update</button></td>
         `;
-        tbody.appendChild(tr);
-      });
-
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      document.getElementById('msg').innerText = 'Failed to load users.';
-      document.getElementById('msg').style.color = 'red';
-    }
-  }
-
-  async function updatePricing(email, button) {
-    const row = button.closest('tr');
-    const am = parseInt(row.querySelector('.am').value) || 0;
-    const pm = parseInt(row.querySelector('.pm').value) || 0;
-    const full = parseInt(row.querySelector('.full').value) || 0;
-
-    const payload = {
-      email,
-      pricing: { am, pm, full }
-    };
-
-    button.disabled = true;
-    button.innerText = 'Saving...';
-
-    try {
-      const res = await fetch(`${API_BASE}/api/user-custom-price`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      const msg = document.getElementById('msg');
-      if (data.success) {
-        msg.innerText = `✅ Updated pricing for ${email}`;
-        msg.style.color = 'green';
-      } else {
-        msg.innerText = data.message || 'Failed to update';
-        msg.style.color = 'red';
+            tbody.appendChild(tr);
+          });
+        } catch (err) {
+          console.error("Error fetching users:", err);
+          document.getElementById("msg").innerText = "Failed to load users.";
+          document.getElementById("msg").style.color = "red";
+        }
       }
-    } catch (err) {
-      console.error(err);
-      document.getElementById('msg').innerText = 'Server error';
-      document.getElementById('msg').style.color = 'red';
-    }
 
-    button.disabled = false;
-    button.innerText = 'Update';
-  }
+      async function updatePricing(email, button) {
+        const row = button.closest("tr");
+        const am = parseInt(row.querySelector(".am").value) || 0;
+        const pm = parseInt(row.querySelector(".pm").value) || 0;
+        const full = parseInt(row.querySelector(".full").value) || 0;
 
-  fetchUsers();
-</script>
+        const payload = {
+          email,
+          pricing: { am, pm, full },
+        };
 
-</body>
+        button.disabled = true;
+        button.innerText = "Saving...";
+
+        try {
+          const res = await fetch(`${API_BASE}/api/user-custom-price`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          const msg = document.getElementById("msg");
+          if (data.success) {
+            msg.innerText = `✅ Updated pricing for ${email}`;
+            msg.style.color = "green";
+          } else {
+            msg.innerText = data.message || "Failed to update";
+            msg.style.color = "red";
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById("msg").innerText = "Server error";
+          document.getElementById("msg").style.color = "red";
+        }
+
+        button.disabled = false;
+        button.innerText = "Update";
+      }
+
+      fetchUsers();
+    </script>
+  </body>
 </html>
