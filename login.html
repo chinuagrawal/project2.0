@@ -181,7 +181,10 @@
                 class="ri-smartphone-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-white transition-colors z-10"
               ></i>
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="tel"
                 id="mobile"
                 required
                 class="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all peer"
@@ -207,32 +210,45 @@
           <div id="step-otp" class="hidden space-y-6 animate-fade-in-up">
             <div id="otp-inputs" class="flex justify-between gap-2 mt-4">
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="one-time-code"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
               <input
-                type="text"
+                type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 maxlength="1"
                 class="w-12 h-12 text-center bg-white/5 border border-white/10 rounded-lg text-white text-xl focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition-all"
               />
@@ -423,9 +439,31 @@
       let isRegistration = false;
       let verifiedUser = null;
 
-      // Handle OTP Inputs Logic (Auto-focus, Backspace)
+      // Handle OTP Inputs Logic (Auto-focus, Backspace, Paste)
       otpInputs.forEach((input, index) => {
         input.addEventListener("input", (e) => {
+          // Handle Paste of full code
+          if (e.target.value.length > 1) {
+            const pasteData = e.target.value.split("");
+            for (let i = 0; i < otpInputs.length; i++) {
+              if (pasteData[i]) {
+                otpInputs[i].value = pasteData[i];
+              }
+            }
+            // Focus last filled input or last input
+            const lastIndex = Math.min(
+              pasteData.length - 1,
+              otpInputs.length - 1,
+            );
+            otpInputs[lastIndex].focus();
+
+            // Auto-submit if full code
+            if (getOtpValue().length === 6) {
+              verifyOtpBtn.click();
+            }
+            return;
+          }
+
           if (e.target.value.length === 1) {
             if (index < otpInputs.length - 1) {
               otpInputs[index + 1].focus();
@@ -435,6 +473,28 @@
           // Auto-submit if all fields are filled
           const otp = getOtpValue();
           if (otp.length === 6) {
+            verifyOtpBtn.click();
+          }
+        });
+
+        input.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const paste = (e.clipboardData || window.clipboardData).getData(
+            "text",
+          );
+          const pasteData = paste.split("");
+          for (let i = 0; i < otpInputs.length; i++) {
+            if (pasteData[i]) {
+              otpInputs[i].value = pasteData[i];
+            }
+          }
+          const lastIndex = Math.min(
+            pasteData.length - 1,
+            otpInputs.length - 1,
+          );
+          otpInputs[lastIndex].focus();
+
+          if (getOtpValue().length === 6) {
             verifyOtpBtn.click();
           }
         });
@@ -484,6 +544,31 @@
         }, 1000);
       }
 
+      function listenForWebOTP() {
+        if ("OTPCredential" in window) {
+          const ac = new AbortController();
+
+          navigator.credentials
+            .get({
+              otp: { transport: ["sms"] },
+              signal: ac.signal,
+            })
+            .then((otp) => {
+              const code = otp.code;
+              if (code && code.length === 6) {
+                const codeArr = code.split("");
+                otpInputs.forEach((input, i) => {
+                  input.value = codeArr[i];
+                });
+                verifyOtpBtn.click();
+              }
+            })
+            .catch((err) => {
+              console.log("WebOTP Error:", err);
+            });
+        }
+      }
+
       resendOtpBtn.addEventListener("click", function () {
         sendOtpBtn.click();
       });
@@ -523,6 +608,9 @@
 
             // Focus first OTP input
             setTimeout(() => otpInputs[0].focus(), 100);
+
+            // Listen for WebOTP (Auto-fill from SMS)
+            listenForWebOTP();
 
             // Start Resend Timer
             startResendTimer();
