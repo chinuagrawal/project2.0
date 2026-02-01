@@ -2,6 +2,21 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 
+// GET /api/insights/seat-stats (Lightweight for Booking Page)
+router.get("/seat-stats", async (req, res) => {
+  try {
+    const seatStats = await Booking.aggregate([
+      { $match: { status: "paid" } },
+      { $group: { _id: "$seatId", count: { $sum: 1 } } },
+      { $sort: { count: 1 } }, // Least booked first
+    ]);
+    res.json(seatStats);
+  } catch (err) {
+    console.error("Seat Stats Error:", err);
+    res.status(500).json({ message: "Failed to fetch seat stats" });
+  }
+});
+
 // GET /api/insights/dashboard
 router.get("/dashboard", async (req, res) => {
   try {

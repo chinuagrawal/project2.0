@@ -10,7 +10,24 @@ let recentBooking = null;
 window.isExtensionMode = false;
 window.extensionDetails = null; // Holds {seatId, shift, fromDate} for extension
 
+// AI Recommendation Data
+let seatStatsMap = {};
+
 const API_BASE = "https://kanha-backend-yfx1.onrender.com/api";
+
+async function fetchSeatStats() {
+  try {
+    const res = await fetch(
+      "https://kanha-backend-yfx1.onrender.com/api/insights/seat-stats",
+    );
+    if (res.ok) {
+      const stats = await res.json();
+      stats.forEach((s) => (seatStatsMap[s._id] = s.count));
+    }
+  } catch (e) {
+    console.warn("AI recommendation fetch failed", e);
+  }
+}
 
 function formatDate(dateStr) {
   const date = new Date(dateStr);
@@ -817,6 +834,37 @@ function renderSeats() {
       col3.appendChild(seat);
     }
   }
+
+  // ---------------------------------------------------------
+  // 🤖 AI RECOMMENDATION LOGIC
+  // Suggest least booked seats to balance load (only if no restrictions)
+  // ---------------------------------------------------------
+  if (
+    !window.isExtensionMode &&
+    !window.isChangeSeatMode &&
+    !restrictFullyEmptySeats
+  ) {
+    // Find all truly available seats (not booked, not disabled)
+    const availableSeats = Array.from(
+      document.querySelectorAll(".seat.available"),
+    ).filter(
+      (el) =>
+        !el.classList.contains("disabled") && !el.classList.contains("booked"),
+    );
+
+    // Sort by historical booking count (Ascending: 0 bookings first)
+    availableSeats.sort((a, b) => {
+      const countA = seatStatsMap[a.dataset.seatId] || 0;
+      const countB = seatStatsMap[b.dataset.seatId] || 0;
+      return countA - countB;
+    });
+
+    // Mark top 3 as recommended
+    availableSeats.slice(0, 3).forEach((el) => {
+      el.classList.add("recommended");
+      el.title = (el.title || "") + " (AI Recommended: Quiet Spot)";
+    });
+  }
 }
 
 // ⚠️ MODIFIED bookBtn.addEventListener to check the new global flag
@@ -1073,7 +1121,7 @@ bookBtn.addEventListener("click", async () => {
 window.onload = async () => {
   const today = new Date().toISOString().split("T")[0]; // 1. Remove the old URL param logic
   // 2. Call the new logic to determine the mode
-
+  await fetchSeatStats(); // Fetch AI stats first
   await checkAndLoadBookings(); // Set today's date if not in extension mode (where date is pre-set)
 
   if (!startDateInput.value) {
