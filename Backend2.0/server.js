@@ -39,6 +39,7 @@ app.use("/api", require("./routes/student.routes"));
 app.use("/api", require("./routes/profile.routes")); // Added Profile Route // Added Analytics Route
 app.use("/api", require("./routes/outlet.routes"));
 app.use("/api", require("./routes/admin.routes"));
+app.use("/api/insights", require("./routes/insights.routes"));
 
 const blockUserRoute = require("./routes/blockuser");
 app.use("/api", blockUserRoute);

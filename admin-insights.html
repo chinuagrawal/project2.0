@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4a148c" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Insights | Kanha Library</title>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      :root {
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --secondary-500: #ec4899;
+        --secondary-600: #db2777;
+
+        --bg-gradient-start: #e0c3fc;
+        --bg-gradient-end: #8ec5fc;
+
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+
+        --radius-xl: 24px;
+        --radius-lg: 16px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--bg-gradient-start),
+          var(--bg-gradient-end)
+        );
+        min-height: 100vh;
+        color: var(--text-main);
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      h1 i {
+        color: var(--primary-600);
+      }
+
+      .back-btn {
+        text-decoration: none;
+        color: var(--text-main);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.4);
+        padding: 8px 16px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Grid Layout */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--glass-shadow);
+        padding: 24px;
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .card.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .card h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--text-main);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-600);
+      }
+
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* Heatmap specific */
+      .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .seat-box {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .seat-box:hover {
+        transform: scale(1.1);
+        z-index: 10;
+      }
+
+      .seat-box .tooltip {
+        visibility: hidden;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        padding: 5px 10px;
+        border-radius: 6px;
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 0.75rem;
+        z-index: 20;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .seat-box:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Chart Container */
+      .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+      }
+
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e0c3fc;
+        border-top-color: var(--primary-600);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Analyzing Booking Data...</p>
+    </div>
+
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-robot"></i> AI Insights Dashboard</h1>
+        <a href="admin.html" class="back-btn"
+          ><i class="fas fa-arrow-left"></i> Back to Admin</a
+        >
+      </header>
+
+      <div class="dashboard-grid">
+        <!-- Card 1: Peak Booking Dates -->
+        <div class="card full-width">
+          <h2>
+            Monthly Booking Trend (Day 1-31)
+            <i class="fas fa-calendar-alt text-purple-500"></i>
+          </h2>
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 2: Most Demanded Seats -->
+        <div class="card">
+          <h2>
+            Top Demanded Seats <i class="fas fa-crown text-yellow-500"></i>
+          </h2>
+          <div class="chart-container">
+            <canvas id="seatChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 3: Shift Preference -->
+        <div class="card">
+          <h2>Shift Preference <i class="fas fa-sun text-orange-500"></i></h2>
+          <div class="chart-container">
+            <canvas id="shiftChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 4: Payment Modes -->
+        <div class="card">
+          <h2>Payment Modes <i class="fas fa-wallet text-green-500"></i></h2>
+          <div class="chart-container">
+            <canvas id="paymentChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 5: Peak Booking Times -->
+        <div class="card full-width">
+          <h2>
+            Peak Booking Times (24h) <i class="fas fa-clock text-blue-500"></i>
+          </h2>
+          <div class="chart-container">
+            <canvas id="timeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 4: Seat Heatmap -->
+        <div class="card full-width">
+          <h2>
+            Seat Occupancy Heatmap <i class="fas fa-fire text-red-500"></i>
+          </h2>
+          <p class="text-sm text-gray-500 mb-4">
+            Darker color indicates higher booking frequency
+          </p>
+          <div id="heatmap" class="heatmap-grid">
+            <!-- Seats generated by JS -->
+          </div>
+        </div>
+
+        <!-- Card 7: Top Loyal Users -->
+        <div class="card full-width">
+          <h2>Top Loyal Users <i class="fas fa-users text-indigo-500"></i></h2>
+          <div style="overflow-x: auto">
+            <table
+              style="width: 100%; border-collapse: collapse; margin-top: 1rem"
+            >
+              <thead>
+                <tr
+                  style="
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+                    text-align: left;
+                  "
+                >
+                  <th style="padding: 10px">User Email</th>
+                  <th style="padding: 10px">Total Bookings</th>
+                  <th style="padding: 10px">Total Spent</th>
+                </tr>
+              </thead>
+              <tbody id="topUsersTable" style="color: rgba(255, 255, 255, 0.8)">
+                <!-- JS generated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "https://kanha-backend-yfx1.onrender.com/api/insights/dashboard";
+
+      async function fetchInsights() {
+        try {
+          const res = await fetch(API_URL);
+          if (!res.ok) throw new Error("Failed to fetch data");
+          const data = await res.json();
+          renderDashboard(data);
+        } catch (err) {
+          console.error(err);
+          alert("Failed to load insights. Please try again later.");
+        } finally {
+          document.getElementById("loading").style.display = "none";
+        }
+      }
+
+      function renderDashboard(data) {
+        // 1. Monthly Booking Trend (Line Chart)
+        const trendCtx = document.getElementById("trendChart").getContext("2d");
+
+        // Days 1-31
+        const days = Array.from({ length: 31 }, (_, i) => i + 1);
+        const trendData = days.map((day) => {
+          const found = data.bookingTrends.find((t) => t._id === day);
+          return found ? found.count : 0;
+        });
+
+        new Chart(trendCtx, {
+          type: "line",
+          data: {
+            labels: days,
+            datasets: [
+              {
+                label: "Bookings Created",
+                data: trendData,
+                borderColor: "#8b5cf6", // Purple
+                backgroundColor: "rgba(139, 92, 246, 0.1)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Bookings" },
+              },
+              x: { title: { display: true, text: "Day of Month" } },
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: (items) => `Day ${items[0].label}`,
+                },
+              },
+            },
+          },
+        });
+
+        // 3. Peak Time Chart (Bar)
+        const timeCtx = document.getElementById("timeChart").getContext("2d");
+
+        // Prepare 24h data (fill missing hours with 0)
+        const hours = Array.from({ length: 24 }, (_, i) => i);
+        const timeData = hours.map((h) => {
+          const found = data.peakTimes.find((t) => t._id === h);
+          return found ? found.count : 0;
+        });
+
+        new Chart(timeCtx, {
+          type: "line",
+          data: {
+            labels: hours.map((h) => `${h}:00`),
+            datasets: [
+              {
+                label: "Bookings",
+                data: timeData,
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true },
+            },
+          },
+        });
+
+        // 4. Popular Seats (Bar)
+        const seatCtx = document.getElementById("seatChart").getContext("2d");
+        new Chart(seatCtx, {
+          type: "bar",
+          data: {
+            labels: data.popularSeats.map((s) => `Seat ${s._id}`),
+            datasets: [
+              {
+                label: "Bookings",
+                data: data.popularSeats.map((s) => s.count),
+                backgroundColor: "#f59e0b",
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: "y",
+          },
+        });
+
+        // 5. Heatmap
+        renderHeatmap(data.seatHeatmap);
+
+        // 6. Shift Preference (Doughnut)
+        const shiftCtx = document.getElementById("shiftChart").getContext("2d");
+        new Chart(shiftCtx, {
+          type: "doughnut",
+          data: {
+            labels: data.shiftPopularity.map((s) => s._id.toUpperCase()),
+            datasets: [
+              {
+                data: data.shiftPopularity.map((s) => s.count),
+                backgroundColor: ["#f472b6", "#60a5fa", "#a78bfa"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+
+        // 7. Payment Modes (Pie)
+        const payCtx = document.getElementById("paymentChart").getContext("2d");
+        new Chart(payCtx, {
+          type: "pie",
+          data: {
+            labels: data.paymentModeStats.map((p) => p._id.toUpperCase()),
+            datasets: [
+              {
+                data: data.paymentModeStats.map((p) => p.count),
+                backgroundColor: ["#34d399", "#fbbf24", "#9ca3af"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+
+        // 8. Top Loyal Users (Table)
+        const tableBody = document.getElementById("topUsersTable");
+        tableBody.innerHTML = data.topUsers
+          .map(
+            (user) => `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px; color: #fff; font-weight: 500;">${user._id || "Unknown"}</td>
+                <td style="padding: 10px; color: #60a5fa; font-weight: bold;">${user.count}</td>
+                <td style="padding: 10px; color: #34d399; font-weight: bold;">₹${user.totalSpent}</td>
+            </tr>
+        `,
+          )
+          .join("");
+      }
+
+      function renderHeatmap(seatData) {
+        const grid = document.getElementById("heatmap");
+        grid.innerHTML = "";
+
+        // Find max bookings for scaling color
+        const maxCount = Math.max(...seatData.map((s) => s.count), 1);
+
+        // Create 34 seats
+        for (let i = 1; i <= 34; i++) {
+          const seatId = i.toString();
+          const seatInfo = seatData.find((s) => s._id === seatId);
+          const count = seatInfo ? seatInfo.count : 0;
+
+          // Calculate opacity based on count (min 0.2 so it's visible)
+          const intensity = count / maxCount;
+          // Color from light blue to dark blue/purple
+          const bg = `rgba(59, 130, 246, ${0.2 + intensity * 0.8})`;
+
+          const div = document.createElement("div");
+          div.className = "seat-box";
+          div.style.backgroundColor = bg;
+          div.textContent = seatId;
+
+          // Tooltip
+          const tooltip = document.createElement("span");
+          tooltip.className = "tooltip";
+          tooltip.textContent = `${count} bookings`;
+          div.appendChild(tooltip);
+
+          grid.appendChild(div);
+        }
+      }
+
+      // Start
+      fetchInsights();
+    </script>
+  </body>
+</html>

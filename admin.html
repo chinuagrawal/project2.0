@@ -313,6 +313,7 @@
       <a onclick="loadregisteredUsers()">Registered Users</a>
       <a onclick="loadpriceChange()">Price</a>
       <a onclick="loadcustomPrice()">Custom Price</a>
+      <a onclick="loadInsights()">AI Insights</a>
       <a onclick="logout()">Logout</a>
     </div>
 
@@ -490,6 +491,14 @@
       function loadseatChange() {
         const iframe = document.createElement("iframe");
         iframe.src = "seatChange.html";
+        const mainContent = document.getElementById("mainContent");
+        mainContent.innerHTML = "";
+        mainContent.appendChild(iframe);
+      }
+
+      function loadInsights() {
+        const iframe = document.createElement("iframe");
+        iframe.src = "admin-insights.html";
         const mainContent = document.getElementById("mainContent");
         mainContent.innerHTML = "";
         mainContent.appendChild(iframe);
