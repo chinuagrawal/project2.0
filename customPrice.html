@@ -146,14 +146,58 @@
         }
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
   </head>
   <body>
     <h2><i class="fas fa-tags"></i> Custom Pricing for Users</h2>
     <div class="message" id="msg"></div>
+    <div
+      style="
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      "
+    >
+      <strong style="margin-right: 10px">Bulk Action:</strong>
+      <input
+        type="number"
+        id="bulk-am"
+        placeholder="Morning ₹"
+        style="width: 100px"
+      />
+      <input
+        type="number"
+        id="bulk-pm"
+        placeholder="Evening ₹"
+        style="width: 100px"
+      />
+      <input
+        type="number"
+        id="bulk-full"
+        placeholder="Full Day ₹"
+        style="width: 100px"
+      />
+      <button id="btn-apply-bulk" style="background-color: #27ae60">
+        Update Selected
+      </button>
+
+      <div style="flex-grow: 1"></div>
+
+      <button id="btn-export-excel">Export Excel</button>
+      <button id="btn-export-pdf">Export PDF</button>
+    </div>
 
     <table id="users-table">
       <thead>
         <tr>
+          <th><input type="checkbox" id="select-all" /></th>
           <th>#</th>
           <th>Name</th>
           <th>Email</th>
@@ -174,12 +218,13 @@
         window.location.href = "login.html";
       }
 
-      const API_BASE = "https://kanha-backend-yfx1.onrender.com";
+  const API_BASE = 'https://kanha-backend-yfx1.onrender.com';
 
       async function fetchUsers() {
         try {
           const res = await fetch(`${API_BASE}/api/users`);
           const users = await res.json();
+          window.__usersData = users;
           const tbody = document.querySelector("#users-table tbody");
 
           users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -192,6 +237,7 @@
             const full = user.customPricing?.full ?? "";
 
             tr.innerHTML = `
+          <td><input type="checkbox" class="user-select" value="${user.email}"></td>
           <td data-label="#">${index + 1}</td>
           <td data-label="Name">${user.firstName} ${user.lastName}</td>
           <td data-label="Email">${user.email}</td>
@@ -251,6 +297,126 @@
       }
 
       fetchUsers();
+
+      function exportExcel() {
+        const users = Array.isArray(window.__usersData)
+          ? window.__usersData
+          : [];
+        const data = users.map((u) => ({
+          Name: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
+          Email: u.email || "",
+          Mobile: u.mobile || "",
+          Morning: u.customPricing?.am ?? "",
+          Evening: u.customPricing?.pm ?? "",
+          Full: u.customPricing?.full ?? "",
+          Created: u.createdAt
+            ? new Date(u.createdAt).toISOString().slice(0, 10)
+            : "",
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "CustomPricing");
+        const fname = `custom-pricing-${new Date().toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(wb, fname);
+      }
+
+      function exportPDF() {
+        const element = document.getElementById("users-table");
+        const opt = {
+          margin: 10,
+          filename: `custom-pricing-${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.95 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        };
+        html2pdf().from(element).set(opt).save();
+      }
+
+      document
+        .getElementById("btn-export-excel")
+        .addEventListener("click", exportExcel);
+      document
+        .getElementById("btn-export-pdf")
+        .addEventListener("click", exportPDF);
+
+      // --- Select All Logic ---
+      document.getElementById("select-all").addEventListener("change", (e) => {
+        const checked = e.target.checked;
+        document
+          .querySelectorAll(".user-select")
+          .forEach((cb) => (cb.checked = checked));
+      });
+
+      // --- Bulk Apply Logic ---
+      async function applyBulk() {
+        const selected = Array.from(
+          document.querySelectorAll(".user-select:checked"),
+        );
+        if (selected.length === 0) {
+          alert("Please select at least one user.");
+          return;
+        }
+
+        const amVal = document.getElementById("bulk-am").value;
+        const pmVal = document.getElementById("bulk-pm").value;
+        const fullVal = document.getElementById("bulk-full").value;
+
+        const am = Number(amVal) || 0;
+        const pm = Number(pmVal) || 0;
+        const full = Number(fullVal) || 0;
+
+        const updates = selected.map((cb) => ({
+          email: cb.value,
+          pricing: { am, pm, full },
+        }));
+
+        const btn = document.getElementById("btn-apply-bulk");
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Applying...";
+
+        try {
+          const res = await fetch(`${API_BASE}/api/user-custom-price/bulk`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ updates }),
+          });
+
+          let data;
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            data = await res.json();
+          } else {
+            const text = await res.text();
+            throw new Error(
+              "Server returned non-JSON: " + text.substring(0, 50),
+            );
+          }
+
+          const msg = document.getElementById("msg");
+
+          if (res.ok && data.success) {
+            msg.innerText = `✅ Successfully updated ${data.count} users.`;
+            msg.style.color = "green";
+            await fetchUsers();
+            document.getElementById("select-all").checked = false;
+          } else {
+            msg.innerText = data.message || "Failed to bulk update";
+            msg.style.color = "red";
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById("msg").innerText = "Error: " + err.message;
+          document.getElementById("msg").style.color = "red";
+        }
+
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+
+      document
+        .getElementById("btn-apply-bulk")
+        .addEventListener("click", applyBulk);
     </script>
   </body>
 </html>
