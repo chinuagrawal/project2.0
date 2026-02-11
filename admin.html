@@ -368,7 +368,7 @@
       async function updateSeatStats() {
         try {
           const res = await fetch(
-            "https://kanha-backend-yfx1.onrender.com/api/bookings",
+            "https://kanhabackend.onrender.com/api/bookings",
           );
           if (!res.ok) throw new Error("Failed to fetch bookings");
           const bookings = await res.json();

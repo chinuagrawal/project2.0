@@ -240,7 +240,7 @@
       } else {
         // Poll status or single check
         fetch(
-          `https://kanha-backend-yfx1.onrender.com/api/payment/status?txnId=${txnId}`,
+          `https://kanhabackend.onrender.com/api/payment/status?txnId=${txnId}`,
         )
           .then((res) => res.json())
           .then((data) => {

@@ -1,208 +1,218 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4a148c">
+  <head>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4a148c" />
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recent Bookings</title>
-   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-
-    h2 {
-      text-align: center;
-      color: #4a148c;
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #ede7f6;
-      color: #4a148c;
-      font-weight: bold;
-    }
-
-    tr:hover {
-      background-color: #f9f9f9;
-    }
-
-    @media screen and (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recent Bookings</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        background-color: #f4f4f4;
+        color: #333;
       }
 
-      thead {
-        display: none;
+      h2 {
+        text-align: center;
+        color: #4a148c;
+        font-size: 28px;
+        margin-bottom: 20px;
       }
 
-      tr {
-        margin-bottom: 15px;
+      table {
+        width: 100%;
+        border-collapse: collapse;
         background: white;
         border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        padding: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
+      th,
       td {
-        position: relative;
-        padding-left: 50%;
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
         text-align: left;
-        border: none;
-        border-bottom: 1px solid #eee;
+        font-size: 14px;
       }
 
-      td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        top: 12px;
+      th {
+        background-color: #ede7f6;
+        color: #4a148c;
         font-weight: bold;
-        color: #666;
-        font-size: 13px;
-        white-space: nowrap;
       }
 
-      td:last-child {
-        border-bottom: none;
+      tr:hover {
+        background-color: #f9f9f9;
       }
-    }
-  </style>
-</head>
-<body>
 
-<h2>Recent Bookings</h2>
+      @media screen and (max-width: 768px) {
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
 
-<table id="booking-table">
-  <thead>
-    <tr>
-      <th>Seat</th>
-      <th>Name</th>
-      <th>Mobile</th>
-      <th>Email</th>
-      <th>Shift</th>
-      <th>Payment</th>
-      <th>From</th>
-      <th>To</th>
-      <th>Days</th>
-      <th>Booking Date</th> 
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+        thead {
+          display: none;
+        }
 
+        tr {
+          margin-bottom: 15px;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+          padding: 12px;
+        }
 
- <script>
+        td {
+          position: relative;
+          padding-left: 50%;
+          text-align: left;
+          border: none;
+          border-bottom: 1px solid #eee;
+        }
 
+        td::before {
+          content: attr(data-label);
+          position: absolute;
+          left: 15px;
+          top: 12px;
+          font-weight: bold;
+          color: #666;
+          font-size: 13px;
+          white-space: nowrap;
+        }
 
- const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || user.role !== "admin") {
-      alert("Access denied! Admins only.");
-      window.location.href = "login.html";
-    }
-
- function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 'N/A';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = String(d.getFullYear());
-  return `${day}/${month}/${year}`;
-}
-
-
-  async function loadRecentBookings() {
-    const bookingsRes = await fetch("https://kanha-backend-yfx1.onrender.com/api/bookings");
-    const all = await bookingsRes.json();
-    const usersRes = await fetch("https://kanha-backend-yfx1.onrender.com/api/users");
-    const users = await usersRes.json();
-
-    const usersByEmail = {};
-    users.forEach(u => {
-      usersByEmail[u.email] = {
-        name: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
-        mobile: u.mobile || 'N/A'
-      };
-    });
-
-    const grouped = {};
-    all.forEach(b => {
-      const key = `${b.email}_${b.seatId}_${b.shift}`;
-      if (!grouped[key]) {
-        grouped[key] = {
-          email: b.email,
-          seat: b.seatId,
-          shift: b.shift,
-          pay: b.paymentMode,
-          createdAts: [],
-          dates: []
-        };
+        td:last-child {
+          border-bottom: none;
+        }
       }
-      grouped[key].dates.push(b.date);
-      grouped[key].createdAts.push(b.createdAt ? new Date(b.createdAt) : new Date(0)); // fallback to epoch (1970)
-    });
+    </style>
+  </head>
+  <body>
+    <h2>Recent Bookings</h2>
 
-    const sortedGrouped = Object.values(grouped)
-  .map(g => {
-    g.dates.sort();
-    g.from = g.dates[0];
-    g.to = g.dates.at(-1);
-    g.days = Math.ceil((new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24)) + 1;
-    g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
-    return g;
-  })
-  .sort((a, b) => {
-  const timeDiff = b.latestCreated - a.latestCreated;
-  if (timeDiff !== 0) return timeDiff;
-  return new Date(b.from) - new Date(a.from); // DESCENDING
-});
+    <table id="booking-table">
+      <thead>
+        <tr>
+          <th>Seat</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Email</th>
+          <th>Shift</th>
+          <th>Payment</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Days</th>
+          <th>Booking Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
+    <script>
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "admin") {
+        alert("Access denied! Admins only.");
+        window.location.href = "login.html";
+      }
 
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "N/A";
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = String(d.getFullYear());
+        return `${day}/${month}/${year}`;
+      }
 
-    const tbody = document.querySelector("#booking-table tbody");
-    tbody.innerHTML = "";
-    sortedGrouped.forEach(entry => {
-      const user = usersByEmail[entry.email] || { name: entry.email, mobile: 'N/A' };
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
+      async function loadRecentBookings() {
+        const bookingsRes = await fetch(
+          "https://kanhabackend.onrender.com/api/bookings",
+        );
+        const all = await bookingsRes.json();
+        const usersRes = await fetch(
+          "https://kanhabackend.onrender.com/api/users",
+        );
+        const users = await usersRes.json();
+
+        const usersByEmail = {};
+        users.forEach((u) => {
+          usersByEmail[u.email] = {
+            name: `${u.firstName || ""} ${u.lastName || ""}`.trim(),
+            mobile: u.mobile || "N/A",
+          };
+        });
+
+        const grouped = {};
+        all.forEach((b) => {
+          const key = `${b.email}_${b.seatId}_${b.shift}`;
+          if (!grouped[key]) {
+            grouped[key] = {
+              email: b.email,
+              seat: b.seatId,
+              shift: b.shift,
+              pay: b.paymentMode,
+              createdAts: [],
+              dates: [],
+            };
+          }
+          grouped[key].dates.push(b.date);
+          grouped[key].createdAts.push(
+            b.createdAt ? new Date(b.createdAt) : new Date(0),
+          ); // fallback to epoch (1970)
+        });
+
+        const sortedGrouped = Object.values(grouped)
+          .map((g) => {
+            g.dates.sort();
+            g.from = g.dates[0];
+            g.to = g.dates.at(-1);
+            g.days =
+              Math.ceil(
+                (new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24),
+              ) + 1;
+            g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
+            return g;
+          })
+          .sort((a, b) => {
+            const timeDiff = b.latestCreated - a.latestCreated;
+            if (timeDiff !== 0) return timeDiff;
+            return new Date(b.from) - new Date(a.from); // DESCENDING
+          });
+
+        const tbody = document.querySelector("#booking-table tbody");
+        tbody.innerHTML = "";
+        sortedGrouped.forEach((entry) => {
+          const user = usersByEmail[entry.email] || {
+            name: entry.email,
+            mobile: "N/A",
+          };
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
         <td data-label="Seat">${entry.seat}</td>
         <td data-label="Name">${user.name}</td>
         <td data-label="Mobile">${user.mobile}</td>
         <td data-label="Email">${entry.email}</td>
         <td data-label="Shift">${entry.shift}</td>
-        <td data-label="Payment">${entry.pay || 'Online'}</td>
+        <td data-label="Payment">${entry.pay || "Online"}</td>
         <td data-label="From">${formatDate(entry.from)}</td>
         <td data-label="To">${formatDate(entry.to)}</td>
         <td data-label="Days">${entry.days}</td>
         <td data-label="Booking Date">${formatDate(entry.latestCreated)}</td>
       `;
-      tbody.appendChild(tr);
-    });
-  }
+          tbody.appendChild(tr);
+        });
+      }
 
-  loadRecentBookings();
-</script>
-
-</body>
+      loadRecentBookings();
+    </script>
+  </body>
 </html>

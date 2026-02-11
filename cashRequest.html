@@ -1,169 +1,194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Admin - Cash Bookings</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 20px;
-      background: #f8f9fa;
-      color: #333;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      background-color: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #e0e0e0;
-      font-weight: 600;
-      color: #333;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    button {
-      padding: 6px 12px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    /* ✅ Responsive Styles */
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin - Cash Bookings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 20px;
+        background: #f8f9fa;
+        color: #333;
       }
 
-      thead {
-        display: none;
+      h1 {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #2c3e50;
       }
 
-      tr {
-        margin-bottom: 15px;
+      table {
+        border-collapse: collapse;
+        width: 100%;
         background-color: #fff;
-        padding: 12px;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       }
 
+      th,
       td {
-        position: relative;
-        padding-left: 50%;
-        border: none;
-        border-bottom: 1px solid #eee;
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
         font-size: 14px;
       }
 
-      td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        top: 12px;
-        font-weight: bold;
-        color: #555;
+      th {
+        background-color: #e0e0e0;
+        font-weight: 600;
+        color: #333;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      button {
+        padding: 6px 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
         font-size: 13px;
-        white-space: nowrap;
       }
 
-      td:last-child {
-        border-bottom: none;
+      button:hover {
+        background-color: #45a049;
       }
-    }
-  </style>
-</head>
-<body>
-  <h1>Library Admin Panel - Cash Bookings</h1>
-<div style="text-align: right; margin-bottom: 10px;">
-  <button id="clearPendingBtn" style="background:red;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;">
-    Clear All Pending Bookings
-  </button>
-</div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Seat</th>
-        <th>Date</th>
-        <th>Shift</th>
-        <th>Email</th>
-        <th>Amount</th>
-        <th>Action</th>
-      </tr>
-    </thead>
+      /* ✅ Responsive Styles */
+      @media (max-width: 768px) {
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tr {
+          margin-bottom: 15px;
+          background-color: #fff;
+          padding: 12px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        td {
+          position: relative;
+          padding-left: 50%;
+          border: none;
+          border-bottom: 1px solid #eee;
+          font-size: 14px;
+        }
+
+        td::before {
+          content: attr(data-label);
+          position: absolute;
+          left: 15px;
+          top: 12px;
+          font-weight: bold;
+          color: #555;
+          font-size: 13px;
+          white-space: nowrap;
+        }
+
+        td:last-child {
+          border-bottom: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Library Admin Panel - Cash Bookings</h1>
+    <div style="text-align: right; margin-bottom: 10px">
+      <button
+        id="clearPendingBtn"
+        style="
+          background: red;
+          color: white;
+          padding: 10px 15px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        "
+      >
+        Clear All Pending Bookings
+      </button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Seat</th>
+          <th>Date</th>
+          <th>Shift</th>
+          <th>Email</th>
+          <th>Amount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody id="pending-bookings-body"></tbody>
+    </table>
+    <script>
+      document
+        .getElementById("clearPendingBtn")
+        .addEventListener("click", async () => {
+          if (
+            confirm(
+              "Are you sure you want to delete ALL pending bookings? This action cannot be undone.",
+            )
+          ) {
+            try {
+              const res = await fetch(
+                "https://kanhabackend.onrender.com/api/bookings/clear-pending",
+                {
+                  method: "DELETE",
+                },
+              );
+              const data = await res.json();
+              if (data.success) {
+                alert(`✅ Deleted ${data.deletedCount} pending bookings`);
+                location.reload();
+              } else {
+                alert("❌ Failed to clear pending bookings");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("⚠️ Error connecting to server");
+            }
+          }
+        });
 
-  </table>
-  <script>
-
-    document.getElementById('clearPendingBtn').addEventListener('click', async () => {
-  if (confirm("Are you sure you want to delete ALL pending bookings? This action cannot be undone.")) {
-    try {
-      const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/bookings/clear-pending', {
-        method: 'DELETE'
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`✅ Deleted ${data.deletedCount} pending bookings`);
-        location.reload();
-      } else {
-        alert('❌ Failed to clear pending bookings');
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "admin") {
+        alert("Access denied! Admins only.");
+        window.location.href = "login.html";
       }
-    } catch (err) {
-      console.error(err);
-      alert('⚠️ Error connecting to server');
-    }
-  }
-});
 
-     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || user.role !== "admin") {
-      alert("Access denied! Admins only.");
-      window.location.href = "login.html";
-    }
+      async function fetchPendingBookings() {
+        try {
+          const res = await fetch(
+            "https://kanhabackend.onrender.com/api/pending-bookings",
+          );
+          const bookings = await res.json();
 
-    async function fetchPendingBookings() {
-  try {
-    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/pending-bookings');
-    const bookings = await res.json();
+          const tbody = document.getElementById("pending-bookings-body");
+          tbody.innerHTML = "";
 
-    const tbody = document.getElementById('pending-bookings-body');
-    tbody.innerHTML = '';
-
-    bookings.forEach(booking => {
-      const idsString = booking.ids.join(',');
-      const row = document.createElement('tr');
-      row.innerHTML = `
+          bookings.forEach((booking) => {
+            const idsString = booking.ids.join(",");
+            const row = document.createElement("tr");
+            row.innerHTML = `
         <td>${booking.seatId}</td>
         <td>${booking.startDate} ➔ ${booking.endDate}</td>
         <td>${booking.shift}</td>
@@ -171,48 +196,52 @@
         <td>₹ ${booking.amount.toFixed(2)}</td>
         <td><button data-ids="${idsString}" data-amount="${booking.amount}">Mark as Paid</button></td>
       `;
-      tbody.appendChild(row);
-    });
+            tbody.appendChild(row);
+          });
 
-    document.querySelectorAll('button[data-ids]').forEach(button => {
-      button.addEventListener('click', () => {
-        const ids = button.dataset.ids.split(',');
-        const amount = parseFloat(button.dataset.amount);
-        if (confirm(`Confirm you have received ₹${amount.toFixed(2)} in CASH?`)) {
-          markAsPaid(ids);
+          document.querySelectorAll("button[data-ids]").forEach((button) => {
+            button.addEventListener("click", () => {
+              const ids = button.dataset.ids.split(",");
+              const amount = parseFloat(button.dataset.amount);
+              if (
+                confirm(
+                  `Confirm you have received ₹${amount.toFixed(2)} in CASH?`,
+                )
+              ) {
+                markAsPaid(ids);
+              }
+            });
+          });
+        } catch (err) {
+          console.error(err);
+          alert("Failed to load pending bookings");
         }
-      });
-    });
+      }
 
-  } catch (err) {
-    console.error(err);
-    alert('Failed to load pending bookings');
-  }
-}
+      async function markAsPaid(ids) {
+        try {
+          const res = await fetch(
+            "https://kanhabackend.onrender.com/api/mark-paid",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ids }),
+            },
+          );
 
-async function markAsPaid(ids) {
-  try {
-    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/mark-paid', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert('Marked as Paid!');
+          const data = await res.json();
+          if (res.ok) {
+            alert("Marked as Paid!");
+            fetchPendingBookings();
+          } else {
+            alert(data.message || "Failed to update.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error updating payment status.");
+        }
+      }
       fetchPendingBookings();
-    } else {
-      alert(data.message || 'Failed to update.');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Error updating payment status.');
-  }
-}
-fetchPendingBookings();
-
-  </script>
-
-</body>
+    </script>
+  </body>
 </html>
