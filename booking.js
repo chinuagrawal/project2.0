@@ -13,12 +13,12 @@ window.extensionDetails = null; // Holds {seatId, shift, fromDate} for extension
 // AI Recommendation Data
 let seatStatsMap = {};
 
-const API_BASE = "https://kanha-backend-yfx1.onrender.com/api";
+const API_BASE = "https://kanhabackend.onrender.com/api";
 
 async function fetchSeatStats() {
   try {
     const res = await fetch(
-      "https://kanha-backend-yfx1.onrender.com/api/insights/seat-stats",
+      "https://kanhabackend.onrender.com/api/insights/seat-stats",
     );
     if (res.ok) {
       const stats = await res.json();
@@ -429,7 +429,7 @@ async function refreshUserData() {
 
   try {
     const res = await fetch(
-      `https://kanha-backend-yfx1.onrender.com/api/users/me/${oldUser.email}`,
+      `https://kanhabackend.onrender.com/api/users/me/${oldUser.email}`,
     );
     const user = await res.json();
     localStorage.setItem("user", JSON.stringify(user));
@@ -464,14 +464,14 @@ let userBookingsData = []; // <-- REAL USER BOOKINGS SAFE STORAGE
 const amountDisplay = document.getElementById("amount-display");
 let priceSettings = null;
 async function fetchPrices() {
-  const res = await fetch("https://kanha-backend-yfx1.onrender.com/api/prices");
+  const res = await fetch("https://kanhabackend.onrender.com/api/prices");
   priceSettings = await res.json();
   window.priceSettings = priceSettings; // Expose globally for mobile bar logic
 }
 // === After your fetchPrices() definition ===
 
 async function fetchPricesForLabels() {
-  const API_URL = "https://kanha-backend-yfx1.onrender.com/api/prices";
+  const API_URL = "https://kanhabackend.onrender.com/api/prices";
   try {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Failed to fetch prices");
@@ -620,7 +620,7 @@ async function fetchBookings() {
 
   try {
     const res = await fetch(
-      `https://kanha-backend-yfx1.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`,
+      `https://kanhabackend.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`,
     );
     bookings = await res.json();
     renderSeats();
@@ -894,7 +894,7 @@ bookBtn.addEventListener("click", async () => {
       if (!user?.email) throw new Error("Please login.");
 
       const res = await fetch(
-        "https://kanha-backend-yfx1.onrender.com/api/payment/initiate-change-seat",
+        "https://kanhabackend.onrender.com/api/payment/initiate-change-seat",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -998,7 +998,7 @@ bookBtn.addEventListener("click", async () => {
       let amount = basePrice * duration - discount + 100;
 
       const res = await fetch(
-        "https://kanha-backend-yfx1.onrender.com/api/book-cash",
+        "https://kanhabackend.onrender.com/api/book-cash",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1052,7 +1052,7 @@ bookBtn.addEventListener("click", async () => {
     );
 
     const res = await fetch(
-      "https://kanha-backend-yfx1.onrender.com/api/payment/initiate",
+      "https://kanhabackend.onrender.com/api/payment/initiate",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -1,205 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Price Change</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Price Change</title>
 
-  <style>
-  
-  body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #f0f4f8, #e0ecf8);
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #f0f4f8, #e0ecf8);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
 
-form {
-  background: #fff;
-  padding: 25px;
-  width: 100%;
-  max-width: 480px;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-}
+      form {
+        background: #fff;
+        padding: 25px;
+        width: 100%;
+        max-width: 480px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      }
 
-h2 {
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
-}
+      h2 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+      }
 
-h3 {
-  color: #444;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
+      h3 {
+        color: #444;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
 
-label {
-  font-weight: 600;
-  margin-bottom: 5px;
-  display: block;
-  color: #555;
-}
+      label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+        color: #555;
+      }
 
-input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
 
-input[type="number"]:focus {
-  border-color: #4a90e2;
-  outline: none;
-  box-shadow: 0 0 4px rgba(74,144,226,0.3);
-}
+      input[type="number"]:focus {
+        border-color: #4a90e2;
+        outline: none;
+        box-shadow: 0 0 4px rgba(74, 144, 226, 0.3);
+      }
 
-button {
-  background: #4a90e2;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  display: inline-block;
-}
+      button {
+        background: #4a90e2;
+        color: #fff;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        display: inline-block;
+      }
 
-button:hover {
-  background: #3b78c4;
-}
+      button:hover {
+        background: #3b78c4;
+      }
 
-button[type="button"] {
-  background: #6c63ff;
-  margin-bottom: 12px;
-}
+      button[type="button"] {
+        background: #6c63ff;
+        margin-bottom: 12px;
+      }
 
-#offer-container div {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+      #offer-container div {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
 
-#offer-container input {
-  flex: 1;
-}
+      #offer-container input {
+        flex: 1;
+      }
 
-@media (max-width: 600px) {
-  form {
-    padding: 20px;
-    margin: 10px;
-  }
-  #offer-container div {
-    flex-direction: column;
-    gap: 8px;
-  }
-  button {
-    width: 100%;
-  }
-}
+      @media (max-width: 600px) {
+        form {
+          padding: 20px;
+          margin: 10px;
+        }
+        #offer-container div {
+          flex-direction: column;
+          gap: 8px;
+        }
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <form id="price-form">
+      <h2>Update Price & Offers</h2>
+      <label>Morning Shift Price:</label>
+      <input type="number" id="am" /><br />
 
-</style>
+      <label>Evening Shift Price:</label>
+      <input type="number" id="pm" /><br />
 
-</head>
-<body>
-  <form id="price-form">
-  <h2>Update Price & Offers</h2>
-  <label>Morning Shift Price:</label>
-  <input type="number" id="am" /><br />
-  
-  <label>Evening Shift Price:</label>
-  <input type="number" id="pm" /><br />
-  
-  <label>Full Day Price:</label>
-  <input type="number" id="full" /><br /><br />
+      <label>Full Day Price:</label>
+      <input type="number" id="full" /><br /><br />
 
-  <h3>Offers (Duration based ₹ Discounts)</h3>
-  <div id="offer-container">
-    <div>
-      <input type="number" class="duration" placeholder="Months" />
-      <input type="number" class="discount" placeholder="Discount ₹" />
-    </div>
-  </div>
-  <button type="button" onclick="addOffer()">+ Add Offer</button><br /><br />
+      <h3>Offers (Duration based ₹ Discounts)</h3>
+      <div id="offer-container">
+        <div>
+          <input type="number" class="duration" placeholder="Months" />
+          <input type="number" class="discount" placeholder="Discount ₹" />
+        </div>
+      </div>
+      <button type="button" onclick="addOffer()">+ Add Offer</button
+      ><br /><br />
 
-  <h3>Extra Charges</h3>
-  <label>Payment Gateway Fee (%):</label>
-  <input type="number" id="pg-fee" /><br />
+      <h3>Extra Charges</h3>
+      <label>Payment Gateway Fee (%):</label>
+      <input type="number" id="pg-fee" /><br />
 
-  <label>Convenience Fee (₹):</label>
-  <input type="number" id="convenience-fee" /><br /><br />
+      <label>Convenience Fee (₹):</label>
+      <input type="number" id="convenience-fee" /><br /><br />
 
-  <button type="submit">💾 Save</button>
-</form>
+      <button type="submit">💾 Save</button>
+    </form>
 
-<script>
+    <script>
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || user.role !== "admin") {
+        alert("Access denied! Admins only.");
+        window.location.href = "login.html";
+      }
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || user.role !== "admin") {
-      alert("Access denied! Admins only.");
-      window.location.href = "login.html";
-    }
-
-  function addOffer() {
-    const div = document.createElement('div');
-    div.innerHTML = `
+      function addOffer() {
+        const div = document.createElement("div");
+        div.innerHTML = `
       <input type="number" class="duration" placeholder="Months" />
       <input type="number" class="discount" placeholder="Discount ₹" />
     `;
-    document.getElementById('offer-container').appendChild(div);
-  }
+        document.getElementById("offer-container").appendChild(div);
+      }
 
-  document.getElementById('price-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const am = +document.getElementById('am').value;
-    const pm = +document.getElementById('pm').value;
-    const full = +document.getElementById('full').value;
-    const pgFee = +document.getElementById('pg-fee').value;
-    const convenienceFee = +document.getElementById('convenience-fee').value;
+      document
+        .getElementById("price-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const am = +document.getElementById("am").value;
+          const pm = +document.getElementById("pm").value;
+          const full = +document.getElementById("full").value;
+          const pgFee = +document.getElementById("pg-fee").value;
+          const convenienceFee =
+            +document.getElementById("convenience-fee").value;
 
-    const offers = Array.from(document.querySelectorAll('#offer-container div')).map(div => ({
-      duration: +div.querySelector('.duration').value,
-      discount: +div.querySelector('.discount').value
-    }));
+          const offers = Array.from(
+            document.querySelectorAll("#offer-container div"),
+          ).map((div) => ({
+            duration: +div.querySelector(".duration").value,
+            discount: +div.querySelector(".discount").value,
+          }));
 
-    await fetch('https://kanha-backend-yfx1.onrender.com/api/prices', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ am, pm, full, offers, paymentGatewayFeePercent: pgFee, convenienceFee })
-    });
+          await fetch("https://kanhabackend.onrender.com/api/prices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              am,
+              pm,
+              full,
+              offers,
+              paymentGatewayFeePercent: pgFee,
+              convenienceFee,
+            }),
+          });
 
-    alert('✅ Prices updated successfully!');
-  });
+          alert("✅ Prices updated successfully!");
+        });
 
-  window.onload = async () => {
-    const res = await fetch('https://kanha-backend-yfx1.onrender.com/api/prices');
-    const data = await res.json();
-    document.getElementById('am').value = data.am;
-    document.getElementById('pm').value = data.pm;
-    document.getElementById('full').value = data.full;
-    document.getElementById('pg-fee').value = data.paymentGatewayFeePercent || 0;
-    document.getElementById('convenience-fee').value = data.convenienceFee || 0;
+      window.onload = async () => {
+        const res = await fetch("https://kanhabackend.onrender.com/api/prices");
+        const data = await res.json();
+        document.getElementById("am").value = data.am;
+        document.getElementById("pm").value = data.pm;
+        document.getElementById("full").value = data.full;
+        document.getElementById("pg-fee").value =
+          data.paymentGatewayFeePercent || 0;
+        document.getElementById("convenience-fee").value =
+          data.convenienceFee || 0;
 
-    document.getElementById('offer-container').innerHTML = '';
-    data.offers.forEach(offer => {
-      const div = document.createElement('div');
-      div.innerHTML = `
+        document.getElementById("offer-container").innerHTML = "";
+        data.offers.forEach((offer) => {
+          const div = document.createElement("div");
+          div.innerHTML = `
         <input type="number" class="duration" value="${offer.duration}" />
         <input type="number" class="discount" value="${offer.discount}" />
       `;
-      document.getElementById('offer-container').appendChild(div);
-    });
-  };
-</script>
-
-</body>
+          document.getElementById("offer-container").appendChild(div);
+        });
+      };
+    </script>
+  </body>
 </html>

@@ -378,8 +378,8 @@
           const dateStr = document.getElementById("date-picker").value;
 
           const [bookingsRes, usersRes] = await Promise.all([
-            fetch("https://kanha-backend-yfx1.onrender.com/api/bookings"),
-            fetch("https://kanha-backend-yfx1.onrender.com/api/users"),
+            fetch("https://kanhabackend.onrender.com/api/bookings"),
+            fetch("https://kanhabackend.onrender.com/api/users"),
           ]);
 
           const allBookings = await bookingsRes.json();
