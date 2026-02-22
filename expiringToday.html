@@ -177,7 +177,9 @@
         justify-content: center;
         margin-right: 5px;
         text-decoration: none;
-        transition: transform 0.2s;
+        transition:
+          transform 0.2s,
+          opacity 0.2s;
       }
 
       .btn-whatsapp {
@@ -195,6 +197,12 @@
 
       .action-btn:hover {
         transform: translateY(-2px);
+      }
+
+      .action-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
       }
 
       .loading,
@@ -292,12 +300,13 @@
               <th>Student</th>
               <th>Contact</th>
               <th>Shift</th>
+              <th>End Date</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="table-body">
             <tr>
-              <td colspan="5" class="loading">
+              <td colspan="6" class="loading">
                 <i class="fas fa-spinner fa-spin"></i> Loading...
               </td>
             </tr>
@@ -366,6 +375,15 @@
         const parts = dateStr.split("-");
         if (parts.length !== 3) return dateStr;
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+
+      function buildWhatsAppLink(mobile, waMsg) {
+        if (!mobile) return "#";
+        const digits = mobile.toString().replace(/\D/g, "");
+        if (digits.length < 10) return "#";
+        const last10 = digits.slice(-10);
+        const fullNumber = "91" + last10;
+        return `https://wa.me/${fullNumber}?text=${waMsg}`;
       }
 
       // Data Fetching
@@ -494,7 +512,7 @@
       function renderTable(list) {
         const tbody = document.getElementById("table-body");
         if (list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><i class="far fa-calendar-check" style="font-size:2rem; margin-bottom:10px;"></i><p>No bookings expiring on this date matching your filters.</p></td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><i class="far fa-calendar-check" style="font-size:2rem; margin-bottom:10px;"></i><p>No bookings expiring on this date matching your filters.</p></td></tr>`;
           return;
         }
 
@@ -503,11 +521,14 @@
             const waMsg = encodeURIComponent(
               `Hello ${item.name}, your library seat (${item.seat}) booking expires on ${formatDateIN(item.endDate)}. Please renew if you wish to continue.`,
             );
-            const waLink = item.mobile
-              ? `https://wa.me/91${item.mobile}?text=${waMsg}`
-              : "#";
+            const waLink = buildWhatsAppLink(item.mobile, waMsg);
+            const hasValidWhatsApp = waLink !== "#";
             const callLink = item.mobile ? `tel:${item.mobile}` : "#";
             const extendLink = `booking.html?extend=1&seatId=${item.seat}&shift=${item.shift}&fromDate=${item.dates[0]}&toDate=${item.endDate}`;
+            const waDisabledClass = hasValidWhatsApp ? "" : " disabled";
+            const waTitle = hasValidWhatsApp
+              ? "WhatsApp"
+              : "Mobile number missing or invalid";
 
             return `
               <tr>
@@ -518,9 +539,10 @@
                 </td>
                 <td>${item.mobile || "N/A"}</td>
                 <td><span style="text-transform:uppercase; font-weight:bold; font-size:0.8rem; background:#f1f5f9; padding:2px 6px; rounded:4px;">${item.shift}</span></td>
+                <td>${formatDateIN(item.endDate)}</td>
                 <td>
                   <div style="display:flex;">
-                    <a href="${waLink}" target="_blank" class="action-btn btn-whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="${waLink}" target="_blank" class="action-btn btn-whatsapp${waDisabledClass}" title="${waTitle}"><i class="fab fa-whatsapp"></i></a>
                     <a href="${callLink}" class="action-btn btn-call" title="Call"><i class="fas fa-phone"></i></a>
                     <a href="${extendLink}" target="_top" class="action-btn btn-extend" title="Extend"><i class="fas fa-clock"></i></a>
                   </div>
