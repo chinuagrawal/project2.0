@@ -1124,17 +1124,11 @@ window.onload = async () => {
   await fetchSeatStats(); // Fetch AI stats first
   await checkAndLoadBookings(); // Set today's date if not in extension mode (where date is pre-set)
 
-  if (!startDateInput.value) {
+  if (!startDateInput.value || startDateInput.value === "NaN-NaN-NaN") {
     startDateInput.value = today;
-    startDateInput.min = today;
-  } else if (startDateInput.value === "NaN-NaN-NaN") {
-    // Failsafe for invalid date calculation during extension setup
-    startDateInput.value = today;
-    startDateInput.min = today;
-  } else {
-    // Ensure the date picker respects the calculated start date
-    startDateInput.min = startDateInput.value;
-  } // 3. Fetch bookings and update UI based on the determined mode
+  }
+
+  // 3. Fetch bookings and update UI based on the determined mode
   // Ensure the correct seat is selected after seat map renders in EXTEND mode
 
   if (window.isExtensionMode) {
