@@ -31,44 +31,60 @@ if (bellBtn) {
       if (!res.ok) return;
 
       const bookings = await res.json();
+      if (bookings.length === 0) return;
 
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // 1. Find the latest (expiry) date among all bookings
+      const expiryDateStr = bookings.reduce((max, b) => {
+        return b.date > max ? b.date : max;
+      }, bookings[0].date);
+
+      const expiryDate = new Date(expiryDateStr);
+      expiryDate.setHours(0, 0, 0, 0);
+
+      const diffTime = expiryDate - today;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
       const notifications = [];
 
-      bookings.forEach((b) => {
-        const bookingDate = new Date(b.date);
-        const diffTime = bookingDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // 2. Only notify if the REAL expiry is in the next 2 days (as requested)
+      if (diffDays >= 0 && diffDays <= 2) {
+        const msg =
+          diffDays === 0
+            ? `Your library seat booking expires TODAY!`
+            : `Your library seat booking expires in ${diffDays} day${diffDays > 1 ? "s" : ""}. Please renew.`;
 
-        if (diffDays >= 0 && diffDays <= 3) {
-          const msg = `Your seat for ${b.date} expires in ${diffDays === 0 ? "today" : diffDays + " day(s)"}.`;
-          notifications.push({
-            msg: msg,
-            urgent: diffDays <= 1,
-          });
+        notifications.push({
+          msg: msg,
+          urgent: diffDays <= 1,
+        });
 
-          // Trigger System Notification
-          if (Notification.permission === "granted") {
-            // Use Service Worker if available for better mobile support
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-              navigator.serviceWorker.ready.then((registration) => {
-                registration.showNotification("Kanha Library Alert", {
-                  body: msg,
-                  icon: "/images/logo.jpg", // Ensure this exists or fallback
-                  badge: "/images/icon-512.png",
-                  vibrate: [200, 100, 200],
-                });
-              });
-            } else {
-              // Fallback to standard Notification API
-              new Notification("Kanha Library Alert", {
-                body: msg,
-                icon: "/images/logo.jpg",
-              });
-            }
+        // Trigger System Notification
+        if (Notification.permission === "granted") {
+          const notificationTitle = "Kanha Library Expiry Alert";
+          const notificationOptions = {
+            body: msg,
+            icon: "/images/logo.jpg",
+            badge: "/images/icon-512.png",
+            vibrate: [200, 100, 200],
+            tag: "expiry-alert", // Tag prevents duplicate notifications
+            renotify: true,
+          };
+
+          if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.showNotification(
+                notificationTitle,
+                notificationOptions,
+              );
+            });
+          } else {
+            new Notification(notificationTitle, notificationOptions);
           }
         }
-      });
+      }
 
       if (notifications.length > 0) {
         notifList.innerHTML = notifications

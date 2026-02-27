@@ -7,37 +7,43 @@ const { makeVoiceCall } = require("./twilioService");
 cron.schedule("0 10 * * *", async () => {
   console.log("⏰ Running automated expiry voice call check...");
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+  // Target: 2 days from now (as requested by user)
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + 2);
+  const targetDateStr = targetDate.toISOString().split("T")[0];
+
+  // Also need "day after target" to check if it's the actual expiry
+  const dayAfterTarget = new Date(targetDate);
+  dayAfterTarget.setDate(dayAfterTarget.getDate() + 1);
+  const dayAfterTargetStr = dayAfterTarget.toISOString().split("T")[0];
 
   try {
-    // 1. Find all active bookings for TODAY
-    const activeBookingsToday = await Booking.find({
-      date: todayStr,
+    // 1. Find all active bookings for the TARGET DATE (2 days from now)
+    const activeBookingsOnTarget = await Booking.find({
+      date: targetDateStr,
       status: "paid",
     });
 
     // 2. Group by email to ensure unique users
     const distinctEmails = [
-      ...new Set(activeBookingsToday.map((b) => b.email)),
+      ...new Set(activeBookingsOnTarget.map((b) => b.email)),
     ];
 
     console.log(
-      `🔎 Found ${activeBookingsToday.length} expiring seats today. Unique users: ${distinctEmails.length}`,
+      `🔎 Found ${activeBookingsOnTarget.length} seats booked for ${targetDateStr}. Unique users: ${distinctEmails.length}`,
     );
 
     for (const email of distinctEmails) {
-      // 3. Check if this user has ANY booking for TOMORROW
-      const hasBookingTomorrow = await Booking.findOne({
+      // 3. Check if this user has ANY booking for the day AFTER target
+      const hasBookingAfterTarget = await Booking.findOne({
         email: email,
-        date: tomorrowStr,
+        date: dayAfterTargetStr,
         status: "paid",
       });
 
-      // 4. Only call if they have NO booking for tomorrow
-      if (!hasBookingTomorrow) {
+      // 4. Only call if they have NO booking after target
+      // This means targetDateStr (2 days from now) is their FINAL day.
+      if (!hasBookingAfterTarget) {
         const user = await User.findOne({ email });
 
         if (user && user.mobile) {
@@ -48,8 +54,8 @@ cron.schedule("0 10 * * *", async () => {
             phone = "+" + phone;
 
           if (phone.length >= 12) {
-            console.log(`🔔 calling ${user.firstName}...`);
-            const msg = `Hello ${user.firstName}, your Kanha Library seat expires today. Please renew to keep your seat.`;
+            console.log(`🔔 calling ${user.firstName} (Expiry in 2 days)...`);
+            const msg = `Hello ${user.firstName}, your Kanha Library seat expires in two days. Please renew to keep your seat.`;
             await makeVoiceCall(phone, msg);
           }
         }
