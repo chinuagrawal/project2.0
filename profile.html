@@ -14,6 +14,37 @@
         font-family: "Poppins", sans-serif;
         background-color: #f8fafc;
       }
+      /* Toast Styles */
+      #toast-container {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+      }
+      .toast {
+        background: #1e293b;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: slideUpFade 0.3s ease-out forwards;
+      }
+      @keyframes slideUpFade {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
     </style>
   </head>
   <body class="bg-slate-50">
@@ -143,6 +174,8 @@
       </form>
     </div>
 
+    <div id="toast-container"></div>
+
     <script>
       const BASE_URL = "https://kanhabackend.onrender.com/api";
 
@@ -166,11 +199,24 @@
       const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
       document.getElementById("referralLink").value = refLink;
 
+      function showToast(message) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transition = "opacity 0.3s ease";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
       window.copyReferral = () => {
         const input = document.getElementById("referralLink");
         input.select();
         document.execCommand("copy");
-        alert("Referral link copied!");
+        showToast("Referral link copied!");
       };
 
       // Wallet Balance
@@ -217,9 +263,9 @@
                 data.user.firstName[0] + data.user.lastName[0]
               ).toUpperCase();
 
-              alert("Profile Updated Successfully!");
+              showToast("Profile Updated Successfully!");
             } else {
-              alert(data.message || "Update failed");
+              showToast(data.message || "Update failed");
             }
           } catch (err) {
             console.error(err);
