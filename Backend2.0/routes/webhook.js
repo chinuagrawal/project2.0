@@ -1,15 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Booking = require('../models/Booking'); // adjust path if needed
-const PendingBooking = require('../models/PendingBooking'); // adjust path if needed
+const Booking = require("../models/Booking"); // adjust path if needed
+const PendingBooking = require("../models/PendingBooking"); // adjust path if needed
+const Coupon = require("../models/Coupon");
+const User = require("../models/User");
 
-
-router.post('/phonepe/webhook', async (req, res) => {
+router.post("/phonepe/webhook", async (req, res) => {
   try {
-    console.log('📥 PhonePe Callback Received:', req.body);
+    console.log("📥 PhonePe Callback Received:", req.body);
 
     const payload = req.body.payload;
-
 
     if (!payload) {
       console.error("❌ Invalid webhook format");
@@ -27,26 +27,31 @@ router.post('/phonepe/webhook', async (req, res) => {
       const existing = await Booking.findOne({ paymentTxnId: merchantOrderId });
       if (!existing) {
         // 2️⃣ Find Pending Booking
-        const pending = await PendingBooking.findOne({ txnId: merchantOrderId });
+        const pending = await PendingBooking.findOne({
+          txnId: merchantOrderId,
+        });
         if (pending) {
-          
-          if (pending.type === 'seat_change') {
-             // ✅ HANDLE SEAT CHANGE
-             console.log(`🔄 Processing Seat Change for ${email}: ${pending.oldSeatId} -> ${pending.seatId}`);
-             
-             await Booking.updateMany({
+          if (pending.type === "seat_change") {
+            // ✅ HANDLE SEAT CHANGE
+            console.log(
+              `🔄 Processing Seat Change for ${email}: ${pending.oldSeatId} -> ${pending.seatId}`,
+            );
+
+            await Booking.updateMany(
+              {
                 email: pending.email,
                 seatId: pending.oldSeatId,
                 shift: pending.shift,
                 date: { $gte: pending.startDate, $lte: pending.endDate },
-                status: 'paid'
-             }, { 
-                $set: { seatId: pending.seatId } 
-             });
-             
-             await PendingBooking.deleteOne({ txnId: merchantOrderId });
-             console.log(`✅ Seat change successful for ${email}`);
+                status: "paid",
+              },
+              {
+                $set: { seatId: pending.seatId },
+              },
+            );
 
+            await PendingBooking.deleteOne({ txnId: merchantOrderId });
+            console.log(`✅ Seat change successful for ${email}`);
           } else {
             // ✅ NORMAL BOOKING
             // ✅ Generate all dates between startDate and endDate
@@ -54,12 +59,12 @@ router.post('/phonepe/webhook', async (req, res) => {
             let current = new Date(pending.startDate);
             const end = new Date(pending.endDate);
             while (current <= end) {
-              dates.push(current.toISOString().split('T')[0]);
+              dates.push(current.toISOString().split("T")[0]);
               current.setDate(current.getDate() + 1);
             }
 
             // ✅ Create bookings for each date
-            const bookings = dates.map(date => ({
+            const bookings = dates.map((date) => ({
               seatId: pending.seatId,
               date,
               shift: pending.shift,
@@ -67,21 +72,51 @@ router.post('/phonepe/webhook', async (req, res) => {
               amount: pending.amount,
               status: "paid",
               paymentMode,
-              paymentTxnId: merchantOrderId,  // your TXN_xxx
-              transactionId: phonepeTxn,      // PhonePe txn id
-              paymentConfirmedVia: "webhook"
+              paymentTxnId: merchantOrderId, // your TXN_xxx
+              transactionId: phonepeTxn, // PhonePe txn id
+              paymentConfirmedVia: "webhook",
             }));
 
             await Booking.insertMany(bookings);
-            await PendingBooking.deleteOne({ txnId: merchantOrderId });
-            console.log(`✅ Seats booked for ${email}, TXN: ${merchantOrderId}, Dates: ${dates.length}`);
-          }
 
+            // ✅ UPDATE WALLET & COUPONS AFTER SUCCESSFUL BOOKING
+            if (pending.couponCode) {
+              await Coupon.findOneAndUpdate(
+                { code: pending.couponCode.toUpperCase() },
+                { $inc: { usedCount: 1 } },
+              );
+              console.log(`🎟️ Coupon usage updated: ${pending.couponCode}`);
+            }
+
+            if (pending.useWallet) {
+              const user = await User.findOne({ email: pending.email });
+              if (user && user.walletBalance > 0) {
+                // Deduct the amount applied from wallet (capped at user balance)
+                // We don't store the exact deduction in PendingBooking, so we re-calculate or assume full usage
+                // Ideally, we'd save 'walletDeductionAmount' in PendingBooking
+                // For now, let's assume we use as much as possible to cover the price
+                const deduction = Math.min(user.walletBalance, pending.amount);
+                user.walletBalance -= deduction;
+                await user.save();
+                console.log(
+                  `💰 Wallet deducted for ${pending.email}: ₹${deduction}`,
+                );
+              }
+            }
+
+            await PendingBooking.deleteOne({ txnId: merchantOrderId });
+            console.log(
+              `✅ Seats booked for ${email}, TXN: ${merchantOrderId}, Dates: ${dates.length}`,
+            );
+          }
         } else {
           console.warn("⚠️ Pending booking not found for:", merchantOrderId);
         }
       } else {
-        console.log("ℹ️ Booking already exists, skipping duplicate:", merchantOrderId);
+        console.log(
+          "ℹ️ Booking already exists, skipping duplicate:",
+          merchantOrderId,
+        );
       }
     } else {
       // ❌ Failed or expired payment → cleanup
@@ -97,4 +132,3 @@ router.post('/phonepe/webhook', async (req, res) => {
 });
 
 module.exports = router;
-

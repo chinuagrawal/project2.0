@@ -25,6 +25,7 @@ mongoose
 // Models & Routes
 const Booking = require("./models/Booking");
 const User = require("./models/User");
+const Coupon = require("./models/Coupon");
 const authRoutes = require("./routes/auth");
 const webhookRoutes = require("./routes/webhook");
 const customPriceRoute = require("./routes/customprice");
@@ -35,9 +36,7 @@ app.use("/api", customPriceRoute);
 const deleteUserRoute = require("./routes/deleteuser");
 app.use("/api", deleteUserRoute);
 
-
 app.use("/api", require("./routes/profile.routes")); // Added Profile Route // Added Analytics Route
-
 
 app.use("/api/insights", require("./routes/insights.routes"));
 app.use("/api/chat", require("./routes/chatbot.routes"));
@@ -167,7 +166,16 @@ app.get("/api/bookings", async (req, res) => {
 
 // routes/initiate.js or in your main route file
 app.post("/api/payment/initiate", async (req, res) => {
-  const { amount, email, seatId, shift, startDate, endDate } = req.body;
+  const {
+    amount,
+    email,
+    seatId,
+    shift,
+    startDate,
+    endDate,
+    couponCode,
+    useWallet,
+  } = req.body;
   const merchantTransactionId = "TXN_" + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
   const baseUrl = process.env.PHONEPE_BASE_URL;
@@ -187,6 +195,8 @@ app.post("/api/payment/initiate", async (req, res) => {
       startDate,
       endDate,
       shift,
+      couponCode,
+      useWallet,
     });
 
     // ✅ Get PhonePe token
@@ -340,7 +350,16 @@ app.post("/api/payment/callback", (req, res) => {
 
 // Book seat via cash (pending status)
 app.post("/api/book-cash", async (req, res) => {
-  const { seatId, startDate, endDate, shift, email, duration } = req.body;
+  const {
+    seatId,
+    startDate,
+    endDate,
+    shift,
+    email,
+    duration,
+    couponCode,
+    useWallet,
+  } = req.body;
   const months = parseInt(duration);
   const baseAmount = shift === "full" ? 800 : 600;
   const amount = baseAmount * months;
@@ -385,6 +404,8 @@ app.post("/api/book-cash", async (req, res) => {
     paymentMode: "cash",
     status: "pending",
     amount,
+    couponCode,
+    useWallet,
   }));
   await Booking.insertMany(bookings);
   res.json({ success: true });
@@ -397,6 +418,29 @@ app.post("/api/mark-paid", async (req, res) => {
     return res.status(400).json({ message: "Booking IDs required" });
 
   try {
+    const bookings = await Booking.find({ _id: { $in: ids } });
+    if (bookings.length > 0) {
+      const first = bookings[0];
+
+      // ✅ Handle Coupon increment
+      if (first.couponCode) {
+        await Coupon.findOneAndUpdate(
+          { code: first.couponCode.toUpperCase() },
+          { $inc: { usedCount: 1 } },
+        );
+      }
+
+      // ✅ Handle Wallet deduction
+      if (first.useWallet) {
+        const user = await User.findOne({ email: first.email });
+        if (user && user.walletBalance > 0) {
+          const deduction = Math.min(user.walletBalance, first.amount);
+          user.walletBalance -= deduction;
+          await user.save();
+        }
+      }
+    }
+
     await Booking.updateMany(
       { _id: { $in: ids } },
       { $set: { status: "paid" } },
