@@ -1184,18 +1184,25 @@ window.onload = async () => {
           }),
         });
 
-        const data = await res.json();
         if (res.ok) {
+          const data = await res.json();
           appliedCoupon = { code, ...data };
           couponMsg.style.display = "block";
           couponMsg.style.color = "#16a34a";
           couponMsg.textContent = `Coupon applied! You saved ₹${data.value}${data.type === "percent" ? "%" : ""}`;
           updateAmount();
         } else {
+          let msg = "Invalid coupon";
+          try {
+            const data = await res.json();
+            msg = data.message || msg;
+          } catch (e) {
+            console.error("Non-JSON error:", await res.text());
+          }
           appliedCoupon = null;
           couponMsg.style.display = "block";
           couponMsg.style.color = "#ef4444";
-          couponMsg.textContent = data.message || "Invalid coupon";
+          couponMsg.textContent = msg;
           updateAmount();
         }
       } catch (err) {

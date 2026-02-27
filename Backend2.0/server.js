@@ -48,6 +48,9 @@ app.use("/api", blockUserRoute);
 const pendingDeleteRoutes = require("./routes/deletepending");
 app.use("/api", pendingDeleteRoutes);
 
+const couponRoutes = require("./routes/coupons");
+app.use("/api/coupons", couponRoutes);
+
 // ✅ Initialize Scheduler
 require("./utils/scheduler");
 

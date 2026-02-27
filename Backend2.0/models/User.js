@@ -1,33 +1,38 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName:  { type: String, required: true },
-  gender:    { type: String, required: true },
-  mobile:    { type: String, required: true, unique: true },
-  email:     { type: String, required: true, unique: true },
-  password:  { type: String, required: true },
-  role:      { type: String, enum: ['user', 'admin'], default: 'user' },
-  blocked: { type: Boolean, default: false }, // ✅ NEW
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    gender: { type: String, required: true },
+    mobile: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    blocked: { type: Boolean, default: false }, // ✅ NEW
+    walletBalance: { type: Number, default: 0 },
+    referralCode: { type: String, unique: true },
+    referredBy: { type: String }, // Email of the person who referred them
 
-  // In userSchema
-resetPasswordToken: String,
-resetPasswordExpires: Date,
+    // In userSchema
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
 
-  customPricing: {
-    am: Number,
-    pm: Number,
-    full: Number,
-    offers: [
-      {
-        duration: Number,
-        discount: Number
-      }
-    ],
-    paymentGatewayFeePercent: Number,
-    convenienceFee: Number
-  }
-}, { timestamps: true });
+    customPricing: {
+      am: Number,
+      pm: Number,
+      full: Number,
+      offers: [
+        {
+          duration: Number,
+          discount: Number,
+        },
+      ],
+      paymentGatewayFeePercent: Number,
+      convenienceFee: Number,
+    },
+  },
+  { timestamps: true },
+);
 
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);
