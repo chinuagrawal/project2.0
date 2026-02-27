@@ -342,29 +342,30 @@ function setNewBookingMode() {
   bookBtn.textContent = "Pay";
   document.getElementById("mobile-book-btn").textContent = "Pay";
 
-  // Add the "Switch to EXTEND" button
-  const btnContainer = document.createElement("div");
-  btnContainer.id = "action-buttons-container";
-  btnContainer.style.display = "flex";
-  btnContainer.style.justifyContent = "center";
-  btnContainer.style.width = "100%";
-  btnContainer.style.marginTop = "10px";
-
-  const newBookingBtn = createSwitchButton("Extend Seat", "extend");
-  newBookingBtn.style.margin = "0"; // Override CSS margin
-  btnContainer.appendChild(newBookingBtn);
-
-  // Remove Change Seat button if exists
+  // Clean up existing buttons/containers first
   const existingContainer = document.getElementById("action-buttons-container");
   const existingChange = document.getElementById("change-seat-btn");
-
   if (existingContainer) existingContainer.remove();
   if (existingChange) existingChange.remove();
 
-  // Place below the H1 title
-  const h1 = document.querySelector("h1");
-  if (h1 && h1.parentNode) {
-    h1.parentNode.insertBefore(btnContainer, h1.nextSibling);
+  // Add the "Switch to EXTEND" button ONLY if user has existing bookings
+  if (userBookingsData && userBookingsData.length > 0) {
+    const btnContainer = document.createElement("div");
+    btnContainer.id = "action-buttons-container";
+    btnContainer.style.display = "flex";
+    btnContainer.style.justifyContent = "center";
+    btnContainer.style.width = "100%";
+    btnContainer.style.marginTop = "10px";
+
+    const extendBtn = createSwitchButton("Extend Seat", "extend");
+    extendBtn.style.margin = "0"; // Override CSS margin
+    btnContainer.appendChild(extendBtn);
+
+    // Place below the H1 title
+    const h1 = document.querySelector("h1");
+    if (h1 && h1.parentNode) {
+      h1.parentNode.insertBefore(btnContainer, h1.nextSibling);
+    }
   }
 }
 
