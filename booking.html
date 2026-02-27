@@ -1030,6 +1030,69 @@
 
         <div class="seat-map" id="seat-map"></div>
 
+        <!-- Wallet & Coupon Section -->
+        <div
+          id="wallet-coupon-section"
+          style="
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+          "
+        >
+          <div
+            id="wallet-display"
+            style="
+              display: none;
+              background: #f0fdf4;
+              padding: 12px;
+              border-radius: 12px;
+              border: 1px solid #bbf7d0;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 8px">
+              <i class="fas fa-wallet" style="color: #16a34a"></i>
+              <span style="font-weight: 500; color: #166534"
+                >Wallet Balance</span
+              >
+            </div>
+            <span
+              id="wallet-balance-amount"
+              style="font-weight: 700; color: #166534"
+              >₹ 0</span
+            >
+          </div>
+
+          <div class="coupon-container" style="display: flex; gap: 10px">
+            <input
+              type="text"
+              id="coupon-input"
+              placeholder="Enter Coupon Code"
+              style="flex: 1; margin-bottom: 0"
+            />
+            <button
+              id="apply-coupon-btn"
+              style="
+                width: auto;
+                padding: 0 20px;
+                margin-top: 0;
+                background: #4f46e5;
+                border-radius: 10px;
+                color: white;
+                border: none;
+                font-weight: 600;
+                cursor: pointer;
+              "
+            >
+              Apply
+            </button>
+          </div>
+          <div id="coupon-msg" style="font-size: 0.85rem; display: none"></div>
+        </div>
+
         <div class="amount-display">
           <div id="amount-display">
             <!-- Price breakdown will be injected here -->
@@ -1082,6 +1145,5 @@
       </div>
       <button id="mobile-book-btn" class="mobile-book-btn">Pay</button>
     </div>
-
   </body>
 </html>

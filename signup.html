@@ -758,6 +758,13 @@
       const btnText = qs("#btn-text");
       const btnSpinner = qs("#btn-spinner");
 
+      // Referral Capture
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get("ref");
+      if (referralCode) {
+        showToast(`Referral code ${referralCode} applied!`, "success");
+      }
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -817,6 +824,7 @@
                 mobile,
                 password,
                 confirmPassword,
+                referralCode, // Added referral code
               }),
             },
           );

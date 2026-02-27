@@ -438,6 +438,13 @@
       let isRegistration = false;
       let verifiedUser = null;
 
+      // Referral Capture
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get("ref");
+      if (referralCode) {
+        showToast(`Referral code ${referralCode} applied!`, "success");
+      }
+
       // Helper to fill OTP inputs
       function fillOTPInputs(code) {
         const cleanCode = code ? code.toString().replace(/\D/g, "") : "";
@@ -720,6 +727,7 @@
                 firstName: firstName,
                 lastName: lastName,
                 gender: gender,
+                referralCode: referralCode, // Pass referral code if present
               }),
             },
           );

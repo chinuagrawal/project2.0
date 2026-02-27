@@ -15,6 +15,40 @@ let seatStatsMap = {};
 
 const API_BASE = "https://kanhabackend.onrender.com/api";
 
+// Wallet & Coupon State
+let walletBalance = 0;
+let appliedCoupon = null;
+
+async function fetchWalletBalance() {
+  const userData = localStorage.getItem("user");
+  if (!userData) return;
+  const user = JSON.parse(userData);
+
+  try {
+    const res = await fetch(`${API_BASE}/users/me/${user.email}`);
+    if (res.ok) {
+      const data = await res.json();
+      walletBalance = data.walletBalance || 0;
+      updateWalletUI();
+    }
+  } catch (err) {
+    console.error("Error fetching wallet balance:", err);
+  }
+}
+
+function updateWalletUI() {
+  const walletDisplay = document.getElementById("wallet-display");
+  const walletAmount = document.getElementById("wallet-balance-amount");
+  if (walletDisplay && walletAmount) {
+    if (walletBalance > 0) {
+      walletDisplay.style.display = "flex";
+      walletAmount.textContent = `₹ ${walletBalance}`;
+    } else {
+      walletDisplay.style.display = "none";
+    }
+  }
+}
+
 async function fetchSeatStats() {
   try {
     const res = await fetch(
@@ -569,27 +603,51 @@ async function updateAmount() {
   const convenienceFee =
     paymentMode === "cash" ? 20 : priceSettings.convenienceFee;
 
-  const { subtotal, pgFee, convenience, total } = getTotalAmount(
-    basePrice,
-    duration,
-    discount,
-    pgPercent,
-    convenienceFee,
-  );
+  const {
+    subtotal,
+    pgFee,
+    convenience,
+    total: initialTotal,
+  } = getTotalAmount(basePrice, duration, discount, pgPercent, convenienceFee);
+
+  let finalTotal = initialTotal;
+  let couponDiscount = 0;
+  let walletDeduction = 0;
+
+  // 1. Apply Coupon first
+  if (appliedCoupon) {
+    if (appliedCoupon.type === "fixed") {
+      couponDiscount = appliedCoupon.value;
+    } else if (appliedCoupon.type === "percent") {
+      couponDiscount = Math.round((subtotal * appliedCoupon.value) / 100);
+    }
+    finalTotal -= couponDiscount;
+  }
+
+  // 2. Apply Wallet deduction (only if there's still a balance needed)
+  if (walletBalance > 0 && finalTotal > 0) {
+    walletDeduction = Math.min(walletBalance, finalTotal);
+    finalTotal -= walletDeduction;
+  }
+
+  // 3. Ensure total is not negative
+  finalTotal = Math.max(0, finalTotal);
 
   amountDisplay.innerHTML = `
     <div class="price-breakdown">
       <div><span>Base Price</span> <span>₹${basePrice} × ${duration} months</span></div>
       <div><span>Subtotal</span> <span>₹${basePrice * duration}</span></div>
       <div><span>Discount</span> <span class="discount">– ₹${discount}</span></div>
+      ${couponDiscount > 0 ? `<div><span>Coupon (${appliedCoupon.code})</span> <span class="discount">– ₹${couponDiscount}</span></div>` : ""}
       <div><span>Convenience Fee</span> <span>+ ₹${convenience}</span></div>
       <div><span>PG Fee (${pgPercent}%)</span> <span>+ ₹${pgFee}</span></div>
+      ${walletDeduction > 0 ? `<div style="color: #166534; font-weight: 600;"><span>Wallet Applied</span> <span>– ₹${walletDeduction}</span></div>` : ""}
       <hr>
-      <div class="total"><span>Total Amount</span> <span>₹${total}</span></div>
+      <div class="total"><span>Total Amount</span> <span>₹${finalTotal}</span></div>
     </div>
   `;
-  updateMobileBarAmount(total);
-  if (bookBtn) bookBtn.dataset.amount = total;
+  updateMobileBarAmount(finalTotal);
+  if (bookBtn) bookBtn.dataset.amount = finalTotal;
 }
 
 function calculateEndDate(start, months) {
@@ -984,18 +1042,7 @@ bookBtn.addEventListener("click", async () => {
 
     if (paymentMode === "cash") {
       // ... (Cash booking logic) ...
-      if (!priceSettings) await fetchPrices();
-
-      let basePrice;
-      if (user?.customPricing && user.customPricing[shift]) {
-        basePrice = user.customPricing[shift];
-      } else {
-        basePrice =
-          shift === "full" ? priceSettings.full : priceSettings[shift];
-      }
-
-      const discount = getDiscount(duration);
-      let amount = basePrice * duration - discount + 100;
+      const amount = parseFloat(bookBtn.dataset.amount);
 
       const res = await fetch(
         "https://kanhabackend.onrender.com/api/book-cash",
@@ -1011,6 +1058,8 @@ bookBtn.addEventListener("click", async () => {
             duration,
             amount,
             isExtension: window.isExtensionMode,
+            couponCode: appliedCoupon ? appliedCoupon.code : null,
+            useWallet: walletBalance > 0,
           }),
         },
       );
@@ -1033,23 +1082,7 @@ bookBtn.addEventListener("click", async () => {
     }
 
     // 🟣 Online booking via PhonePe
-    if (!priceSettings) await fetchPrices();
-    let basePrice;
-
-    if (user?.customPricing && user.customPricing[shift]) {
-      basePrice = user.customPricing[shift];
-    } else {
-      basePrice = shift === "full" ? priceSettings.full : priceSettings[shift];
-    }
-
-    const discount = getDiscount(months);
-    const { total: amount } = getTotalAmount(
-      basePrice,
-      months,
-      discount,
-      priceSettings.paymentGatewayFeePercent,
-      priceSettings.convenienceFee,
-    );
+    const amount = parseFloat(bookBtn.dataset.amount);
 
     const res = await fetch(
       "https://kanhabackend.onrender.com/api/payment/initiate",
@@ -1064,6 +1097,8 @@ bookBtn.addEventListener("click", async () => {
           startDate,
           endDate,
           isExtension: window.isExtensionMode,
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
+          useWallet: walletBalance > 0,
         }),
       },
     );
@@ -1122,7 +1157,55 @@ window.onload = async () => {
   const today = new Date().toISOString().split("T")[0]; // 1. Remove the old URL param logic
   // 2. Call the new logic to determine the mode
   await fetchSeatStats(); // Fetch AI stats first
+  await fetchWalletBalance(); // Fetch user wallet
   await checkAndLoadBookings(); // Set today's date if not in extension mode (where date is pre-set)
+
+  // Coupon Logic
+  const applyCouponBtn = document.getElementById("apply-coupon-btn");
+  const couponInput = document.getElementById("coupon-input");
+  const couponMsg = document.getElementById("coupon-msg");
+
+  if (applyCouponBtn) {
+    applyCouponBtn.addEventListener("click", async () => {
+      const code = couponInput.value.trim().toUpperCase();
+      if (!code) return;
+
+      applyCouponBtn.disabled = true;
+      applyCouponBtn.textContent = "Checking...";
+
+      try {
+        const res = await fetch(`${API_BASE}/coupons/validate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            email: JSON.parse(localStorage.getItem("user")).email,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          appliedCoupon = { code, ...data };
+          couponMsg.style.display = "block";
+          couponMsg.style.color = "#16a34a";
+          couponMsg.textContent = `Coupon applied! You saved ₹${data.value}${data.type === "percent" ? "%" : ""}`;
+          updateAmount();
+        } else {
+          appliedCoupon = null;
+          couponMsg.style.display = "block";
+          couponMsg.style.color = "#ef4444";
+          couponMsg.textContent = data.message || "Invalid coupon";
+          updateAmount();
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error validating coupon");
+      } finally {
+        applyCouponBtn.disabled = false;
+        applyCouponBtn.textContent = "Apply";
+      }
+    });
+  }
 
   if (!startDateInput.value || startDateInput.value === "NaN-NaN-NaN") {
     startDateInput.value = today;
