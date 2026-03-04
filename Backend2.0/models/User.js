@@ -31,6 +31,17 @@ const userSchema = new mongoose.Schema(
       paymentGatewayFeePercent: Number,
       convenienceFee: Number,
     },
+
+    // ✅ Autopay Settings
+    autopay: {
+      active: { type: Boolean, default: false },
+      paymentToken: String, // Stored after first successful PhonePe payment
+      subscriptionDetails: {
+        seatId: String,
+        shift: String,
+        duration: Number,
+      },
+    },
   },
   { timestamps: true },
 );

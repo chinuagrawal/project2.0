@@ -75,6 +75,7 @@ router.post("/phonepe/webhook", async (req, res) => {
               paymentTxnId: merchantOrderId, // your TXN_xxx
               transactionId: phonepeTxn, // PhonePe txn id
               paymentConfirmedVia: "webhook",
+              autopayActive: pending.enableAutopay,
             }));
 
             await Booking.insertMany(bookings);
@@ -88,20 +89,37 @@ router.post("/phonepe/webhook", async (req, res) => {
               console.log(`🎟️ Coupon usage updated: ${pending.couponCode}`);
             }
 
-            if (pending.useWallet) {
-              const user = await User.findOne({ email: pending.email });
-              if (user && user.walletBalance > 0) {
-                // Deduct the amount applied from wallet (capped at user balance)
-                // We don't store the exact deduction in PendingBooking, so we re-calculate or assume full usage
-                // Ideally, we'd save 'walletDeductionAmount' in PendingBooking
-                // For now, let's assume we use as much as possible to cover the price
+            const user = await User.findOne({ email: pending.email });
+            if (user) {
+              // ✅ HANDLE AUTOPAY SETUP
+              if (pending.enableAutopay) {
+                user.autopay = {
+                  active: true,
+                  paymentToken: phonepeTxn, // In real scenario, use a specific recurrent token from PG
+                  subscriptionDetails: {
+                    seatId: pending.seatId,
+                    shift: pending.shift,
+                    duration:
+                      Math.round(
+                        (new Date(pending.endDate) -
+                          new Date(pending.startDate)) /
+                          (1000 * 60 * 60 * 24 * 30),
+                      ) || 1, // approximate duration in months
+                  },
+                };
+                console.log(`✅ Autopay enabled for ${pending.email}`);
+              }
+
+              // ✅ HANDLE WALLET DEDUCTION
+              if (pending.useWallet && user.walletBalance > 0) {
                 const deduction = Math.min(user.walletBalance, pending.amount);
                 user.walletBalance -= deduction;
-                await user.save();
                 console.log(
                   `💰 Wallet deducted for ${pending.email}: ₹${deduction}`,
                 );
               }
+
+              await user.save();
             }
 
             await PendingBooking.deleteOne({ txnId: merchantOrderId });

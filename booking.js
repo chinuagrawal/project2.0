@@ -1040,6 +1040,8 @@ bookBtn.addEventListener("click", async () => {
     const paymentMode = document.querySelector(
       'input[name="paymentMode"]:checked',
     ).value;
+    const enableAutopay =
+      document.getElementById("autopay-checkbox")?.checked || false;
 
     if (paymentMode === "cash") {
       // ... (Cash booking logic) ...
@@ -1061,6 +1063,7 @@ bookBtn.addEventListener("click", async () => {
             isExtension: window.isExtensionMode,
             couponCode: appliedCoupon ? appliedCoupon.code : null,
             useWallet: walletBalance > 0,
+            enableAutopay,
           }),
         },
       );
@@ -1100,6 +1103,7 @@ bookBtn.addEventListener("click", async () => {
           isExtension: window.isExtensionMode,
           couponCode: appliedCoupon ? appliedCoupon.code : null,
           useWallet: walletBalance > 0,
+          enableAutopay,
         }),
       },
     );

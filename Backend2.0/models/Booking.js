@@ -17,6 +17,7 @@ const bookingSchema = new mongoose.Schema(
     // ✅ New Fields for Coupons & Wallet
     couponCode: String,
     useWallet: { type: Boolean, default: false },
+    autopayActive: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

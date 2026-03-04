@@ -52,6 +52,7 @@ app.use("/api/coupons", couponRoutes);
 
 // ✅ Initialize Scheduler
 require("./utils/scheduler");
+require("./utils/renewalScheduler");
 
 const extendRoutes = require("./routes/extend");
 const PendingBooking = require("./models/PendingBooking");
@@ -135,6 +136,21 @@ const getPhonePeAccessToken = async () => {
   return response.data.access_token;
 };
 
+// ✅ Autopay Cancel Endpoint
+app.post("/api/autopay/cancel", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.autopay.active = false;
+    await user.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Endpoint: Available seats
 app.get("/api/available-seats", async (req, res) => {
   try {
@@ -175,6 +191,7 @@ app.post("/api/payment/initiate", async (req, res) => {
     endDate,
     couponCode,
     useWallet,
+    enableAutopay,
   } = req.body;
   const merchantTransactionId = "TXN_" + Date.now();
   const merchantId = process.env.PHONEPE_MERCHANT_ID;
@@ -197,6 +214,7 @@ app.post("/api/payment/initiate", async (req, res) => {
       shift,
       couponCode,
       useWallet,
+      enableAutopay,
     });
 
     // ✅ Get PhonePe token
@@ -359,6 +377,7 @@ app.post("/api/book-cash", async (req, res) => {
     duration,
     couponCode,
     useWallet,
+    enableAutopay,
   } = req.body;
   const months = parseInt(duration);
   const baseAmount = shift === "full" ? 800 : 600;
@@ -406,6 +425,7 @@ app.post("/api/book-cash", async (req, res) => {
     amount,
     couponCode,
     useWallet,
+    autopayActive: enableAutopay,
   }));
   await Booking.insertMany(bookings);
   res.json({ success: true });

@@ -21,6 +21,7 @@ const pendingBookingSchema = new mongoose.Schema(
     // ✅ New Fields for Coupons & Wallet
     couponCode: String,
     useWallet: { type: Boolean, default: false },
+    enableAutopay: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

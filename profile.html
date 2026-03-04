@@ -139,6 +139,33 @@
         </div>
       </div>
 
+      <!-- Autopay Section -->
+      <div
+        id="autopaySection"
+        class="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-200 hidden"
+      >
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-bold text-blue-800 flex items-center gap-2">
+            <i class="fas fa-sync-alt text-blue-500"></i>
+            Autopay Active
+          </h3>
+          <span
+            class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-wider"
+            >Active</span
+          >
+        </div>
+        <p class="text-[11px] text-blue-600 mb-4" id="autopayDetails">
+          Your seat will be automatically renewed for 1 month before expiry.
+        </p>
+        <button
+          onclick="cancelAutopay()"
+          id="cancelAutopayBtn"
+          class="w-full bg-white border border-red-200 text-red-500 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors"
+        >
+          Cancel Autopay
+        </button>
+      </div>
+
       <form id="profileForm" class="space-y-5">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1"
@@ -220,19 +247,63 @@
       };
 
       // Wallet Balance
-      async function fetchWallet() {
+      async function fetchUserExtraInfo() {
         try {
           const res = await fetch(`${BASE_URL}/users/me/${user.email}`);
           if (res.ok) {
             const data = await res.json();
             document.getElementById("walletBalance").innerText =
               `₹ ${data.walletBalance || 0}`;
+
+            // ✅ Handle Autopay display
+            const autopaySection = document.getElementById("autopaySection");
+            if (data.autopay && data.autopay.active) {
+              autopaySection.classList.remove("hidden");
+              const details = data.autopay.subscriptionDetails;
+              document.getElementById("autopayDetails").innerText =
+                `Seat ${details.seatId} (${details.shift}) will be automatically renewed for ${details.duration} month${details.duration > 1 ? "s" : ""} 2 days before expiry.`;
+            } else {
+              autopaySection.classList.add("hidden");
+            }
           }
         } catch (err) {
           console.error(err);
         }
       }
-      fetchWallet();
+      fetchUserExtraInfo();
+
+      window.cancelAutopay = async () => {
+        if (
+          !confirm(
+            "Are you sure you want to cancel Autopay? You will have to renew manually next time.",
+          )
+        )
+          return;
+
+        const btn = document.getElementById("cancelAutopayBtn");
+        btn.disabled = true;
+        btn.innerText = "Cancelling...";
+
+        try {
+          const res = await fetch(`${BASE_URL}/autopay/cancel`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email }),
+          });
+
+          if (res.ok) {
+            showToast("Autopay Cancelled Successfully!");
+            document.getElementById("autopaySection").classList.add("hidden");
+          } else {
+            showToast("Failed to cancel Autopay.");
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          btn.disabled = false;
+          btn.innerText = "Cancel Autopay";
+        }
+      };
 
       document
         .getElementById("profileForm")
