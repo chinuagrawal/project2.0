@@ -684,7 +684,7 @@ async function fetchBookings() {
     bookings = await res.json();
     renderSeats();
   } catch (err) {
-    alert("Failed to load seat bookings");
+    
   }
 }
 
