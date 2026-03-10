@@ -58,13 +58,17 @@ function getDateStringsBetween(fromDateStr, toDateStr) {
 /* ---------- Route ---------- */
 /**
  * POST /change-seat
- * body: { email, fromDate, toDate, shifts: ['am'|'pm'|'full'], newSeatId, force?: boolean }
+ * body: { email, fromDate, toDate, shifts: ['am'|'pm'|'full'], newSeatId?, newShift?, force?: boolean }
  */
 router.post('/change-seat', async (req, res) => {
-  const { email, fromDate, toDate, shifts, newSeatId, force } = req.body;
+  const { email, fromDate, toDate, shifts, newSeatId, newShift, force } = req.body;
 
-  if (!email || !fromDate || !toDate || !Array.isArray(shifts) || shifts.length === 0 || !newSeatId) {
-    return res.status(400).json({ message: 'Missing required fields: email, fromDate, toDate, shifts[], newSeatId' });
+  if (!email || !fromDate || !toDate || !Array.isArray(shifts) || shifts.length === 0) {
+    return res.status(400).json({ message: 'Missing required fields: email, fromDate, toDate, shifts[]' });
+  }
+
+  if (!newSeatId && !newShift) {
+    return res.status(400).json({ message: 'Provide at least a newSeatId or a newShift to change.' });
   }
 
   try {
@@ -85,14 +89,33 @@ router.post('/change-seat', async (req, res) => {
       return res.status(404).json({ message: 'No bookings found for this user in the selected range & shifts' });
     }
 
-    // 2) find paid conflicts on newSeatId by other users
-    const conflicts = await Booking.find({
-      seatId: String(newSeatId),
+    // 2) find paid conflicts on target (newSeatId and/or newShift) by other users
+    const targetSeatId = newSeatId || userBookings[0].seatId; // if not changing seat, use current
+    const targetShift = newShift || null; // if not changing shift, it varies per booking
+
+    const conflictQuery = {
       date: { $in: dates },
-      shift: { $in: shifts },
       status: 'paid',
       email: { $ne: email }
-    }).lean();
+    };
+
+    if (newSeatId) {
+      conflictQuery.seatId = String(newSeatId);
+    } else {
+      // if only changing shift, we check conflicts on the SAME seat the user already has
+      // but wait, userBookings might have different seats? (unlikely but possible)
+      // for simplicity, if newSeatId is not provided, we check conflicts on each booking's current seat
+      // this is complex for a single query. Let's assume most users have 1 seat for the range.
+      conflictQuery.seatId = { $in: [...new Set(userBookings.map(b => b.seatId))] };
+    }
+
+    if (newShift) {
+      conflictQuery.shift = newShift;
+    } else {
+      conflictQuery.shift = { $in: shifts };
+    }
+
+    const conflicts = await Booking.find(conflictQuery).lean();
 
     if (conflicts.length > 0 && !force) {
       const conflictSummary = conflicts.map(c => ({
@@ -103,7 +126,7 @@ router.post('/change-seat', async (req, res) => {
         email: c.email
       }));
       return res.status(409).json({
-        message: 'Conflicts found for the requested seat (set force=true to override).',
+        message: 'Conflicts found for the requested change (set force=true to override).',
         conflictCount: conflictSummary.length,
         conflicts: conflictSummary
       });
@@ -122,10 +145,14 @@ router.post('/change-seat', async (req, res) => {
         deletedCount = delRes.deletedCount || 0;
       }
 
+      const updateData = { updatedAt: new Date() };
+      if (newSeatId) updateData.seatId = String(newSeatId);
+      if (newShift) updateData.shift = newShift;
+
       const bookingIds = userBookings.map(b => b._id);
       const updateRes = await Booking.updateMany(
         { _id: { $in: bookingIds } },
-        { $set: { seatId: String(newSeatId), updatedAt: new Date() } }
+        { $set: updateData }
       ).session(session);
 
       updatedCount = updateRes.modifiedCount ?? updateRes.nModified ?? 0;
@@ -135,13 +162,14 @@ router.post('/change-seat', async (req, res) => {
         try {
           await Audit.create([{
             admin: req.user?.email || 'admin',
-            action: 'change_seat',
+            action: 'change_seat_or_shift',
             details: {
               movedUser: email,
               fromDate,
               toDate,
-              shifts,
-              newSeatId: String(newSeatId),
+              oldShifts: shifts,
+              newShift: newShift || 'unchanged',
+              newSeatId: newSeatId ? String(newSeatId) : 'unchanged',
               force: !!force,
               movedCount: bookingIds.length,
               conflictsDeleted: deletedCount
@@ -157,7 +185,7 @@ router.post('/change-seat', async (req, res) => {
       session.endSession();
 
       return res.json({
-        message: 'Seat change successful',
+        message: 'Change successful',
         movedBookings: bookingIds.length,
         updatedBookings: updatedCount,
         conflictsHandled: deletedCount
