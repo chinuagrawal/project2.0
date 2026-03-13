@@ -1045,56 +1045,52 @@
             style="
               display: none;
               background: #f0fdf4;
-              padding: 12px;
+              padding: 12px 16px;
               border-radius: 12px;
               border: 1px solid #bbf7d0;
               justify-content: space-between;
               align-items: center;
             "
           >
-            <div style="display: flex; align-items: center; gap: 8px">
-              <i class="fas fa-wallet" style="color: #16a34a"></i>
-              <span style="font-weight: 500; color: #166534"
-                >Wallet Balance</span
-              >
-            </div>
             <div style="display: flex; align-items: center; gap: 10px">
-              <span
-                id="wallet-balance-amount"
-                style="font-weight: 700; color: #166534"
-                >₹ 0</span
-              >
-              <label class="switch" style="display: flex; align-items: center">
-                <input type="checkbox" id="use-wallet-checkbox" checked />
-                <span
-                  class="slider round"
-                  style="
-                    position: relative;
-                    display: inline-block;
-                    width: 34px;
-                    height: 20px;
-                    background-color: #ccc;
-                    border-radius: 34px;
-                    cursor: pointer;
-                  "
-                >
-                  <span
-                    style="
-                      position: absolute;
-                      content: &quot;&quot;;
-                      height: 14px;
-                      width: 14px;
-                      left: 3px;
-                      bottom: 3px;
-                      background-color: white;
-                      border-radius: 50%;
-                      transition: 0.4s;
-                    "
-                  ></span>
-                </span>
+              <div style="background: #dcfce7; padding: 8px; border-radius: 10px;">
+                <i class="fas fa-wallet" style="color: #16a34a; font-size: 1rem;"></i>
+              </div>
+              <span style="font-weight: 600; color: #166534; font-size: 0.9rem;">Wallet Balance</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span id="wallet-balance-amount" style="font-weight: 800; color: #166534; font-size: 1rem;">₹ 0</span>
+              
+              <!-- Clean Toggle Switch -->
+              <label style="position: relative; display: inline-block; width: 44px; height: 22px; margin: 0;">
+                <input type="checkbox" id="use-wallet-checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                <span class="wallet-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 22px;"></span>
               </label>
             </div>
           </div>
+
+          <style>
+            /* Custom CSS for the toggle switch */
+            #use-wallet-checkbox:checked + .wallet-slider {
+              background-color: #22c55e;
+            }
+            .wallet-slider:before {
+              position: absolute;
+              content: "";
+              height: 16px;
+              width: 16px;
+              left: 3px;
+              bottom: 3px;
+              background-color: white;
+              transition: .3s;
+              border-radius: 50%;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            #use-wallet-checkbox:checked + .wallet-slider:before {
+              transform: translateX(22px);
+            }
+          </style>
 
           <div
             class="coupon-wrapper"
