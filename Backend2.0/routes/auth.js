@@ -85,11 +85,11 @@ router.post("/signup", async (req, res) => {
 
         if (referrer) {
           newUser.referredBy = referrer.email;
-          newUser.walletBalance = 50;
-          referrer.walletBalance = (referrer.walletBalance || 0) + 50;
-          await referrer.save();
+          newUser.walletBalance = 50; // New user still gets bonus
+          // referrer.walletBalance = (referrer.walletBalance || 0) + 50; // REMOVED: Referrer gets only on booking
+          // await referrer.save();
           console.log(
-            `✅ Referral success: ${referrer.email} referred ${newUser.email}`,
+            `✅ Referral recorded: ${referrer.email} referred ${newUser.email}. Referrer will get bonus on booking.`,
           );
         } else {
           console.log(`⚠️ Referrer not found for code: ${cleanRefCode}`);
@@ -258,11 +258,11 @@ router.post("/signup-otp", async (req, res) => {
 
         if (referrer) {
           newUser.referredBy = referrer.email;
-          newUser.walletBalance = 50;
-          referrer.walletBalance = (referrer.walletBalance || 0) + 50;
-          await referrer.save();
+          newUser.walletBalance = 50; // New user still gets bonus
+          // referrer.walletBalance = (referrer.walletBalance || 0) + 50; // REMOVED: Referrer gets only on booking
+          // await referrer.save();
           console.log(
-            `✅ Referral success (OTP): ${referrer.email} referred ${newUser.email}`,
+            `✅ Referral recorded (OTP): ${referrer.email} referred ${newUser.email}. Referrer will get bonus on booking.`,
           );
         } else {
           console.log(`⚠️ Referrer not found (OTP) for code: ${cleanRefCode}`);

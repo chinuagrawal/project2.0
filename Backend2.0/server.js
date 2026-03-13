@@ -459,6 +459,21 @@ app.post("/api/mark-paid", async (req, res) => {
           await user.save();
         }
       }
+
+      // ✅ NEW: REFERRER BONUS ON FIRST BOOKING (Cash)
+      const user = await User.findOne({ email: first.email });
+      if (user && user.referredBy && !user.referralBonusPaid) {
+        const referrer = await User.findOne({ email: user.referredBy });
+        if (referrer) {
+          referrer.walletBalance = (referrer.walletBalance || 0) + 50;
+          await referrer.save();
+          user.referralBonusPaid = true;
+          await user.save();
+          console.log(
+            `🎁 Referrer ${referrer.email} awarded ₹50 for ${user.email}'s first cash booking`,
+          );
+        }
+      }
     }
 
     await Booking.updateMany(

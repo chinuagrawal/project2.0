@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     walletBalance: { type: Number, default: 0 },
     referralCode: { type: String, unique: true },
     referredBy: { type: String }, // Email of the person who referred them
+    referralBonusPaid: { type: Boolean, default: false }, // Whether the referrer has been paid for this user
 
     // In userSchema
     resetPasswordToken: String,

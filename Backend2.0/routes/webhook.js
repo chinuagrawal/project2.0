@@ -119,6 +119,19 @@ router.post("/phonepe/webhook", async (req, res) => {
                 );
               }
 
+              // ✅ NEW: REFERRER BONUS ON FIRST BOOKING
+              if (user.referredBy && !user.referralBonusPaid) {
+                const referrer = await User.findOne({ email: user.referredBy });
+                if (referrer) {
+                  referrer.walletBalance = (referrer.walletBalance || 0) + 50;
+                  await referrer.save();
+                  user.referralBonusPaid = true;
+                  console.log(
+                    `🎁 Referrer ${referrer.email} awarded ₹50 for ${user.email}'s first booking`,
+                  );
+                }
+              }
+
               await user.save();
             }
 
