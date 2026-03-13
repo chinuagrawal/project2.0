@@ -73,15 +73,27 @@ router.post("/signup", async (req, res) => {
     });
 
     // If referred by someone, give both ₹50
-    if (referralCode) {
-      const referrer = await User.findOne({
-        referralCode: referralCode.toUpperCase(),
-      });
-      if (referrer) {
-        newUser.referredBy = referrer.email;
-        newUser.walletBalance = 50;
-        referrer.walletBalance = (referrer.walletBalance || 0) + 50;
-        await referrer.save();
+    if (referralCode && referralCode.length >= 6) {
+      // Sanitize incoming code (just in case)
+      const cleanRefCode = referralCode.replace("+91", "").replace(/\D/g, "");
+      console.log(`🔎 Checking referral code: ${cleanRefCode}`);
+
+      if (cleanRefCode) {
+        const referrer = await User.findOne({
+          referralCode: cleanRefCode,
+        });
+
+        if (referrer) {
+          newUser.referredBy = referrer.email;
+          newUser.walletBalance = 50;
+          referrer.walletBalance = (referrer.walletBalance || 0) + 50;
+          await referrer.save();
+          console.log(
+            `✅ Referral success: ${referrer.email} referred ${newUser.email}`,
+          );
+        } else {
+          console.log(`⚠️ Referrer not found for code: ${cleanRefCode}`);
+        }
       }
     }
 
@@ -234,15 +246,27 @@ router.post("/signup-otp", async (req, res) => {
       walletBalance: 0,
     });
 
-    if (referralCode) {
-      const referrer = await User.findOne({
-        referralCode: referralCode.toUpperCase(),
-      });
-      if (referrer) {
-        newUser.referredBy = referrer.email;
-        newUser.walletBalance = 50;
-        referrer.walletBalance = (referrer.walletBalance || 0) + 50;
-        await referrer.save();
+    if (referralCode && referralCode.length >= 6) {
+      // Sanitize incoming code (just in case)
+      const cleanRefCode = referralCode.replace("+91", "").replace(/\D/g, "");
+      console.log(`🔎 Checking referral code (OTP): ${cleanRefCode}`);
+
+      if (cleanRefCode) {
+        const referrer = await User.findOne({
+          referralCode: cleanRefCode,
+        });
+
+        if (referrer) {
+          newUser.referredBy = referrer.email;
+          newUser.walletBalance = 50;
+          referrer.walletBalance = (referrer.walletBalance || 0) + 50;
+          await referrer.save();
+          console.log(
+            `✅ Referral success (OTP): ${referrer.email} referred ${newUser.email}`,
+          );
+        } else {
+          console.log(`⚠️ Referrer not found (OTP) for code: ${cleanRefCode}`);
+        }
       }
     }
 

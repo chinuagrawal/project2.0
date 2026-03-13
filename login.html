@@ -441,6 +441,7 @@
       // Referral Capture
       const urlParams = new URLSearchParams(window.location.search);
       const referralCode = urlParams.get("ref");
+      console.log("🔗 Referral code captured:", referralCode);
       if (referralCode) {
         showToast(`Referral code ${referralCode} applied!`, "success");
       }
@@ -713,6 +714,11 @@
         const names = fullname.split(" ");
         const firstName = names[0];
         const lastName = names.slice(1).join(" ") || "."; // Default dot if no last name
+
+        console.log("📤 Sending registration data with ref:", {
+          mobile: verifiedUser.phoneNumber,
+          referralCode: referralCode,
+        });
 
         try {
           const res = await fetch(
