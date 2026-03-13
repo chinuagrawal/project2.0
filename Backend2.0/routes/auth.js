@@ -58,10 +58,8 @@ router.post("/signup", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newReferralCode = Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+    // Use mobile number as referral code (sanitized)
+    const newReferralCode = mobile.replace("+91", "").replace(/\D/g, "");
 
     const newUser = new User({
       firstName,
@@ -119,18 +117,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
 
     if (!user.referralCode) {
-      user.referralCode = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
-      await user.save();
-    }
-
-    if (!user.referralCode) {
-      user.referralCode = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
+      user.referralCode = user.mobile.replace("+91", "").replace(/\D/g, "");
       await user.save();
     }
 
@@ -180,10 +167,7 @@ router.post("/login-otp", async (req, res) => {
     }
 
     if (!user.referralCode) {
-      user.referralCode = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
+      user.referralCode = user.mobile.replace("+91", "").replace(/\D/g, "");
       await user.save();
     }
 
@@ -236,10 +220,8 @@ router.post("/signup-otp", async (req, res) => {
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
     const dummyEmail = `${mobile.replace("+", "")}@kanhalib.com`;
 
-    const newReferralCode = Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+    // Use mobile number as referral code (sanitized)
+    const newReferralCode = mobile.replace("+91", "").replace(/\D/g, "");
 
     const newUser = new User({
       firstName,
