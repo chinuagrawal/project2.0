@@ -862,6 +862,50 @@
           pointer-events: none;
         "
       >
+        <!-- Wallet Balance Display (Zomato style) -->
+        <div
+          id="headerWalletBtn"
+          style="
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px;
+            padding: 0 12px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            pointer-events: auto;
+            transition: all 0.2s;
+          "
+          onclick="openReferralModal()"
+        >
+          <div
+            style="
+              background: #16a34a;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i class="fas fa-wallet" style="font-size: 12px; color: white"></i>
+          </div>
+          <span
+            id="headerWalletBalance"
+            style="
+              font-weight: 700;
+              color: #166534;
+              font-size: 0.9rem;
+              font-family: &quot;Poppins&quot;, sans-serif;
+            "
+            >₹ 0</span
+          >
+        </div>
+
         <!-- Notification Bell -->
         <div style="position: relative; pointer-events: auto">
           <button
@@ -1053,19 +1097,56 @@
             "
           >
             <div style="display: flex; align-items: center; gap: 10px">
-              <div style="background: #dcfce7; padding: 8px; border-radius: 10px;">
-                <i class="fas fa-wallet" style="color: #16a34a; font-size: 1rem;"></i>
+              <div
+                style="background: #dcfce7; padding: 8px; border-radius: 10px"
+              >
+                <i
+                  class="fas fa-wallet"
+                  style="color: #16a34a; font-size: 1rem"
+                ></i>
               </div>
-              <span style="font-weight: 600; color: #166534; font-size: 0.9rem;">Wallet Balance</span>
+              <span style="font-weight: 600; color: #166534; font-size: 0.9rem"
+                >Wallet Balance</span
+              >
             </div>
-            
+
             <div style="display: flex; align-items: center; gap: 12px">
-              <span id="wallet-balance-amount" style="font-weight: 800; color: #166534; font-size: 1rem;">₹ 0</span>
-              
+              <span
+                id="wallet-balance-amount"
+                style="font-weight: 800; color: #166534; font-size: 1rem"
+                >₹ 0</span
+              >
+
               <!-- Clean Toggle Switch -->
-              <label style="position: relative; display: inline-block; width: 44px; height: 22px; margin: 0;">
-                <input type="checkbox" id="use-wallet-checkbox" checked style="opacity: 0; width: 0; height: 0;">
-                <span class="wallet-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 22px;"></span>
+              <label
+                style="
+                  position: relative;
+                  display: inline-block;
+                  width: 44px;
+                  height: 22px;
+                  margin: 0;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="use-wallet-checkbox"
+                  checked
+                  style="opacity: 0; width: 0; height: 0"
+                />
+                <span
+                  class="wallet-slider"
+                  style="
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #cbd5e1;
+                    transition: 0.3s;
+                    border-radius: 22px;
+                  "
+                ></span>
               </label>
             </div>
           </div>
@@ -1083,9 +1164,9 @@
               left: 3px;
               bottom: 3px;
               background-color: white;
-              transition: .3s;
+              transition: 0.3s;
               border-radius: 50%;
-              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }
             #use-wallet-checkbox:checked + .wallet-slider:before {
               transform: translateX(22px);
@@ -1269,5 +1350,160 @@
       </div>
       <button id="mobile-book-btn" class="mobile-book-btn">Pay</button>
     </div>
+
+    <!-- Referral Modal -->
+    <div
+      id="referralModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: white;
+          width: 90%;
+          max-width: 400px;
+          border-radius: 24px;
+          padding: 25px;
+          position: relative;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+          animation: slideUp 0.3s ease-out;
+        "
+      >
+        <button
+          onclick="closeReferralModal()"
+          style="
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            color: #64748b;
+          "
+        >
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div style="text-align: center; margin-bottom: 20px">
+          <div
+            style="
+              background: #f0fdf4;
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0 auto 15px;
+            "
+          >
+            <i class="fas fa-gift" style="color: #16a34a; font-size: 24px"></i>
+          </div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b">
+            Refer & Earn ₹50
+          </h3>
+          <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5">
+            Invite your friends to Kanha Library. When they sign up and book a
+            seat, both of you get ₹50 in your wallet!
+          </p>
+        </div>
+
+        <div
+          style="
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 15px;
+          "
+        >
+          <label
+            style="
+              display: block;
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: #94a3b8;
+              margin-bottom: 8px;
+              text-transform: uppercase;
+            "
+            >Your Referral Link</label
+          >
+          <div style="display: flex; gap: 8px">
+            <input
+              type="text"
+              id="modalReferralLink"
+              readonly
+              style="
+                flex: 1;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 10px;
+                font-size: 0.8rem;
+                color: #475569;
+                outline: none;
+              "
+            />
+            <button
+              onclick="copyModalReferral()"
+              style="
+                background: #16a34a;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 0 15px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                cursor: pointer;
+              "
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="modal-toast"
+          style="
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+            color: #16a34a;
+            font-size: 0.8rem;
+            font-weight: 600;
+          "
+        >
+          Link copied to clipboard!
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    <div id="toast-container"></div>
   </body>
 </html>

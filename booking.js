@@ -39,6 +39,14 @@ async function fetchWalletBalance() {
 function updateWalletUI() {
   const walletDisplay = document.getElementById("wallet-display");
   const walletAmount = document.getElementById("wallet-balance-amount");
+  const headerWalletBalance = document.getElementById("headerWalletBalance");
+
+  // Update Header Balance (Zomato style)
+  if (headerWalletBalance) {
+    headerWalletBalance.textContent = `₹ ${walletBalance}`;
+  }
+
+  // Update Booking Section Balance
   if (walletDisplay && walletAmount) {
     if (walletBalance > 0) {
       walletDisplay.style.display = "flex";
@@ -48,6 +56,57 @@ function updateWalletUI() {
     }
   }
 }
+
+// Referral Modal Functions
+window.openReferralModal = function () {
+  const modal = document.getElementById("referralModal");
+  const linkInput = document.getElementById("modalReferralLink");
+  const userData = JSON.parse(localStorage.getItem("user"));
+
+  if (modal && linkInput && userData) {
+    // Use mobile as referral code (matching your current logic)
+    const refCode =
+      userData.referralCode || userData.mobile.replace("+91", "").replace(/\D/g, "");
+    const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
+
+    linkInput.value = refLink;
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden"; // Prevent scroll
+  }
+};
+
+window.closeReferralModal = function () {
+  const modal = document.getElementById("referralModal");
+  if (modal) {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+};
+
+window.copyModalReferral = function () {
+  const input = document.getElementById("modalReferralLink");
+  const toast = document.getElementById("modal-toast");
+
+  if (input) {
+    input.select();
+    document.execCommand("copy");
+
+    if (toast) {
+      toast.style.display = "block";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 2000);
+    }
+  }
+};
+
+// Close modal when clicking outside
+window.onclick = function (event) {
+  const modal = document.getElementById("referralModal");
+  if (event.target == modal) {
+    closeReferralModal();
+  }
+};
 
 async function fetchSeatStats() {
   try {
