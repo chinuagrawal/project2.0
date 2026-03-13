@@ -228,13 +228,17 @@
           const res = await fetch(`${BASE_URL}/users/me/${user.email}`);
           if (res.ok) {
             const data = await res.json();
-            const refCode = data.referralCode;
+            const refCode =
+              data.referralCode ||
+              data.mobile.replace("+91", "").replace(/\D/g, "");
             if (refCode) {
               const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
               document.getElementById("referralLink").value = refLink;
             } else {
-              // Fallback if still missing (shouldn't happen with backend fix)
-              const fallback = user._id.slice(-6).toUpperCase();
+              // Fallback if still missing
+              const fallback = user.mobile
+                .replace("+91", "")
+                .replace(/\D/g, "");
               document.getElementById("referralLink").value =
                 `${window.location.origin}/login.html?ref=${fallback}`;
             }
