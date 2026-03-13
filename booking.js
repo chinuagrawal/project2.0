@@ -615,6 +615,9 @@ async function updateAmount() {
   let couponDiscount = 0;
   let walletDeduction = 0;
 
+  const useWalletCheckbox = document.getElementById("use-wallet-checkbox");
+  const useWallet = useWalletCheckbox ? useWalletCheckbox.checked : true;
+
   // 1. Apply Coupon first
   if (appliedCoupon) {
     if (appliedCoupon.type === "fixed") {
@@ -625,8 +628,8 @@ async function updateAmount() {
     finalTotal -= couponDiscount;
   }
 
-  // 2. Apply Wallet deduction (only if there's still a balance needed)
-  if (walletBalance > 0 && finalTotal > 0) {
+  // 2. Apply Wallet deduction (only if enabled and there's still a balance needed)
+  if (useWallet && walletBalance > 0 && finalTotal > 0) {
     walletDeduction = Math.min(walletBalance, finalTotal);
     finalTotal -= walletDeduction;
   }
@@ -683,9 +686,7 @@ async function fetchBookings() {
     );
     bookings = await res.json();
     renderSeats();
-  } catch (err) {
-    
-  }
+  } catch (err) {}
 }
 
 // ⚠️ MODIFIED renderSeats to handle the new `window.isExtensionMode` AND Rotated Layout (3 columns)
@@ -1244,6 +1245,11 @@ window.onload = async () => {
   document.querySelectorAll('input[name="paymentMode"]').forEach((radio) => {
     radio.addEventListener("change", updateAmount);
   });
+
+  const walletCheckbox = document.getElementById("use-wallet-checkbox");
+  if (walletCheckbox) {
+    walletCheckbox.addEventListener("change", updateAmount);
+  }
 
   await updateAmount();
   setTimeout(() => {

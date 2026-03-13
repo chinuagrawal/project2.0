@@ -33,6 +33,8 @@ router.put("/users/profile", async (req, res) => {
         lastName: user.lastName,
         role: user.role,
         mobile: user.mobile,
+        walletBalance: user.walletBalance, // ✅ Preserve wallet info
+        referralCode: user.referralCode, // ✅ Preserve referral code
       },
     });
   } catch (err) {

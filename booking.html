@@ -1048,7 +1048,6 @@
               padding: 12px;
               border-radius: 12px;
               border: 1px solid #bbf7d0;
-              display: flex;
               justify-content: space-between;
               align-items: center;
             "
@@ -1059,11 +1058,42 @@
                 >Wallet Balance</span
               >
             </div>
-            <span
-              id="wallet-balance-amount"
-              style="font-weight: 700; color: #166534"
-              >₹ 0</span
-            >
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span
+                id="wallet-balance-amount"
+                style="font-weight: 700; color: #166534"
+                >₹ 0</span
+              >
+              <label class="switch" style="display: flex; align-items: center">
+                <input type="checkbox" id="use-wallet-checkbox" checked />
+                <span
+                  class="slider round"
+                  style="
+                    position: relative;
+                    display: inline-block;
+                    width: 34px;
+                    height: 20px;
+                    background-color: #ccc;
+                    border-radius: 34px;
+                    cursor: pointer;
+                  "
+                >
+                  <span
+                    style="
+                      position: absolute;
+                      content: &quot;&quot;;
+                      height: 14px;
+                      width: 14px;
+                      left: 3px;
+                      bottom: 3px;
+                      background-color: white;
+                      border-radius: 50%;
+                      transition: 0.4s;
+                    "
+                  ></span>
+                </span>
+              </label>
+            </div>
           </div>
 
           <div

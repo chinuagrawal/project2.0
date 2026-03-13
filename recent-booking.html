@@ -104,15 +104,15 @@
         <tr>
           <th>Seat</th>
           <th>Name</th>
-          <th>Mobile</th>
-          <th>Email</th>
-          <th>Shift</th>
           <th>Amount</th>
+          <th>Booking Date</th>
           <th>Payment</th>
           <th>From</th>
           <th>To</th>
+          <th>Mobile</th>
+          <th>Email</th>
+          <th>Shift</th>
           <th>Days</th>
-          <th>Booking Date</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -154,9 +154,16 @@
 
         const grouped = {};
         all.forEach((b) => {
-          // Unique key includes transaction ID or createdAt to separate different booking sessions/extensions
-          const txnKey = b.paymentTxnId || b.createdAt || "legacy";
-          const key = `${b.email}_${b.seatId}_${b.shift}_${txnKey}`;
+          // 1. Determine a unique session key.
+          // Online bookings share a paymentTxnId.
+          // Cash bookings share a createdAt timestamp (from when they were batch-inserted).
+          const sessionKey =
+            b.paymentTxnId || (b.createdAt ? b.createdAt.toString() : "legacy");
+
+          // 2. The group key must include email, seat, shift, paymentMode AND the sessionKey.
+          // Including paymentMode in the key ensures that if a user switches from Cash to Online,
+          // it ALWAYS creates a new row even if timestamps were identical (unlikely but safe).
+          const key = `${b.email}_${b.seatId}_${b.shift}_${b.paymentMode || "online"}_${sessionKey}`;
 
           if (!grouped[key]) {
             grouped[key] = {
@@ -170,9 +177,7 @@
             };
           }
           grouped[key].dates.push(b.date);
-          grouped[key].createdAts.push(
-            b.createdAt ? new Date(b.createdAt) : new Date(0),
-          );
+          if (b.createdAt) grouped[key].createdAts.push(new Date(b.createdAt));
         });
 
         const sortedGrouped = Object.values(grouped)
@@ -180,17 +185,18 @@
             g.dates.sort();
             g.from = g.dates[0];
             g.to = g.dates.at(-1);
-            g.days =
-              Math.ceil(
-                (new Date(g.to) - new Date(g.from)) / (1000 * 60 * 60 * 24),
-              ) + 1;
-            g.latestCreated = g.createdAts.sort((a, b) => b - a)[0];
+            g.days = g.dates.length; // Count actual booked days in this group
+
+            // Use the latest timestamp from this group as the "Booking Date"
+            g.latestCreated =
+              g.createdAts.length > 0
+                ? new Date(Math.max(...g.createdAts))
+                : new Date(0);
             return g;
           })
           .sort((a, b) => {
-            const timeDiff = b.latestCreated - a.latestCreated;
-            if (timeDiff !== 0) return timeDiff;
-            return new Date(b.from) - new Date(a.from);
+            // Sort by booking date descending (newest first)
+            return b.latestCreated - a.latestCreated;
           });
 
         const tbody = document.querySelector("#booking-table tbody");
@@ -200,19 +206,29 @@
             name: entry.email,
             mobile: "N/A",
           };
+
+          // Normalize payment display
+          let paymentDisplay = entry.pay || "Online";
+          if (paymentDisplay === "cash") paymentDisplay = "Cash";
+          else if (
+            paymentDisplay === "PAY_PAGE" ||
+            paymentDisplay === "UNKNOWN"
+          )
+            paymentDisplay = "Online";
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
         <td data-label="Seat">${entry.seat}</td>
         <td data-label="Name">${user.name}</td>
+        <td data-label="Amount" style="font-weight:bold; color:#166534">₹${entry.amount}</td>
+        <td data-label="Booking Date">${formatDate(entry.latestCreated)}</td>
+        <td data-label="Payment">${paymentDisplay}</td>
+        <td data-label="From">${formatDate(entry.from)}</td>
+        <td data-label="To">${formatDate(entry.to)}</td>
         <td data-label="Mobile">${user.mobile}</td>
         <td data-label="Email">${entry.email}</td>
         <td data-label="Shift">${entry.shift}</td>
-        <td data-label="Amount" style="font-weight:bold; color:#166534">₹${entry.amount}</td>
-        <td data-label="Payment">${entry.pay || "Online"}</td>
-        <td data-label="From">${formatDate(entry.from)}</td>
-        <td data-label="To">${formatDate(entry.to)}</td>
         <td data-label="Days">${entry.days}</td>
-        <td data-label="Booking Date">${formatDate(entry.latestCreated)}</td>
       `;
           tbody.appendChild(tr);
         });
