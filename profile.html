@@ -222,9 +222,28 @@
       ).toUpperCase();
 
       // Referral Link
-      const refCode = user.referralCode || user._id.slice(-6).toUpperCase();
-      const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
-      document.getElementById("referralLink").value = refLink;
+      async function setupReferral() {
+        // Fetch fresh user data to ensure we have the referral code
+        try {
+          const res = await fetch(`${BASE_URL}/users/me/${user.email}`);
+          if (res.ok) {
+            const data = await res.json();
+            const refCode = data.referralCode;
+            if (refCode) {
+              const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
+              document.getElementById("referralLink").value = refLink;
+            } else {
+              // Fallback if still missing (shouldn't happen with backend fix)
+              const fallback = user._id.slice(-6).toUpperCase();
+              document.getElementById("referralLink").value =
+                `${window.location.origin}/login.html?ref=${fallback}`;
+            }
+          }
+        } catch (err) {
+          console.error("Error setting up referral:", err);
+        }
+      }
+      setupReferral();
 
       function showToast(message) {
         const container = document.getElementById("toast-container");

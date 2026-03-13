@@ -118,6 +118,22 @@ router.post("/login", async (req, res) => {
     if (!validPassword)
       return res.status(400).json({ message: "Invalid password" });
 
+    if (!user.referralCode) {
+      user.referralCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      await user.save();
+    }
+
+    if (!user.referralCode) {
+      user.referralCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      await user.save();
+    }
+
     res.status(200).json({
       user: {
         email: user.email,
@@ -161,6 +177,14 @@ router.post("/login-otp", async (req, res) => {
         message:
           "You are blocked by admin. Please contact support (8870969514).",
       });
+    }
+
+    if (!user.referralCode) {
+      user.referralCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      await user.save();
     }
 
     res.status(200).json({
