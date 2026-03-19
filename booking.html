@@ -831,10 +831,38 @@
   </head>
 
   <script>
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      window.location.href = "login.html";
-    }
+    (async () => {
+      const userData = localStorage.getItem("user");
+      if (!userData) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const user = JSON.parse(userData);
+        if (!user?.email) {
+          localStorage.removeItem("user");
+          window.location.href = "login.html";
+          return;
+        }
+
+        const res = await fetch(
+          `https://kanhabackend.onrender.com/api/users/me/${user.email}`,
+        );
+        if (!res.ok) return;
+
+        const latestUser = await res.json();
+        if (latestUser?.blocked) {
+          localStorage.removeItem("user");
+          window.location.href = "login.html";
+          return;
+        }
+
+        localStorage.setItem("user", JSON.stringify(latestUser));
+      } catch (error) {
+        console.error("User validation failed:", error);
+      }
+    })();
   </script>
   <script
     src="https://mercury.phonepe.com/web/bundle/checkout.js"

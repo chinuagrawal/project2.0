@@ -517,7 +517,6 @@ function updateMyBookingsUI(groupedBookings) {
 // ====================================================================
 
 async function refreshUserData() {
-  // ... (Existing logic for refreshing user data remains) ...
   const oldUser = JSON.parse(localStorage.getItem("user"));
   if (!oldUser?.email) return;
 
@@ -525,7 +524,13 @@ async function refreshUserData() {
     const res = await fetch(
       `https://kanhabackend.onrender.com/api/users/me/${oldUser.email}`,
     );
+    if (!res.ok) return;
     const user = await res.json();
+    if (user?.blocked) {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+      return;
+    }
     localStorage.setItem("user", JSON.stringify(user));
     console.log("✅ Refreshed user data");
   } catch (err) {

@@ -1690,7 +1690,7 @@
       }
 
       // Auth Check
-      function updateUserUI() {
+      async function updateUserUI() {
         const userData = localStorage.getItem("user");
         const userSection = document.getElementById("user-section");
         const mobileUserSection = document.getElementById(
@@ -1698,7 +1698,25 @@
         );
 
         if (userData) {
-          const user = JSON.parse(userData);
+          let user = JSON.parse(userData);
+          if (user?.email) {
+            try {
+              const res = await fetch(`${API_BASE}/users/me/${user.email}`);
+              if (res.ok) {
+                const latestUser = await res.json();
+                if (latestUser?.blocked) {
+                  localStorage.removeItem("user");
+                  window.location.href = "login.html";
+                  return;
+                }
+                user = latestUser;
+                localStorage.setItem("user", JSON.stringify(user));
+              }
+            } catch (error) {
+              console.error("User validation failed:", error);
+            }
+          }
+
           const html = `
           <div class="flex items-center gap-3">
             <span class="text-sm font-medium text-slate-700 hidden lg:inline">Hello, ${user.firstName || "Student"}</span>
@@ -1980,8 +1998,8 @@
       }
 
       // Init
-      document.addEventListener("DOMContentLoaded", () => {
-        updateUserUI();
+      document.addEventListener("DOMContentLoaded", async () => {
+        await updateUserUI();
         renderSeatLayout();
 
         // Auto-refresh seat status every 30s based on selected date
