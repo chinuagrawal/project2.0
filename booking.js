@@ -66,7 +66,8 @@ window.openReferralModal = function () {
   if (modal && linkInput && userData) {
     // Use mobile as referral code (matching your current logic)
     const refCode =
-      userData.referralCode || userData.mobile.replace("+91", "").replace(/\D/g, "");
+      userData.referralCode ||
+      userData.mobile.replace("+91", "").replace(/\D/g, "");
     const refLink = `${window.location.origin}/login.html?ref=${refCode}`;
 
     linkInput.value = refLink;
@@ -602,16 +603,34 @@ async function updateShiftLabelsWithPrices() {
 // ✅ Run this as soon as the DOM is ready (before your window.onload)
 document.addEventListener("DOMContentLoaded", updateShiftLabelsWithPrices);
 
-function getDiscount(duration) {
-  // ... (Existing logic remains) ...
-  if (!priceSettings || !Array.isArray(priceSettings.offers)) return 0;
-  let best = 0;
-  for (const offer of priceSettings.offers) {
-    if (duration >= offer.duration && offer.discount > best) {
-      best = offer.discount;
+function getDiscount(duration, basePrice) {
+  if (!priceSettings) return 0;
+  let bestDiscount = 0;
+
+  // 1. Check fixed ₹ discounts
+  if (Array.isArray(priceSettings.offers)) {
+    for (const offer of priceSettings.offers) {
+      if (duration >= offer.duration && offer.discount > bestDiscount) {
+        bestDiscount = offer.discount;
+      }
     }
   }
-  return best;
+
+  // 2. Check percentage % discounts
+  if (Array.isArray(priceSettings.percentOffers)) {
+    for (const offer of priceSettings.percentOffers) {
+      if (duration >= offer.duration) {
+        const calculatedDiscount = Math.round(
+          (basePrice * duration * offer.discountPercent) / 100,
+        );
+        if (calculatedDiscount > bestDiscount) {
+          bestDiscount = calculatedDiscount;
+        }
+      }
+    }
+  }
+
+  return bestDiscount;
 }
 
 function getTotalAmount(base, duration, discount, pgPercent, convenience) {
@@ -657,7 +676,7 @@ async function updateAmount() {
     basePrice = shift === "full" ? priceSettings.full : priceSettings[shift];
   }
 
-  const discount = getDiscount(duration); // ✅ Detect payment mode
+  const discount = getDiscount(duration, basePrice); // ✅ Pass basePrice for percent calc
 
   const paymentMode =
     document.querySelector('input[name="paymentMode"]:checked')?.value ||

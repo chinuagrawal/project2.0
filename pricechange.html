@@ -84,14 +84,23 @@
         margin-bottom: 12px;
       }
 
-      #offer-container div {
+      #offer-container div,
+      #percent-offer-container div {
         display: flex;
         gap: 10px;
         margin-bottom: 10px;
+        align-items: center;
       }
 
-      #offer-container input {
+      #offer-container input,
+      #percent-offer-container input {
         flex: 1;
+      }
+
+      .btn-remove {
+        background: #ff4d4d !important;
+        padding: 8px 12px !important;
+        margin-bottom: 0 !important;
       }
 
       @media (max-width: 600px) {
@@ -99,7 +108,8 @@
           padding: 20px;
           margin: 10px;
         }
-        #offer-container div {
+        #offer-container div,
+        #percent-offer-container div {
           flex-direction: column;
           gap: 8px;
         }
@@ -113,43 +123,31 @@
     <form id="price-form">
       <h2>Update Price & Offers</h2>
       <label>Morning Shift Price:</label>
-      <input type="number" id="am" /><br />
+      <input type="number" id="am" required /><br />
 
       <label>Evening Shift Price:</label>
-      <input type="number" id="pm" /><br />
+      <input type="number" id="pm" required /><br />
 
       <label>Full Day Price:</label>
-      <input type="number" id="full" /><br /><br />
+      <input type="number" id="full" required /><br /><br />
 
       <h3>Offers (Duration based ₹ Discounts)</h3>
       <div id="offer-container">
-        <div>
-          <input type="number" class="duration" placeholder="Months" />
-          <input type="number" class="discount" placeholder="Discount ₹" />
-        </div>
+        <!-- Offers will be loaded here -->
       </div>
       <button type="button" onclick="addOffer()">+ Add Offer</button
       ><br /><br />
 
       <h3>Percentage Discounts (Duration based %)</h3>
       <div id="percent-offer-container">
-        <div>
-          <input type="number" class="duration" placeholder="Months" />
-          <input
-            type="number"
-            class="discount-percent"
-            placeholder="Discount %"
-            min="0"
-            max="100"
-          />
-        </div>
+        <!-- Percent offers will be loaded here -->
       </div>
       <button type="button" onclick="addPercentOffer()">+ Add % Discount</button
       ><br /><br />
 
       <h3>Extra Charges</h3>
       <label>Payment Gateway Fee (%):</label>
-      <input type="number" id="pg-fee" /><br />
+      <input type="number" id="pg-fee" step="0.01" /><br />
 
       <label>Convenience Fee (₹):</label>
       <input type="number" id="convenience-fee" /><br /><br />
@@ -164,20 +162,22 @@
         window.location.href = "login.html";
       }
 
-      function addOffer() {
+      function addOffer(duration = "", discount = "") {
         const div = document.createElement("div");
         div.innerHTML = `
-      <input type="number" class="duration" placeholder="Months" />
-      <input type="number" class="discount" placeholder="Discount ₹" />
+      <input type="number" class="duration" placeholder="Months" value="${duration}" required />
+      <input type="number" class="discount" placeholder="Discount ₹" value="${discount}" required />
+      <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
     `;
         document.getElementById("offer-container").appendChild(div);
       }
 
-      function addPercentOffer() {
+      function addPercentOffer(duration = "", discountPercent = "") {
         const div = document.createElement("div");
         div.innerHTML = `
-      <input type="number" class="duration" placeholder="Months" />
-      <input type="number" class="discount-percent" placeholder="Discount %" min="0" max="100" />
+      <input type="number" class="duration" placeholder="Months" value="${duration}" required />
+      <input type="number" class="discount-percent" placeholder="Discount %" min="0" max="100" value="${discountPercent}" required />
+      <button type="button" class="btn-remove" onclick="this.parentElement.remove()">X</button>
     `;
         document.getElementById("percent-offer-container").appendChild(div);
       }
@@ -195,66 +195,84 @@
 
           const offers = Array.from(
             document.querySelectorAll("#offer-container div"),
-          ).map((div) => ({
-            duration: +div.querySelector(".duration").value,
-            discount: +div.querySelector(".discount").value,
-          }));
+          )
+            .map((div) => ({
+              duration: +div.querySelector(".duration").value,
+              discount: +div.querySelector(".discount").value,
+            }))
+            .filter((o) => o.duration > 0);
 
           const percentOffers = Array.from(
             document.querySelectorAll("#percent-offer-container div"),
-          ).map((div) => ({
-            duration: +div.querySelector(".duration").value,
-            discountPercent: +div.querySelector(".discount-percent").value,
-          }));
+          )
+            .map((div) => ({
+              duration: +div.querySelector(".duration").value,
+              discountPercent: +div.querySelector(".discount-percent").value,
+            }))
+            .filter((o) => o.duration > 0);
 
-          await fetch("https://kanhabackend.onrender.com/api/prices", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              am,
-              pm,
-              full,
-              offers,
-              percentOffers,
-              paymentGatewayFeePercent: pgFee,
-              convenienceFee,
-            }),
-          });
+          try {
+            const res = await fetch(
+              "https://kanhabackend.onrender.com/api/prices",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  am,
+                  pm,
+                  full,
+                  offers,
+                  percentOffers,
+                  paymentGatewayFeePercent: pgFee,
+                  convenienceFee,
+                }),
+              },
+            );
 
-          alert("✅ Prices updated successfully!");
+            if (res.ok) {
+              alert("✅ Prices updated successfully!");
+            } else {
+              throw new Error("Failed to update prices");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("❌ Error updating prices: " + err.message);
+          }
         });
 
       window.onload = async () => {
-        const res = await fetch("https://kanhabackend.onrender.com/api/prices");
-        const data = await res.json();
-        document.getElementById("am").value = data.am;
-        document.getElementById("pm").value = data.pm;
-        document.getElementById("full").value = data.full;
-        document.getElementById("pg-fee").value =
-          data.paymentGatewayFeePercent || 0;
-        document.getElementById("convenience-fee").value =
-          data.convenienceFee || 0;
+        try {
+          const res = await fetch(
+            "https://kanhabackend.onrender.com/api/prices",
+          );
+          const data = await res.json();
+          document.getElementById("am").value = data.am || 0;
+          document.getElementById("pm").value = data.pm || 0;
+          document.getElementById("full").value = data.full || 0;
+          document.getElementById("pg-fee").value =
+            data.paymentGatewayFeePercent || 0;
+          document.getElementById("convenience-fee").value =
+            data.convenienceFee || 0;
 
-        document.getElementById("offer-container").innerHTML = "";
-        data.offers.forEach((offer) => {
-          const div = document.createElement("div");
-          div.innerHTML = `
-        <input type="number" class="duration" value="${offer.duration}" />
-        <input type="number" class="discount" value="${offer.discount}" />
-      `;
-          document.getElementById("offer-container").appendChild(div);
-        });
+          document.getElementById("offer-container").innerHTML = "";
+          if (data.offers && data.offers.length > 0) {
+            data.offers.forEach((offer) =>
+              addOffer(offer.duration, offer.discount),
+            );
+          } else {
+            addOffer(); // Add one empty row by default
+          }
 
-        document.getElementById("percent-offer-container").innerHTML = "";
-        if (data.percentOffers) {
-          data.percentOffers.forEach((offer) => {
-            const div = document.createElement("div");
-            div.innerHTML = `
-          <input type="number" class="duration" value="${offer.duration}" />
-          <input type="number" class="discount-percent" value="${offer.discountPercent}" min="0" max="100" />
-        `;
-            document.getElementById("percent-offer-container").appendChild(div);
-          });
+          document.getElementById("percent-offer-container").innerHTML = "";
+          if (data.percentOffers && data.percentOffers.length > 0) {
+            data.percentOffers.forEach((offer) =>
+              addPercentOffer(offer.duration, offer.discountPercent),
+            );
+          } else {
+            addPercentOffer(); // Add one empty row by default
+          }
+        } catch (err) {
+          console.error("Error loading prices:", err);
         }
       };
     </script>

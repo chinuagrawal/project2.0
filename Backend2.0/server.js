@@ -77,8 +77,15 @@ app.get("/api/prices", async (req, res) => {
 });
 
 app.post("/api/prices", async (req, res) => {
-  const { am, pm, full, offers, paymentGatewayFeePercent, convenienceFee } =
-    req.body;
+  const {
+    am,
+    pm,
+    full,
+    offers,
+    percentOffers,
+    paymentGatewayFeePercent,
+    convenienceFee,
+  } = req.body;
   console.log("Incoming price change:", req.body);
 
   let setting = await PriceSetting.findOne();
@@ -92,6 +99,9 @@ app.post("/api/prices", async (req, res) => {
 
   setting.offers = offers;
   setting.markModified("offers");
+
+  setting.percentOffers = percentOffers;
+  setting.markModified("percentOffers");
 
   try {
     const saved = await setting.save();
