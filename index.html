@@ -1659,18 +1659,22 @@
       window.addEventListener("load", () => {
         setTimeout(() => {
           const modal = document.getElementById("offers-modal");
-          if (!sessionStorage.getItem("offerSeen")) {
+          if (modal && !sessionStorage.getItem("offerSeen")) {
             modal.classList.remove("hidden");
           }
         }, 1500);
       });
 
-      document
-        .getElementById("closeOffersBtn")
-        .addEventListener("click", () => {
-          document.getElementById("offers-modal").classList.add("hidden");
-          sessionStorage.setItem("offerSeen", "true");
+      const closeOffersBtn = document.getElementById("closeOffersBtn");
+      if (closeOffersBtn) {
+        closeOffersBtn.addEventListener("click", () => {
+          const modal = document.getElementById("offers-modal");
+          if (modal) {
+            modal.classList.add("hidden");
+            sessionStorage.setItem("offerSeen", "true");
+          }
         });
+      }
 
       // --- Testimonial Carousel ---
       let currentTestimonial = 0;
