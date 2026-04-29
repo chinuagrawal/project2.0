@@ -131,6 +131,22 @@
       <button type="button" onclick="addOffer()">+ Add Offer</button
       ><br /><br />
 
+      <h3>Percentage Discounts (Duration based %)</h3>
+      <div id="percent-offer-container">
+        <div>
+          <input type="number" class="duration" placeholder="Months" />
+          <input
+            type="number"
+            class="discount-percent"
+            placeholder="Discount %"
+            min="0"
+            max="100"
+          />
+        </div>
+      </div>
+      <button type="button" onclick="addPercentOffer()">+ Add % Discount</button
+      ><br /><br />
+
       <h3>Extra Charges</h3>
       <label>Payment Gateway Fee (%):</label>
       <input type="number" id="pg-fee" /><br />
@@ -157,6 +173,15 @@
         document.getElementById("offer-container").appendChild(div);
       }
 
+      function addPercentOffer() {
+        const div = document.createElement("div");
+        div.innerHTML = `
+      <input type="number" class="duration" placeholder="Months" />
+      <input type="number" class="discount-percent" placeholder="Discount %" min="0" max="100" />
+    `;
+        document.getElementById("percent-offer-container").appendChild(div);
+      }
+
       document
         .getElementById("price-form")
         .addEventListener("submit", async (e) => {
@@ -175,6 +200,13 @@
             discount: +div.querySelector(".discount").value,
           }));
 
+          const percentOffers = Array.from(
+            document.querySelectorAll("#percent-offer-container div"),
+          ).map((div) => ({
+            duration: +div.querySelector(".duration").value,
+            discountPercent: +div.querySelector(".discount-percent").value,
+          }));
+
           await fetch("https://kanhabackend.onrender.com/api/prices", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -183,6 +215,7 @@
               pm,
               full,
               offers,
+              percentOffers,
               paymentGatewayFeePercent: pgFee,
               convenienceFee,
             }),
@@ -211,6 +244,18 @@
       `;
           document.getElementById("offer-container").appendChild(div);
         });
+
+        document.getElementById("percent-offer-container").innerHTML = "";
+        if (data.percentOffers) {
+          data.percentOffers.forEach((offer) => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+          <input type="number" class="duration" value="${offer.duration}" />
+          <input type="number" class="discount-percent" value="${offer.discountPercent}" min="0" max="100" />
+        `;
+            document.getElementById("percent-offer-container").appendChild(div);
+          });
+        }
       };
     </script>
   </body>
