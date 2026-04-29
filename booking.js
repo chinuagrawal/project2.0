@@ -567,6 +567,48 @@ async function fetchPrices() {
   const res = await fetch("https://kanhabackend.onrender.com/api/prices");
   priceSettings = await res.json();
   window.priceSettings = priceSettings; // Expose globally for mobile bar logic
+  updateDurationLabelsWithDiscounts(); // ✅ Update duration labels after fetching
+}
+
+function updateDurationLabelsWithDiscounts() {
+  const durationSelect = document.getElementById("duration");
+  if (!durationSelect || !priceSettings) return;
+
+  const options = durationSelect.querySelectorAll("option");
+  options.forEach((opt) => {
+    const months = parseInt(opt.value);
+
+    // Use a dummy base price (e.g. 1000) just to check which is better (fixed vs percent)
+    // for the label display. In reality, getDiscount uses the real base price.
+    // For the label, we just want to show the discount amount.
+    // Actually, it's better to just show the percentage if it's a percentage discount,
+    // or the fixed amount if it's a fixed discount.
+
+    let bestFixed = 0;
+    if (priceSettings.offers) {
+      priceSettings.offers.forEach((o) => {
+        if (months >= o.duration && o.discount > bestFixed)
+          bestFixed = o.discount;
+      });
+    }
+
+    let bestPercent = 0;
+    if (priceSettings.percentOffers) {
+      priceSettings.percentOffers.forEach((o) => {
+        if (months >= o.duration && o.discountPercent > bestPercent)
+          bestPercent = o.discountPercent;
+      });
+    }
+
+    let discountText = "";
+    if (bestPercent > 0) {
+      discountText = ` (${bestPercent}% Off)`;
+    } else if (bestFixed > 0) {
+      discountText = ` (₹${bestFixed} Off)`;
+    }
+
+    opt.textContent = `${months} Months${discountText}`;
+  });
 }
 // === After your fetchPrices() definition ===
 
