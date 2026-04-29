@@ -55,6 +55,7 @@ router.post("/phonepe/webhook", async (req, res) => {
           } else {
             // ✅ NORMAL BOOKING
             // ✅ Generate all dates between startDate and endDate
+            // ℹ️ startDate and endDate already include bonus months if applicable (calculated in booking.js)
             const dates = [];
             let current = new Date(pending.startDate);
             const end = new Date(pending.endDate);

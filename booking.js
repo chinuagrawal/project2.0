@@ -780,12 +780,18 @@ async function updateAmount() {
 }
 
 function calculateEndDate(start, months) {
-  // ... (Existing logic remains) ...
   if (!start) return null;
   const date = new Date(start);
   if (isNaN(date.getTime())) return null;
 
-  date.setMonth(date.getMonth() + parseInt(months));
+  let totalMonths = parseInt(months);
+
+  // ✅ Check if a bonus month coupon is applied
+  if (appliedCoupon && appliedCoupon.type === "extra_month") {
+    totalMonths += parseInt(appliedCoupon.value);
+  }
+
+  date.setMonth(date.getMonth() + totalMonths);
   date.setDate(date.getDate() - 1); // 👈 subtract 1 day
   return date.toISOString().split("T")[0];
 }
@@ -1310,6 +1316,7 @@ window.onload = async () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             code,
+            duration: document.getElementById("duration").value, // ✅ Send duration for validation
             email: JSON.parse(localStorage.getItem("user")).email,
           }),
         });
@@ -1319,8 +1326,15 @@ window.onload = async () => {
           appliedCoupon = { code, ...data };
           couponMsg.style.display = "block";
           couponMsg.style.color = "#16a34a";
-          couponMsg.textContent = `Coupon applied! You saved ₹${data.value}${data.type === "percent" ? "%" : ""}`;
+
+          if (data.type === "extra_month") {
+            couponMsg.textContent = `Coupon applied! You got ${data.value} extra month(s) FREE!`;
+          } else {
+            couponMsg.textContent = `Coupon applied! You saved ₹${data.value}${data.type === "percent" ? "%" : ""}`;
+          }
+
           updateAmount();
+          fetchBookings(); // ✅ Refresh bookings to update the end date visually
         } else {
           let msg = "Invalid coupon";
           try {
