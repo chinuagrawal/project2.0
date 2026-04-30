@@ -385,13 +385,19 @@ app.post("/api/book-cash", async (req, res) => {
     shift,
     email,
     duration,
+    amount: providedAmount, // ✅ Get amount from frontend
     couponCode,
     useWallet,
     enableAutopay,
   } = req.body;
   const months = parseInt(duration);
-  const baseAmount = shift === "full" ? 800 : 600;
-  const amount = baseAmount * months;
+  
+  // Use provided amount or fallback to calculation
+  let amount = providedAmount;
+  if (amount === undefined || amount === null) {
+    const baseAmount = shift === "full" ? 800 : 600;
+    amount = baseAmount * months;
+  }
 
   const dates = [];
   let current = new Date(startDate);
