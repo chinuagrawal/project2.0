@@ -391,7 +391,7 @@ app.post("/api/book-cash", async (req, res) => {
     enableAutopay,
   } = req.body;
   const months = parseInt(duration);
-  
+
   // Use provided amount or fallback to calculation
   let amount = providedAmount;
   if (amount === undefined || amount === null) {
@@ -695,6 +695,108 @@ app.get("/api/payment/status", async (req, res) => {
 
 const seatchangeRoutes = require("./routes/seatchange");
 app.use("/api/admin", seatchangeRoutes);
+
+// Endpoint: Admin Create User without OTP
+app.post("/api/admin/create-user", async (req, res) => {
+  try {
+    const { firstName, lastName, gender, mobile, email } = req.body;
+
+    // Check if user exists
+    let user = await User.findOne({
+      $or: [{ email }, { mobile }, { mobile: `+91${mobile}` }],
+    });
+
+    if (user) {
+      return res.json({ user });
+    }
+
+    // Create new user with dummy password
+    const bcrypt = require("bcryptjs");
+    const dummyPassword = await bcrypt.hash("admincreated123", 10); // Generate a hashed dummy password
+
+    user = await User.create({
+      firstName,
+      lastName,
+      gender,
+      mobile: mobile.startsWith("+91") ? mobile : `+91${mobile}`,
+      email,
+      password: dummyPassword,
+      role: "user",
+      verified: true, // Mark as verified since admin is creating
+    });
+
+    // Don't send password back
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json({ user: userResponse });
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to create user", error: err.message });
+  }
+});
+
+// Endpoint: Admin Direct Booking
+app.post("/api/admin/direct-book", async (req, res) => {
+  try {
+    const { email, seatId, startDate, endDate, shift, paymentMode, amount } =
+      req.body;
+
+    // Validate inputs
+    if (!email || !seatId || !startDate || !endDate || !shift) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Generate all dates between start and end
+    const dates = [];
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+    while (current <= end) {
+      dates.push(current.toISOString().split("T")[0]);
+      current.setDate(current.getDate() + 1);
+    }
+
+    // Check for conflicts
+    const conflictQuery = {
+      seatId: String(seatId),
+      date: { $in: dates },
+      status: "paid",
+    };
+
+    if (shift === "full") {
+      conflictQuery.shift = { $in: ["full", "am", "pm"] };
+    } else {
+      conflictQuery.shift = { $in: ["full", shift] };
+    }
+
+    const conflicts = await Booking.find(conflictQuery);
+    if (conflicts.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Seat not available for selected dates" });
+    }
+
+    // Create bookings
+    const bookings = dates.map((date) => ({
+      seatId: String(seatId),
+      date,
+      shift,
+      email,
+      status: "paid", // Mark as paid since admin is booking directly
+      amount: amount || 0,
+      paymentMode: paymentMode || "cash",
+      paymentConfirmedVia: "admin",
+    }));
+
+    await Booking.insertMany(bookings);
+    res.json({ success: true, bookings });
+  } catch (err) {
+    console.error("Error in direct booking:", err);
+    res.status(500).json({ message: "Booking failed" });
+  }
+});
 
 // Start Server
 app.listen(PORT, () => {

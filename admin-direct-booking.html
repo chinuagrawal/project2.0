@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Direct Booking</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #1f2937;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        background: linear-gradient(135deg, #2563eb, #db2777);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2rem;
+      }
+
+      .section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #e5e7eb;
+      }
+
+      .section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        color: #374151;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: all 0.3s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        flex: 1;
+      }
+
+      .seat-map {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+      }
+
+      .seat-column {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .seat {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .seat.available {
+        background: white;
+        color: #4b5563;
+        border-color: #e5e7eb;
+      }
+
+      .seat.available:hover {
+        transform: translateY(-2px) scale(1.05);
+        border-color: #3b82f6;
+      }
+
+      .seat.booked {
+        background: #ef4444;
+        color: white;
+        cursor: not-allowed;
+      }
+
+      .seat.half-booked {
+        background: #f97316;
+        color: white;
+      }
+
+      .seat.evening-booked {
+        background: #a855f7;
+        color: white;
+      }
+
+      .seat.selected {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        color: white;
+        transform: scale(1.1);
+        border-color: transparent;
+      }
+
+      .seat.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        filter: grayscale(100%);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+      }
+
+      .user-card {
+        background: #f0fdf4;
+        border: 2px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .user-info h3 {
+        color: #065f46;
+        margin-bottom: 4px;
+      }
+
+      .user-info p {
+        color: #047857;
+        font-size: 0.9rem;
+      }
+
+      .message {
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-weight: 500;
+      }
+
+      .message.success {
+        background: #f0fdf4;
+        color: #065f46;
+        border: 1px solid #bbf7d0;
+      }
+
+      .message.error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .message.info {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Admin Direct Booking</h1>
+
+      <div id="message-container"></div>
+
+      <!-- User Creation/Selection Section -->
+      <div class="section" id="user-section">
+        <h2 style="margin-bottom: 20px; color: #374151">
+          <i class="fas fa-user-plus"></i> Step 1: Create or Select User
+        </h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="Enter first name" />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Enter last name" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="mobile">Mobile Number</label>
+            <input
+              type="tel"
+              id="mobile"
+              placeholder="Enter 10 digit mobile number"
+            />
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email (Optional)</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter email (optional)"
+            />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="createOrSelectUser()">
+          <i class="fas fa-check"></i> Create/Find User
+        </button>
+      </div>
+
+      <!-- Selected User Display -->
+      <div class="section hidden" id="selected-user-section">
+        <div class="user-card" id="user-card">
+          <div class="user-info">
+            <h3 id="user-name"></h3>
+            <p id="user-contact"></p>
+          </div>
+          <button
+            class="btn"
+            style="width: auto; background: #ef4444; color: white"
+            onclick="resetUser()"
+          >
+            Change User
+          </button>
+        </div>
+      </div>
+
+      <!-- Booking Details Section -->
+      <div class="section hidden" id="booking-section">
+        <h2 style="margin-bottom: 20px; color: #374151">
+          <i class="fas fa-calendar-check"></i> Step 2: Booking Details
+        </h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" />
+          </div>
+          <div class="form-group">
+            <label for="duration">Duration</label>
+            <select id="duration">
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="3">3 Months</option>
+              <option value="4">4 Months</option>
+              <option value="5">5 Months</option>
+              <option value="6">6 Months</option>
+              <option value="7">7 Months</option>
+              <option value="8">8 Months</option>
+              <option value="9">9 Months</option>
+              <option value="10">10 Months</option>
+              <option value="11">11 Months</option>
+              <option value="12">12 Months</option>
+              <option value="13">13 Months</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="shift">Shift</label>
+            <select id="shift">
+              <option value="am">Morning</option>
+              <option value="pm">Evening</option>
+              <option value="full">Full Day</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="paymentMode">Payment Mode</label>
+            <select id="paymentMode">
+              <option value="cash">Cash</option>
+              <option value="online">Online</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Select Seat</label>
+          <div class="seat-map" id="seat-map"></div>
+        </div>
+        <button class="btn btn-success" onclick="bookSeat()">
+          <i class="fas fa-ticket-alt"></i> Confirm Booking
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let selectedUser = null;
+      let selectedSeatId = null;
+      let priceSettings = null;
+      let bookings = [];
+
+      // ✅ Protect admin page
+      (function checkAuth() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          window.location.href = "login.html";
+        } else if (user.role === "admin") {
+          // Admin allowed – do nothing
+        } else if (user.role === "incharge") {
+          window.location.href = "libincharge.html";
+        } else {
+          window.location.href = "login.html";
+        }
+      })();
+
+      // Initialize
+      window.onload = async () => {
+        // Set today's date as default
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("startDate").value = today;
+        document.getElementById("startDate").min = today;
+
+        // Fetch prices
+        await fetchPrices();
+
+        // Event listeners
+        document
+          .getElementById("startDate")
+          .addEventListener("change", fetchBookings);
+        document
+          .getElementById("duration")
+          .addEventListener("change", fetchBookings);
+        document
+          .getElementById("shift")
+          .addEventListener("change", fetchBookings);
+      };
+
+      async function fetchPrices() {
+        try {
+          const res = await fetch(
+            "https://kanhabackend.onrender.com/api/prices",
+          );
+          priceSettings = await res.json();
+        } catch (err) {
+          console.error("Error fetching prices:", err);
+        }
+      }
+
+      async function createOrSelectUser() {
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        let mobile = document.getElementById("mobile").value.trim();
+        const gender = document.getElementById("gender").value;
+        let email = document.getElementById("email").value.trim();
+
+        // Validation
+        if (!firstName || !lastName || !mobile) {
+          showMessage(
+            "Please fill all required fields (First Name, Last Name, Mobile)",
+            "error",
+          );
+          return;
+        }
+
+        if (!/^\d{10}$/.test(mobile.replace(/\D/g, ""))) {
+          showMessage("Please enter a valid 10-digit mobile number", "error");
+          return;
+        }
+
+        // Sanitize mobile
+        mobile = mobile.replace(/\D/g, "");
+
+        try {
+          // First try to find existing user
+          const checkRes = await fetch(
+            `https://kanhabackend.onrender.com/api/users?mobile=${mobile}`,
+          );
+          if (checkRes.ok) {
+            const users = await checkRes.json();
+            const existingUser = users.find(
+              (u) => u.mobile === mobile || u.mobile === `+91${mobile}`,
+            );
+            if (existingUser) {
+              selectedUser = existingUser;
+              showMessage(
+                `User found: ${existingUser.firstName} ${existingUser.lastName}`,
+                "success",
+              );
+              showBookingSection();
+              return;
+            }
+          }
+
+          // If no existing user, create new one
+          // Generate dummy email if not provided
+          if (!email) {
+            email = `${mobile}@kanhalib.com`;
+          }
+
+          const createRes = await fetch(
+            "https://kanhabackend.onrender.com/api/admin/create-user",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                firstName,
+                lastName,
+                gender,
+                mobile,
+                email,
+              }),
+            },
+          );
+
+          if (createRes.ok) {
+            const data = await createRes.json();
+            selectedUser = data.user;
+            showMessage(
+              `User created successfully: ${firstName} ${lastName}`,
+              "success",
+            );
+            showBookingSection();
+          } else {
+            const errorData = await createRes.json();
+            showMessage(errorData.message || "Failed to create user", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showMessage("Server error. Please try again.", "error");
+        }
+      }
+
+      function showBookingSection() {
+        // Update user card
+        document.getElementById("user-name").textContent =
+          `${selectedUser.firstName} ${selectedUser.lastName}`;
+        document.getElementById("user-contact").textContent =
+          `Mobile: ${selectedUser.mobile} | Email: ${selectedUser.email}`;
+
+        // Show sections
+        document
+          .getElementById("selected-user-section")
+          .classList.remove("hidden");
+        document.getElementById("booking-section").classList.remove("hidden");
+
+        // Fetch bookings and render seats
+        fetchBookings();
+      }
+
+      function resetUser() {
+        selectedUser = null;
+        selectedSeatId = null;
+        document
+          .getElementById("selected-user-section")
+          .classList.add("hidden");
+        document.getElementById("booking-section").classList.add("hidden");
+        document.getElementById("firstName").value = "";
+        document.getElementById("lastName").value = "";
+        document.getElementById("mobile").value = "";
+        document.getElementById("email").value = "";
+        clearMessage();
+      }
+
+      async function fetchBookings() {
+        const startDate = document.getElementById("startDate").value;
+        const duration = document.getElementById("duration").value;
+        const shift = document.getElementById("shift").value;
+
+        if (!startDate || !duration) return;
+
+        try {
+          // Calculate end date
+          const endDate = calculateEndDate(startDate, duration);
+
+          const res = await fetch(
+            `https://kanhabackend.onrender.com/api/bookings?startDate=${startDate}&endDate=${endDate}`,
+          );
+          bookings = await res.json();
+          renderSeats(shift);
+        } catch (err) {
+          console.error("Error fetching bookings:", err);
+        }
+      }
+
+      function calculateEndDate(start, months) {
+        const date = new Date(start);
+        date.setMonth(date.getMonth() + parseInt(months));
+        date.setDate(date.getDate() - 1);
+        return date.toISOString().split("T")[0];
+      }
+
+      function renderSeats(shift) {
+        const seatMapEl = document.getElementById("seat-map");
+        seatMapEl.innerHTML = "";
+        selectedSeatId = null;
+
+        const col1 = document.createElement("div");
+        col1.className = "seat-column";
+        const col2 = document.createElement("div");
+        col2.className = "seat-column";
+        const col3 = document.createElement("div");
+        col3.className = "seat-column";
+
+        const startDate = document.getElementById("startDate").value;
+        const duration = document.getElementById("duration").value;
+        const endDate = calculateEndDate(startDate, duration);
+
+        // Get all dates in range
+        const dates = [];
+        let current = new Date(startDate);
+        const end = new Date(endDate);
+        while (current <= end) {
+          dates.push(current.toISOString().split("T")[0]);
+          current.setDate(current.getDate() + 1);
+        }
+
+        for (let i = 1; i <= 34; i++) {
+          const seatId = String(i);
+          const seat = document.createElement("div");
+          seat.className = "seat";
+          seat.dataset.seatId = seatId;
+          seat.textContent = i;
+
+          // Check seat availability
+          const seatBookings = bookings.filter((b) => b.seatId === seatId);
+          let isAvailable = true;
+
+          for (const date of dates) {
+            const dayBookings = seatBookings.filter((b) => b.date === date);
+            const hasFull = dayBookings.some((b) => b.shift === "full");
+            const hasAM = dayBookings.some((b) => b.shift === "am");
+            const hasPM = dayBookings.some((b) => b.shift === "pm");
+
+            if (shift === "full") {
+              if (hasFull || hasAM || hasPM) {
+                isAvailable = false;
+                break;
+              }
+            } else if (shift === "am") {
+              if (hasFull || hasAM) {
+                isAvailable = false;
+                break;
+              }
+            } else if (shift === "pm") {
+              if (hasFull || hasPM) {
+                isAvailable = false;
+                break;
+              }
+            }
+          }
+
+          // Set seat status
+          if (!isAvailable) {
+            seat.classList.add("booked", "disabled");
+          } else {
+            seat.classList.add("available");
+            seat.addEventListener("click", () => selectSeat(seatId, seat));
+          }
+
+          // Distribute seats into columns
+          if (i <= 12) col1.appendChild(seat);
+          else if (i <= 23) col2.appendChild(seat);
+          else col3.appendChild(seat);
+        }
+
+        seatMapEl.appendChild(col3);
+        seatMapEl.appendChild(col2);
+        seatMapEl.appendChild(col1);
+      }
+
+      function selectSeat(seatId, seatEl) {
+        // Clear previous selection
+        document.querySelectorAll(".seat.selected").forEach((el) => {
+          el.classList.remove("selected");
+        });
+
+        // Select new seat
+        seatEl.classList.add("selected");
+        selectedSeatId = seatId;
+      }
+
+      async function bookSeat() {
+        if (!selectedUser) {
+          showMessage("Please select or create a user first", "error");
+          return;
+        }
+
+        if (!selectedSeatId) {
+          showMessage("Please select a seat", "error");
+          return;
+        }
+
+        const startDate = document.getElementById("startDate").value;
+        const duration = document.getElementById("duration").value;
+        const shift = document.getElementById("shift").value;
+        const paymentMode = document.getElementById("paymentMode").value;
+
+        const endDate = calculateEndDate(startDate, duration);
+
+        // Calculate amount
+        let basePrice = 0;
+        if (priceSettings) {
+          basePrice =
+            shift === "full" ? priceSettings.full : priceSettings[shift];
+        }
+        const amount = basePrice * parseInt(duration);
+
+        try {
+          const res = await fetch(
+            "https://kanhabackend.onrender.com/api/admin/direct-book",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: selectedUser.email,
+                seatId: selectedSeatId,
+                startDate,
+                endDate,
+                shift,
+                paymentMode,
+                amount,
+              }),
+            },
+          );
+
+          if (res.ok) {
+            showMessage("Booking confirmed successfully!", "success");
+            // Reset form
+            setTimeout(() => {
+              resetUser();
+              fetchBookings();
+            }, 2000);
+          } else {
+            const errorData = await res.json();
+            showMessage(errorData.message || "Booking failed", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showMessage("Server error. Please try again.", "error");
+        }
+      }
+
+      function showMessage(text, type) {
+        const container = document.getElementById("message-container");
+        container.innerHTML = `<div class="message ${type}">${text}</div>`;
+      }
+
+      function clearMessage() {
+        document.getElementById("message-container").innerHTML = "";
+      }
+    </script>
+  </body>
+</html>

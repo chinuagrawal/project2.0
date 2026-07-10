@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    verified: { type: Boolean, default: false },
     blocked: { type: Boolean, default: false }, // ✅ NEW
     walletBalance: { type: Number, default: 0 },
     referralCode: { type: String, unique: true },
