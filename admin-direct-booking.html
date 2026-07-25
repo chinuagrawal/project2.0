@@ -396,7 +396,6 @@
         // Set today's date as default
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("startDate").value = today;
-        document.getElementById("startDate").min = today;
 
         // Fetch prices
         await fetchPrices();
